@@ -4,8 +4,10 @@ os:
 language: generic
 sudo: required
 dist: trusty
-script:
+before_install:
   - curl -sL swift.qutheory.io/07-20 | bash
+script:
+  - export PATH=/usr/local/bin/swift-DEVELOPMENT-SNAPSHOT-2016-07-20-qutheory/usr/bin:"{$PATH}"
   # Build Core
   - swift build
   - swift build --configuration release
