@@ -4,9 +4,8 @@ os:
 language: generic
 sudo: required
 dist: trusty
-install:
-  - curl -sL swift.qutheory.io/07-20 | bash
 script:
+  - curl -sL swift.qutheory.io/07-20 | bash
   # Build Core
   - swift build
   - swift build --configuration release
