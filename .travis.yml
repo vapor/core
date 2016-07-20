@@ -5,10 +5,10 @@ language: generic
 sudo: required
 dist: trusty
 osx_image: xcode8
-before_install:
+before_script:
   - curl -sL swift.qutheory.io/07-20 | bash
 script:
-  - curl -sL swift.qutheory.io/07-20 | bash
+  # - export PATH=$HOME/swift/usr/bin:"{$PATH}"
   # Build Core
   - swift build
   - swift build --configuration release
