@@ -1,7 +1,6 @@
 import Foundation
 import XCTest
-
-@testable import Base
+@testable import Core
 
 class UtilityTests: XCTestCase {
 

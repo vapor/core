@@ -1,13 +1,5 @@
-//
-//  PromiseTests.swift
-//  Vapor
-//
-//  Created by Logan Wright on 7/4/16.
-//
-//
-
 import XCTest
-@testable import Base
+@testable import Core
 
 private enum PromiseTestError: ErrorProtocol {
     case someError

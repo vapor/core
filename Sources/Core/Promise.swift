@@ -18,7 +18,7 @@
     public final class Promise<T> {
         private var result: Result<T>? = .none
         private let semaphore: DispatchSemaphore
-        private let lock = Base.Lock()
+        private let lock = Core.Lock()
 
         private init(_ semaphore: DispatchSemaphore) {
             self.semaphore = semaphore
