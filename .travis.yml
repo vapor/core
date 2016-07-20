@@ -4,6 +4,7 @@ os:
 language: generic
 sudo: required
 dist: trusty
+osx_image: xcode8
 before_install:
   - curl -sL swift.qutheory.io/07-20 | bash
 script:
