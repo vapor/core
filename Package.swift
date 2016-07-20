@@ -5,7 +5,7 @@ var dependencies: [Package.Dependency] = []
 #if os(Linux)
     dependencies += [
         //Wrapper around pthreads
-        .Package(url: "https://github.com/ketzusaka/Strand.git", majorVersion: 1, minor: 5),
+        .Package(url: "https://github.com/ketzusaka/Strand.git", majorVersion: 1, minor: 5)
     ]
 #endif
 
