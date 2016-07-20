@@ -1,7 +1,7 @@
 import XCTest
 @testable import Core
 
-private enum PromiseTestError: ErrorProtocol {
+private enum PromiseTestError: Error {
     case someError
     case anotherError
 }
