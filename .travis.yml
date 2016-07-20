@@ -8,7 +8,9 @@ osx_image: xcode8
 before_script:
   - curl -sL swift.qutheory.io/07-20 | bash
 script:
+  - cat ~/.bashrc
   - source ~/.bashrc
+  - echo $PATH
   # Build Core
   - swift build
   - swift build --configuration release
