@@ -14,8 +14,8 @@ class UnsignedIntegerTests: XCTestCase {
 
         let uint = UInt(flags)
 
-        XCTAssertEqual(uint.containsMask(UInt(SOCK_RAW)), true)
-        XCTAssertEqual(uint.containsMask(UInt(SOCK_DGRAM)), true)
-        XCTAssertEqual(uint.containsMask(UInt(SOCK_MAXADDRLEN)), false)
+        XCTAssertEqual(uint.containsMask(SOCK_RAW), true)
+        XCTAssertEqual(uint.containsMask(SOCK_DGRAM), true)
+        XCTAssertEqual(uint.containsMask(SOCK_MAXADDRLEN), false)
     }
 }
