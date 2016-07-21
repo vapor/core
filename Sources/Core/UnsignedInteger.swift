@@ -35,10 +35,6 @@ extension UnsignedInteger {
     public func containsMask(_ mask: Self) -> Bool {
         return (self & mask) == mask
     }
-
-    public func containsMask(_ mask: Int32) -> Bool {
-        return containsMask(Self.init(UInt(mask).toUIntMax()))
-    }
 }
 
 extension UnsignedInteger {

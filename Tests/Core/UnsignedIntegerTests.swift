@@ -10,12 +10,10 @@ class UnsignedIntegerTests: XCTestCase {
     ]
 
     func testMask() {
-        let flags = SOCK_RAW | SOCK_DGRAM
+        let flags: UInt = 0x01 | 0x04
 
-        let uint = UInt(flags)
-
-        XCTAssertEqual(uint.containsMask(SOCK_RAW), true)
-        XCTAssertEqual(uint.containsMask(SOCK_DGRAM), true)
-        XCTAssertEqual(uint.containsMask(SOCK_MAXADDRLEN), false)
+        XCTAssertEqual(flags.containsMask(0x04), true)
+        XCTAssertEqual(flags.containsMask(0x01), true)
+        XCTAssertEqual(flags.containsMask(0x02), false)
     }
 }
