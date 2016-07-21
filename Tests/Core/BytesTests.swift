@@ -12,6 +12,8 @@ class BytesTests: XCTestCase {
         ("testEasyAppend", testEasyAppend),
         ("testIntHex", testIntHex),
         ("testHexInt", testHexInt),
+        ("testDecimalInt", testDecimalInt),
+        ("testDecimalIntError", testDecimalIntError),
         ("testTrim", testTrim),
         ("testTrimEmpty", testTrimEmpty),
         ("testTrimAll", testTrimAll)
@@ -59,6 +61,16 @@ class BytesTests: XCTestCase {
 
     func testHexInt() {
         XCTAssertEqual("aBf89".bytes.hexInt, 704393)
+    }
+
+    func testDecimalInt() {
+        let test = "1337"
+        XCTAssertEqual(test.bytes.decimalInt, 1337)
+    }
+
+    func testDecimalIntError() {
+        let test = "13ferret37"
+        XCTAssertEqual(test.bytes.decimalInt, nil)
     }
 
     func testTrim() {

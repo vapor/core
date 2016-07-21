@@ -19,4 +19,12 @@ class ArrayTests: XCTestCase {
         XCTAssertEqual(result[1], [3, 4])
         XCTAssertEqual(result[2], [5])
     }
+
+    func testSafeAccess() {
+        let array = [1, 2, 3]
+
+        XCTAssertEqual(array[safe: 4], nil)
+        XCTAssertEqual(array[safe: 0], 1)
+        XCTAssertEqual(array[safe: -1], nil)
+    }
 }
