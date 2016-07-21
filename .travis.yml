@@ -7,7 +7,6 @@ dist: trusty
 osx_image: xcode8
 install:
   - curl -sL swift.qutheory.io/07-20 | bash
-  - source ~/.bashrc
 script:
   # Build Core
   - swift build
