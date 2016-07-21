@@ -31,7 +31,7 @@ class UtilityTests: XCTestCase {
     }
 
     func testEquals() {
-        XCTAssertEqual([0, 1, 2].equals(any: [0, 1, 2]), true)
-        XCTAssertEqual([0, 1, 2].equals(any: [[5, 4], [0, 2, 1]]), false)
+        XCTAssertEqual(1.equals(any: [0, 1, 2]), true)
+        XCTAssertEqual(1.equals(any: 5, 2, 3), false)
     }
 }
