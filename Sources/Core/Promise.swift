@@ -46,6 +46,13 @@
                 semaphore.signal()
             }
         }
+
+        /**
+            Dismiss the promise throwing a promiseNotCalled error.
+        */
+        public func dismiss() {
+            semaphore.signal()
+        }
     }
 
     extension Promise {

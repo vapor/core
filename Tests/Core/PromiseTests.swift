@@ -71,6 +71,40 @@ class PromiseTests: XCTestCase {
         XCTAssert(array == [1,2,3,4])
     }
 
+    func testPromiseNotCalled() {
+        do {
+            let _ = try Promise<Int>.async(timingOut: .distantFuture) { promise in
+                promise.dismiss()
+            }
+            XCTFail("Should not have passed")
+        } catch PromiseError.promiseNotCalled {
+            // pass
+        } catch {
+            XCTFail("Wrong error: \(error)")
+        }
+    }
+
+    func testPromiseTimedOut() {
+        do {
+            let _ = try Promise<Int>.async(timingOut: DispatchTime.now()) { promise in
+                //
+            }
+            XCTFail("Should not have passed")
+        } catch PromiseError.timedOut {
+            // pass
+        } catch {
+            XCTFail("Wrong error: \(error)")
+        }
+    }
+
+    func testTimeout() throws {
+        let result = try Promise<Int>.timeout(DispatchTime.now()) {
+            return 1
+        }
+
+        XCTAssertEqual(result, 1)
+    }
+
     func testDuplicateResults() throws {
         let response = try Promise<Int>.async { promise in
             promise.resolve(with: 10)
