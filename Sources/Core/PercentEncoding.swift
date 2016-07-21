@@ -12,7 +12,10 @@
  
     - see: percentDecoded(_: Bytes, nonEncodedTransform: (Byte) -> (Byte)) -> [Byte]
 */
-public func percentDecoded(_ input: ArraySlice<Byte>, nonEncodedTransform: (Byte) -> (Byte) = { $0 }) -> Bytes? {
+public func percentDecoded(
+    _ input: ArraySlice<Byte>,
+    nonEncodedTransform: (Byte) -> (Byte) = { $0 }
+) -> Bytes? {
     return percentDecoded(Array(input), nonEncodedTransform: nonEncodedTransform)
 }
 
@@ -29,7 +32,10 @@ public func percentDecoded(_ input: ArraySlice<Byte>, nonEncodedTransform: (Byte
         or returns `nil` if the bytes could not
         be decoded.
 */
-public func percentDecoded(_ input: Bytes, nonEncodedTransform: (Byte) -> (Byte) = { $0 }) -> [Byte]? {
+public func percentDecoded(
+    _ input: Bytes,
+    nonEncodedTransform: (Byte) -> (Byte) = { $0 }
+) -> [Byte]? {
     var idx = 0
     var group: [Byte] = []
     while idx < input.count {
@@ -62,7 +68,19 @@ public func percentDecoded(_ input: Bytes, nonEncodedTransform: (Byte) -> (Byte)
     return group
 }
 
-public func percentEncoded(_ input: [Byte], shouldEncode: (Byte) throws -> Bool = { _ in true }) throws -> [Byte] {
+/**
+    Percent encodes an array of bytes.
+ 
+    - param input: The array of bytes.
+    - param shouldEncode: Use this to selectively
+        choose which bytes should be encoded.
+ 
+    - return: Returns percent-encoded bytes.
+*/
+public func percentEncoded(
+    _ input: [Byte],
+    shouldEncode: (Byte) throws -> Bool = { _ in true }
+) throws -> [Byte] {
     var group: [Byte] = []
     try input.forEach { byte in
         if try shouldEncode(byte) {

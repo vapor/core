@@ -8,7 +8,7 @@ class UtilityTests: XCTestCase {
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
         ("testDecimalInt", testDecimalInt),
-        ("testDecimalIntError", testDecimalIntError),
+        ("testDecimalIntError", testDecimalIntError)
     ]
 
     func testLowercase() {
