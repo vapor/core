@@ -1,10 +1,11 @@
-<div style="text-align:center">
-	<img 
-		src="https://userscontent2.emaze.com/images/bbbef209-eddb-4593-b39e-00a07f035730/0929829d-60e7-42f8-9319-39b38fb729f6.png" 
-		align="center" 
-		alt="Core"
-		width="500px"
-	>
+<p align="center">
+    <img 
+        src="https://userscontent2.emaze.com/images/bbbef209-eddb-4593-b39e-00a07f035730/0929829d-60e7-42f8-9319-39b38fb729f6.png" 
+        align="center" 
+        alt="Core"
+        width="500px"
+    >
+</p>
 
 # Core
 
@@ -15,10 +16,10 @@ Core is a collection of useful protocols, extensions, type-aliases, functions, a
 - 100% test coverage
 - Documented methods
 - Extensions
-	- Array
-	- Bool
-	- Sequence
-	- Equatable
+    - Array
+    - Bool
+    - Sequence
+    - Equatable
 - Collection subscripts
 - Extractable protocol
 - Atomic Locking
