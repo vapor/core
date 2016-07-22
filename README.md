@@ -1,28 +1,46 @@
+<img src="https://userscontent2.emaze.com/images/bbbef209-eddb-4593-b39e-00a07f035730/0929829d-60e7-42f8-9319-39b38fb729f6.png" align="center" alt="Core">
+
 # Core
 
 Core is a collection of useful protocols, extensions, type-aliases, functions, and libraries. It is used extensively in almost all of Qutheory's packages and in [Vapor](https://github.com/qutheory/github).
 
-## 🌏 Current Environment
+## 🚀 Features 
 
-| Vapor |     Xcode    |    Swift    |
-|:-----:|:------------:|:-----------:|
-|0.1.x  |8.0 Beta **2**|3.0-PREVIEW-2|
+- 100% test coverage
+- Documented methods
+- Extensions
+	- Array
+	- Bool
+	- Sequence
+	- Equatable
+- Collection subscripts
+- Extractable protocol
+- Atomic Locking
+- Percent encoding/decoding
+- Promises
+- Result enum
+- Dispatch
+- Bytes and Byte
+- StaticDataBuffer
 
-You can run the following script to verify your environment is correct.
+## 🌏 Environment
 
-```sh
-curl -sL check.qutheory.io | bash
-```
+| Core  |     Xcode    |               Swift                    |
+|:-----:|:------------:|:--------------------------------------:|
+|0.2.x  |8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-20-qutheory|
+|0.1.x  |8.0 Beta **2**|3.0-PREVIEW-2                           |
+
+## 📖 Documentation
+
+Visit the Vapor web framework's [documentation](http://docs.qutheory.io) for instructions on how to install Swift 3. 
 
 ## 💧 Community
 
-We pride ourselves on providing a diverse and welcoming community. Join your fellow Vapor developers in [our slack](slack.qutheory.io) and take part in the conversation.
+We pride ourselves on providing a diverse and welcoming community. Join your fellow Qutheory developers in [our slack](slack.qutheory.io) and take part in the conversation.
 
 ## 🔧 Compatibility
 
-Vapor has been tested on OS X 10.11, Ubuntu 14.04, and Ubuntu 15.10.
-
-Our homepage [http://qutheory.io](http://qutheory.io) is currently running using Vapor on DigitalOcean.
+Core has been tested on OS X 10.11, Ubuntu 14.04, and Ubuntu 15.10.
 
 ## 👥 Authors
 
