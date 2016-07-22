@@ -32,7 +32,6 @@ extension UnsignedInteger {
 }
 
 extension UnsignedInteger {
-    // TODO: not unit tested
     public func containsMask(_ mask: Self) -> Bool {
         return (self & mask) == mask
     }

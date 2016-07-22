@@ -12,7 +12,7 @@ class PercentEncodingTests: XCTestCase {
     func testEncoding() throws {
         try utf8TestCases.forEach { character, encoding in
             let bytes = character.utf8
-            let encoded = try percentEncoded(bytes.array, shouldEncode: { _ in true })
+            let encoded = try percentEncoded(bytes.array)
             let string = encoded.string.uppercased()
             XCTAssertTrue(string == encoding, "\(character) -- \(string) didn't equal expected encoding \(encoding)")
 
@@ -29,6 +29,93 @@ class PercentEncodingTests: XCTestCase {
             let decodedString = decoded.string
             XCTAssert(decodedString == character, "\(character) -- \(decodedString) didn't equal expected decoding: \(character)")
         }
+    }
+
+    func testDecodingInvalidLength() {
+        let input = "%2D%A".bytes // last character is invalid, only 1 character
+        let result = percentDecoded(input)
+        XCTAssertNil(result)
+    }
+
+    func testDecodingInvalidCharacters() {
+        let result = percentDecoded("%--".bytes)
+        XCTAssertNil(result)
+    }
+
+    func testDecodingExtra() {
+        guard let result = percentDecoded("%FF%00A".bytes) else {
+            XCTFail("Unable to decode.")
+            return
+        }
+
+        let expected: Bytes = [0xFF, 0x0, .A]
+        XCTAssertEqual(result, expected)
+    }
+
+    func testDecodingTransform() {
+        let transform: (Byte) -> (Byte) = { byte in
+            if byte == .plus {
+                return .space
+            } else {
+                return byte
+            }
+        }
+
+        guard let result = percentDecoded("%FF+%00".bytes, nonEncodedTransform: transform) else {
+            XCTFail("Unable to decode.")
+            return
+        }
+
+        let expected: Bytes = [0xFF, .space, 0x0]
+        XCTAssertEqual(result, expected)
+    }
+
+    func testDecodingArraySlice() {
+        let slice = "%FF+%00A".bytes[0...6]
+        guard let result = percentDecoded(slice) else {
+            XCTFail("Unable to decode.")
+            return
+        }
+
+        let expected: Bytes = [0xFF, .plus, 0x0]
+        XCTAssertEqual(result, expected)
+    }
+
+    func testDecodingArraySliceTransform() {
+        let transform: (Byte) -> (Byte) = { byte in
+            if byte == .plus {
+                return .space
+            } else {
+                return byte
+            }
+        }
+
+        let slice = "%FF+%00A".bytes[0...6]
+        guard let result = percentDecoded(slice, nonEncodedTransform: transform) else {
+            XCTFail("Unable to decode.")
+            return
+        }
+
+        let expected: Bytes = [0xFF, .space, 0x0]
+        XCTAssertEqual(result, expected)
+    }
+
+    func testEncodingShould() throws {
+        let bytes: Bytes = [.f, .a, .zero]
+        let result = try percentEncoded(bytes) { byte in
+            return byte != .a
+        }
+
+        XCTAssertEqual(result, "%66a%30".bytes)
+    }
+
+    func testEncodingZero() throws {
+        let bytes: Bytes = [0]
+        let result = try percentEncoded(bytes) { byte in
+            return byte != .a
+        }
+
+        XCTAssertEqual(result, "%00".bytes)
     }
 }
 

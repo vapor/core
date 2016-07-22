@@ -5,22 +5,14 @@ extension Bool {
         Any variant of `yes`, `y`, `true`, `t`, or any 
         numerical value greater than 0 will be considered `true`
     */
-    public init(_ string: String) {
-        let cleaned = string
-            .lowercased()
-            .characters
-            .first ?? "n"
-
-        switch cleaned {
-        case "t", "y", "1":
+    public init?(_ string: String) {
+        switch string.lowercased() {
+        case "y", "1", "yes", "t", "true":
             self = true
+        case "n", "0", "no", "f", "false":
+            self = false
         default:
-            if let int = Int(String(cleaned)) where int > 0 {
-                self = true
-            } else {
-                self = false
-            }
-
+            return nil
         }
     }
 }

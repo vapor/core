@@ -21,14 +21,18 @@ public protocol Extractable {
 
 extension Extractable where Wrapped == String {
     public var isNilOrEmpty: Bool {
-        guard let val = extract() else { return true }
+        guard let val = extract() else {
+            return true
+        }
         return val.isEmpty
     }
 }
 
 extension Optional: Extractable {
     public func extract() -> Wrapped? {
-        guard case let .some(value) = self else { return nil }
+        guard case let .some(value) = self else {
+            return nil
+        }
         return value
     }
 }

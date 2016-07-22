@@ -84,7 +84,10 @@ public class StaticDataBuffer {
         When in Query segment, `+` should be interpreted as ` ` (space), 
         not sure useful outside of that point.
     */
-    public func collect(until delimitters: Byte..., convertIfNecessary: (Byte) -> Byte = { $0 }) throws -> [Byte] {
+    public func collect(
+        until delimitters: Byte...,
+        convertIfNecessary: (Byte) -> Byte = { $0 }
+    ) throws -> [Byte] {
         var collected: [Byte] = []
         while let next = try next() {
             if delimitters.contains(next) {

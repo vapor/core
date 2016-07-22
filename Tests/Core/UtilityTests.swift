@@ -7,8 +7,7 @@ class UtilityTests: XCTestCase {
     static var allTests = [
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
-        ("testDecimalInt", testDecimalInt),
-        ("testDecimalIntError", testDecimalIntError),
+        ("testEquals", testEquals)
     ]
 
     func testLowercase() {
@@ -31,13 +30,8 @@ class UtilityTests: XCTestCase {
         )
     }
 
-    func testDecimalInt() {
-        let test = "1337"
-        XCTAssertEqual(test.bytes.decimalInt, 1337)
-    }
-
-    func testDecimalIntError() {
-        let test = "13ferret37"
-        XCTAssertEqual(test.bytes.decimalInt, nil)
+    func testEquals() {
+        XCTAssertEqual(1.equals(any: [0, 1, 2]), true)
+        XCTAssertEqual(1.equals(any: 5, 2, 3), false)
     }
 }
