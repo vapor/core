@@ -4,7 +4,8 @@ import XCTest
 
 class ArrayTests: XCTestCase {
     static var allTests = [
-        ("testChunked", testChunked)
+        ("testChunked", testChunked),
+        ("testSafeAccess", testSafeAccess),
     ]
 
     func testChunked() {

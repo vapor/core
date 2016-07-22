@@ -7,7 +7,7 @@ class UtilityTests: XCTestCase {
     static var allTests = [
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
-        ("testEquals", testEquals),
+        ("testEquals", testEquals)
     ]
 
     func testLowercase() {

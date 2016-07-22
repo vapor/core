@@ -9,6 +9,7 @@ class BytesTests: XCTestCase {
         ("testPatternMatch", testPatternMatch),
         ("testPatternArrayMatch", testPatternArrayMatch),
         ("testBytesSlice", testBytesSlice),
+        ("testBytesSlicePatternMatching", testBytesSlicePatternMatching),
         ("testEasyAppend", testEasyAppend),
         ("testIntHex", testIntHex),
         ("testHexInt", testHexInt),
@@ -46,6 +47,25 @@ class BytesTests: XCTestCase {
     func testBytesSlice() {
         let slice = "hello".bytesSlice
         XCTAssertEqual(slice, ArraySlice("hello".bytes))
+    }
+
+    func testBytesSlicePatternMatching() {
+        let arr: Bytes = [1, 2, 3]
+        switch arr[0...1] {
+        case [3, 4]:
+            XCTFail()
+        case [1, 2]:
+            break
+        default:
+            XCTFail()
+        }
+
+        switch arr[1...2] {
+        case arr:
+            XCTFail()
+        default:
+            break
+        }
     }
 
     func testEasyAppend() {
