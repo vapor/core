@@ -1,4 +1,10 @@
-<img src="https://userscontent2.emaze.com/images/bbbef209-eddb-4593-b39e-00a07f035730/0929829d-60e7-42f8-9319-39b38fb729f6.png" align="center" alt="Core">
+<div style="text-align:center">
+	<img 
+		src="https://userscontent2.emaze.com/images/bbbef209-eddb-4593-b39e-00a07f035730/0929829d-60e7-42f8-9319-39b38fb729f6.png" 
+		align="center" 
+		alt="Core"
+		width="500px"
+	>
 
 # Core
 
