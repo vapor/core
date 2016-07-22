@@ -107,4 +107,16 @@ class BytesTests: XCTestCase {
         let result = Array("~~".characters).trimmed(["~"])
         XCTAssertEqual(String(result), "")
     }
+
+    func testStringConvertible() throws {
+        let bytes: Bytes = [0x64, 0x65]
+        let string = try String(bytes: bytes)
+        XCTAssertEqual(try string.makeBytes(), bytes)
+    }
+
+    func testDataConvertible() throws {
+        let bytes: Bytes = [0x64, 0x65]
+        let data = Data(bytes: bytes)
+        XCTAssertEqual(try data.makeBytes(), bytes)
+    }
 }
