@@ -84,10 +84,10 @@
             try handler(sender)
             let semaphoreResult = semaphore.wait(timeout: timeout)
             switch semaphoreResult {
-            case .Success:
+            case .success:
                 guard let result = sender.result else { throw PromiseError.promiseNotCalled }
                 return try result.extract()
-            case .TimedOut:
+            case .timedOut:
                 throw PromiseError.timedOut
             }
         }
