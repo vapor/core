@@ -10,7 +10,7 @@
 */
 public class Lock {
 
-    let mutex = UnsafeMutablePointer<pthread_mutex_t>(allocatingCapacity: 1)
+    let mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1)
 
     public init() {
         pthread_mutex_init(mutex, nil)
@@ -19,7 +19,7 @@ public class Lock {
     deinit {
         pthread_mutex_destroy(mutex)
         mutex.deinitialize()
-        mutex.deallocateCapacity(1)
+        mutex.deallocate(capacity: 1)
     }
 
     public func lock() {
