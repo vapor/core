@@ -9,6 +9,12 @@
 
 # Core
 
+![Swift](http://img.shields.io/badge/swift-3.0-brightgreen.svg)
+[![Build Status](https://travis-ci.org/qutheory/core.svg?branch=master)](https://travis-ci.org/qutheory/core)
+[![Code Coverage](https://codecov.io/gh/qutheory/core/branch/master/graph/badge.svg)](https://codecov.io/gh/qutheory/core)
+[![Slack Status](http://slack.qutheory.io/badge.svg)](http://slack.qutheory.io)
+[![Codebeat](https://codebeat.co/badges/a793ad97-47e3-40d9-82cf-2aafc516ef4e)](https://codebeat.co/projects/github-com-qutheory-core)
+
 Core is a collection of useful protocols, extensions, type-aliases, functions, and libraries. It is used extensively in almost all of Qutheory's packages and in [Vapor](https://github.com/qutheory/github).
 
 ## 🚀 Features 
