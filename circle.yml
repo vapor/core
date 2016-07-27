@@ -1,6 +1,6 @@
 dependencies:
   pre:
-    - eval "$(curl -sL swift.qutheory.io/travis)"
+    - eval "$(curl -sL swift.qutheory.io/circleci)"
 
 test:
   override:
