@@ -1,9 +1,3 @@
-dependencies:
-  pre:
-    - eval "$(curl -sL swift.qutheory.io/circleci)"
-
 test:
   override:
-    - source ~/.bashrc; swift build
-    - source ~/.bashrc; swift build --configuration release
-    - source ~/.bashrc; swift test
+    - eval "$(curl -sL swift.qutheory.io/circleci)"
