@@ -9,7 +9,7 @@
 
 # Core
 
-![Swift](http://img.shields.io/badge/swift-v3.0--dev.07.25-brightgreen.svg)
+[![Swift](http://img.shields.io/badge/swift-v3.0--dev.07.25-orange.svg)](#-environment)
 [![Build Status](https://travis-ci.org/qutheory/core.svg?branch=master)](https://travis-ci.org/qutheory/core)
 [![CircleCI](https://circleci.com/gh/qutheory/core.svg?style=shield)](https://circleci.com/gh/qutheory/core)
 [![Code Coverage](https://codecov.io/gh/qutheory/core/branch/master/graph/badge.svg)](https://codecov.io/gh/qutheory/core)
