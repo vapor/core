@@ -14,4 +14,6 @@ script:
   # Test Core
   - swift test
 after_success:
+  - swift package generate-xcodeproj
+  - xcodebuild -project Core.xcodeproj -scheme Core -sdk macosx10.12 -destination arch=x86_64 -configuration Debug -enableCodeCoverage YES ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test -toolchain org.swift.3020160725a
   - bash <(curl -s https://codecov.io/bash)
