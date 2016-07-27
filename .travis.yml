@@ -13,5 +13,4 @@ script:
   - swift build --configuration release
   # Test Core
   - swift test
-after_success:
   - eval "$(curl -sL swift.qutheory.io/codecov)"
