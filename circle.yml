@@ -1,6 +1,9 @@
+dependencies:
+  pre:
+    - eval "$(curl -sL swift.qutheory.io/travis)"
+
 test:
   override:
-    - eval "$(curl -sL swift.qutheory.io/travis)"
-    - swift build
-    - swift build --configuration release
-    - swift test
+    - source ~/.bashrc; swift build
+    - source ~/.bashrc; swift build --configuration release
+    - source ~/.bashrc; swift test
