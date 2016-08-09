@@ -7,15 +7,15 @@
 #if !os(Linux)
     import Foundation
 
-    public enum PromiseError: Error {
-        case promiseNotCalled
+    public enum PortalError: Error {
+        case portalNotClosed
         case timedOut
     }
 
     /**
         This class is designed to make it possible to use asynchronous contexts in a synchronous environment.
     */
-    public final class Promise<T> {
+    public final class Portal<T> {
         private var result: Result<T>? = .none
         private let semaphore: DispatchSemaphore
         private let lock = Core.Lock()
@@ -25,9 +25,9 @@
         }
 
         /**
-            Resolve the promise with a successful result
+            Close the portal with a successful result
         */
-        public func resolve(with value: T) {
+        public func close(with value: T) {
             lock.locked {
                 // TODO: Fatal error or throw? It's REALLY convenient NOT to throw here. Should at least log warning
                 guard result == nil else { return }
@@ -37,9 +37,9 @@
         }
 
         /**
-            Reject the promise with an appropriate error
+            Close the portal with an appropriate error
         */
-        public func reject(with error: Error) {
+        public func close(with error: Error) {
             lock.locked {
                 guard result == nil else { return }
                 result = .failure(error)
@@ -48,60 +48,60 @@
         }
 
         /**
-            Dismiss the promise throwing a promiseNotCalled error.
+            Dismiss the portal throwing a portalNotClosed error.
         */
-        public func dismiss() {
+        public func destroy() {
             semaphore.signal()
         }
     }
 
-    extension Promise {
+    extension Portal {
         /**
-            This function is used to enter an asynchronous supported context with a promise
+            This function is used to enter an asynchronous supported context with a portal
             object that can be used to complete a given operation.
 
-            let value = try Promise<Int>.async { promise in
-            // .. do whatever necessary passing around `promise` object
-            // eventually call
+                let value = try Portal<Int>.open { portal in
+                    // .. do whatever necessary passing around `portal` object
+                    // eventually call
 
-            promise.resolve(with: 42)
+                    portal.close(with: 42)
 
-            // or
+                    // or
 
-            promise.resolve(with: errorSignifyingFailure)
-            }
+                    portal.close(with: errorSignifyingFailure)
+                }
 
-            - warning: Calling a `promise` multiple times will have no effect.
+            - warning: Calling a `portal` multiple times will have no effect.
         */
-        public static func async(
+        public static func open(
             timingOut timeout: DispatchTime = .distantFuture,
-            _ handler: (Promise) throws -> Void
+            _ handler: (Portal) throws -> Void
         ) throws -> T {
             let semaphore = DispatchSemaphore(value: 0)
-            let sender = Promise<T>(semaphore)
+            let sender = Portal<T>(semaphore)
             // Ok to call synchronously, since will still unblock semaphore
             // TODO: Find a way to enforce sender is called, not calling will perpetually block w/ long timeout
             try handler(sender)
             let semaphoreResult = semaphore.wait(timeout: timeout)
             switch semaphoreResult {
             case .success:
-                guard let result = sender.result else { throw PromiseError.promiseNotCalled }
+                guard let result = sender.result else { throw PortalError.portalNotClosed }
                 return try result.extract()
             case .timedOut:
-                throw PromiseError.timedOut
+                throw PortalError.timedOut
             }
         }
     }
 
-    extension Promise {
+    extension Portal {
         /**
             Execute timeout operations synchronously.
         */
         static func timeout(_ timingOut: DispatchTime, operation: () throws -> T) throws -> T {
             // TODO: async is locked, it needs to be something like `block` or `lockForAsync`
-            return try Promise<T>.async(timingOut: timingOut) { promise in
+            return try Portal<T>.open(timingOut: timingOut) { portal in
                 let value = try operation()
-                promise.resolve(with: value)
+                portal.close(with: value)
             }
         }
     }

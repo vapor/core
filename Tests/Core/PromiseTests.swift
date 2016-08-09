@@ -1,12 +1,12 @@
 import XCTest
 @testable import Core
 
-private enum PromiseTestError: Error {
+private enum PortalTestError: Error {
     case someError
     case anotherError
 }
 
-class PromiseTests: XCTestCase {
+class PortalTests: XCTestCase {
 
     #if os(Linux)
     /*
@@ -22,22 +22,22 @@ class PromiseTests: XCTestCase {
 
     #else
     static let allTests = [
-        ("testPromiseResult", testPromiseResult),
-        ("testPromiseFailure", testPromiseFailure),
+        ("testPortalResult", testPortalResult),
+        ("testPortalFailure", testPortalFailure),
         ("testDuplicateResults", testDuplicateResults),
         ("testDuplicateErrors", testDuplicateErrors)
     ]
 
-    func testPromiseResult() throws {
+    func testPortalResult() throws {
         var array: [Int] = []
 
         array.append(1)
-        let result: Int = try Promise.async { promise in
+        let result: Int = try Portal.open { portal in
             array.append(2)
             _ = try background {
                 sleep(1)
                 array.append(4)
-                promise.resolve(with: 42)
+                portal.close(with: 42)
             }
             array.append(3)
         }
@@ -47,22 +47,22 @@ class PromiseTests: XCTestCase {
         XCTAssert(result == 42)
     }
 
-    func testPromiseFailure() {
+    func testPortalFailure() {
         var array: [Int] = []
 
         do {
             array.append(1)
-            let _ = try Promise<Int>.async { promise in
+            let _ = try Portal<Int>.open { portal in
                 array.append(2)
                 _ = try background {
                     sleep(1)
                     array.append(4)
-                    promise.reject(with: PromiseTestError.someError)
+                    portal.close(with: PortalTestError.someError)
                 }
                 array.append(3)
             }
-            XCTFail("Promise should throw")
-        } catch PromiseTestError.someError {
+            XCTFail("Portal should throw")
+        } catch PortalTestError.someError {
             // success
         } catch {
             XCTFail("Unexpected error thrown: \(error)")
@@ -71,26 +71,26 @@ class PromiseTests: XCTestCase {
         XCTAssert(array == [1,2,3,4])
     }
 
-    func testPromiseNotCalled() {
+    func testPortalNotCalled() {
         do {
-            let _ = try Promise<Int>.async(timingOut: .distantFuture) { promise in
-                promise.dismiss()
+            let _ = try Portal<Int>.open(timingOut: .distantFuture) { portal in
+                portal.destroy()
             }
             XCTFail("Should not have passed")
-        } catch PromiseError.promiseNotCalled {
+        } catch PortalError.portalNotClosed {
             // pass
         } catch {
             XCTFail("Wrong error: \(error)")
         }
     }
 
-    func testPromiseTimedOut() {
+    func testPortalTimedOut() {
         do {
-            let _ = try Promise<Int>.async(timingOut: DispatchTime.now()) { promise in
+            let _ = try Portal<Int>.open(timingOut: DispatchTime.now()) { portal in
                 //
             }
             XCTFail("Should not have passed")
-        } catch PromiseError.timedOut {
+        } catch PortalError.timedOut {
             // pass
         } catch {
             XCTFail("Wrong error: \(error)")
@@ -98,7 +98,7 @@ class PromiseTests: XCTestCase {
     }
 
     func testTimeout() throws {
-        let result = try Promise<Int>.timeout(DispatchTime.now()) {
+        let result = try Portal<Int>.timeout(DispatchTime.now()) {
             return 1
         }
 
@@ -106,10 +106,10 @@ class PromiseTests: XCTestCase {
     }
 
     func testDuplicateResults() throws {
-        let response = try Promise<Int>.async { promise in
-            promise.resolve(with: 10)
+        let response = try Portal<Int>.open { portal in
+            portal.close(with: 10)
             // subsequent resolutions should be ignored
-            promise.resolve(with: 400)
+            portal.close(with: 400)
         }
 
         XCTAssert(response == 10)
@@ -118,13 +118,13 @@ class PromiseTests: XCTestCase {
 
     func testDuplicateErrors() {
         do {
-            let _ = try Promise<Int>.async { promise in
-                promise.reject(with: PromiseTestError.someError)
+            let _ = try Portal<Int>.open { portal in
+                portal.close(with: PortalTestError.someError)
                 // subsequent rejections should be ignored
-                promise.reject(with: PromiseTestError.anotherError)
+                portal.close(with: PortalTestError.anotherError)
             }
             XCTFail("Test should not pass")
-        } catch PromiseTestError.someError {
+        } catch PortalTestError.someError {
             // success
         } catch {
             XCTFail("Unexpected error thrown")
