@@ -9,7 +9,7 @@ XCTMain([
     testCase(BytesTests.allTests),
     testCase(ExtractableTests.allTests),
     testCase(PercentEncodingTests.allTests),
-    testCase(PromiseTests.allTests),
+    testCase(PortalTests.allTests),
     testCase(ResultTests.allTests),
     testCase(StaticDataBufferTests.allTests),
     testCase(UnsignedIntegerChunkingTests.allTests),
