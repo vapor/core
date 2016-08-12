@@ -4,6 +4,7 @@ import XCTest
 @testable import CoreTestSuite
 
 XCTMain([
+    testCase(SemaphoreTests.allTests),
     testCase(ArrayTests.allTests),
     testCase(BoolTests.allTests),
     testCase(BytesTests.allTests),

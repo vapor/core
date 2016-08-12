@@ -1,6 +1,54 @@
 import Foundation
 import XCTest
+import libc
 @testable import Core
+
+class SemaphoreTests: XCTestCase {
+    static let allTests = [
+        ("testSemaphore", testSemaphore),
+        ("testSemaphoreTimeout", testSemaphoreTimeout)
+    ]
+
+    func testSemaphore() throws {
+        var collection = [String]()
+        let semaphore = Semaphore()
+
+        collection.append("a")
+        try Core.background {
+            collection.append("b")
+            sleep(1)
+            collection.append("c")
+            semaphore.signal()
+        }
+        collection.append("e")
+        _ = semaphore.wait(timeout: 30)
+        collection.append("f")
+
+        print("**** I RAN ****")
+        let expectation = ["a", "e", "b", "c", "f"]
+        XCTAssert(collection == expectation, "got: \(collection), expected: \(expectation)")
+    }
+
+    func testSemaphoreTimeout() throws {
+        try (1...3).forEach { timeoutTest in
+            let semaphore = Semaphore()
+            print("¶¶1")
+            try background {
+                print("¶¶2")
+                let sleeptime = timeoutTest * 2
+                print("¶¶3 \(sleeptime)")
+                sleep(UInt32(sleeptime))
+                print("¶¶4")
+                semaphore.signal()
+                print("¶¶5")
+            }
+            print("¶¶6")
+            let result = semaphore.wait(timeout: Double(timeoutTest))
+            print("¶¶7 \(result)")
+            XCTAssert(result == .timedOut)
+        }
+    }
+ }
 
 class ArrayTests: XCTestCase {
     static var allTests = [

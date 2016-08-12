@@ -1,4 +1,5 @@
 import XCTest
+import libc
 @testable import Core
 
 private enum PortalTestError: Error {
@@ -8,19 +9,19 @@ private enum PortalTestError: Error {
 
 class PortalTests: XCTestCase {
 
-    #if os(Linux)
-    /*
-    Temporary until we get libdispatch support on Linux, then remove this section.
-    */
-    static let allTests = [
-        ("testLinux", testLinux)
-    ]
-
-    func testLinux() {
-        print("Not yet available on linux")
-    }
-
-    #else
+//    #if os(Linux)
+//    /*
+//    Temporary until we get libdispatch support on Linux, then remove this section.
+//    */
+//    static let allTests = [
+//        ("testLinux", testLinux)
+//    ]
+//
+//    func testLinux() {
+//        print("Not yet available on linux")
+//    }
+//
+//    #else
     static let allTests = [
         ("testPortalResult", testPortalResult),
         ("testPortalFailure", testPortalFailure),
@@ -73,7 +74,7 @@ class PortalTests: XCTestCase {
 
     func testPortalNotCalled() {
         do {
-            let _ = try Portal<Int>.open(timingOut: .distantFuture) { portal in
+            let _ = try Portal<Int>.open { portal in
                 portal.destroy()
             }
             XCTFail("Should not have passed")
@@ -86,7 +87,7 @@ class PortalTests: XCTestCase {
 
     func testPortalTimedOut() {
         do {
-            let _ = try Portal<Int>.open(timingOut: DispatchTime.now()) { portal in
+            let _ = try Portal<Int>.open(timeout: 0) { portal in
                 //
             }
             XCTFail("Should not have passed")
@@ -98,7 +99,7 @@ class PortalTests: XCTestCase {
     }
 
     func testTimeout() throws {
-        let result = try Portal<Int>.timeout(DispatchTime.now()) {
+        let result = try Portal<Int>.timeout(0) {
             return 1
         }
 
@@ -115,7 +116,6 @@ class PortalTests: XCTestCase {
         XCTAssert(response == 10)
     }
 
-
     func testDuplicateErrors() {
         do {
             let _ = try Portal<Int>.open { portal in
@@ -130,6 +130,4 @@ class PortalTests: XCTestCase {
             XCTFail("Unexpected error thrown")
         }
     }
-    
-    #endif
 }
