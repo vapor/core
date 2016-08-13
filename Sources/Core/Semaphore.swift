@@ -51,7 +51,14 @@ extension timespec {
     }
 
     internal var timestamp: Double {
-        return Double("\(tv_sec).\(tv_nsec)") ?? -1
+        var ts = Double(tv_sec)
+
+        var nsec = Double(tv_nsec)
+        while nsec >= 1.0 {
+            nsec /= 10
+        }
+
+        return ts + nsec
     }
 
     internal init(secondsFromNow: Double) {
@@ -63,12 +70,15 @@ extension timespec {
 extension Double {
     internal func makeTimespec() -> timespec {
         let seconds = Int(self)
-        let split = self.description.components(separatedBy: ".")
-        let nseconds = split[safe: 1]
+        var ts = timespec(tv_sec: seconds, tv_nsec: 0)
+        let nsec = self.description
+            .components(separatedBy: ".")[safe: 1]
             .flatMap { Int($0)?.makeNanoseconds() }
-            ?? 0
+        if let nsec = nsec {
+            ts.tv_nsec = nsec
+        }
 
-        return timespec(tv_sec: seconds, tv_nsec: nseconds)
+        return ts
     }
 }
 
