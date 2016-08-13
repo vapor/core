@@ -47,15 +47,15 @@ extension Double {
 
 extension Int {
     /**
-     ugly, but considerably faster than string variant
+         ugly, but considerably faster than string variant
 
-     pads nanoseconds to convert from second fractionals to nano-seconds,
+         pads nanoseconds to convert from second fractionals to nano-seconds,
 
-     for example:
+         for example:
 
-     3.24 seconds == `3` seconds and `240,000,000` nanoseconds
-     5.9810 seconds == `5` seconds and `981,000,000` nanoseconds
-     */
+         3.24 seconds == `3` seconds and `240,000,000` nanoseconds
+         5.9810 seconds == `5` seconds and `981,000,000` nanoseconds
+    */
     internal func makeNanoseconds() -> Int {
         if self >= 1_000_000_000 { return (self / 10).makeNanoseconds() }
         if self == 0 { return 0 }

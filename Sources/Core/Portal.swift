@@ -1,5 +1,15 @@
+/**
+    There was an error thrown by the portal itself vs a user thrown variable
+*/
 public enum PortalError: Error {
-    case portalNotClosed
+    /**
+        Portal was destroyed w/o being closed
+    */
+    case notClosed
+
+    /**
+        Portal timedOut before it was closed.
+    */
     case timedOut
 }
 
@@ -38,7 +48,7 @@ public final class Portal<T> {
     }
 
     /**
-         Dismiss the portal throwing a portalNotClosed error.
+         Dismiss the portal throwing a notClosed error.
     */
     public func destroy() {
         semaphore.signal()
@@ -79,7 +89,7 @@ extension Portal {
         let waitResult = semaphore.wait(timeout: timeout)
         switch waitResult {
         case .success:
-            guard let result = portal.result else { throw PortalError.portalNotClosed }
+            guard let result = portal.result else { throw PortalError.notClosed }
             return try result.extract()
         case .timedOut:
             throw PortalError.timedOut

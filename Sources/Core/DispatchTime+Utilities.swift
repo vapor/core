@@ -26,6 +26,9 @@ extension UInt64 {
 }
 
 extension DispatchTime {
+    /**
+        Create a dispatch time for a given seconds from now.
+    */
     public init(secondsFromNow: Double) {
         let now = mach_absolute_time() * NUMER
         let nano = secondsFromNow.nanoseconds
