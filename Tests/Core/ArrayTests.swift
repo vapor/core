@@ -15,13 +15,19 @@ class SemaphoreTests: XCTestCase {
 
         collection.append("a")
         try Core.background {
+            print("MADE IT TO BACKGROUND: \(collection)")
             collection.append("b")
+            print(collection)
             sleep(1)
+            print(collection)
             collection.append("c")
+            print(collection)
             semaphore.signal()
         }
         collection.append("e")
-        _ = semaphore.wait(timeout: 30)
+        print("ENABLING SEMAPHORE")
+        let result = semaphore.wait(timeout: 999_999.999)
+        print("SEMAPHORE RESULT: \(result)")
         collection.append("f")
 
         print("**** I RAN ****")
