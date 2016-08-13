@@ -68,7 +68,7 @@ class PortalTests: XCTestCase {
                 portal.destroy()
             }
             XCTFail("Should not have passed")
-        } catch PortalError.portalNotClosed {
+        } catch PortalError.notClosed {
             // pass
         } catch {
             XCTFail("Wrong error: \(error)")
