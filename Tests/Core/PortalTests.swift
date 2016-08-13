@@ -11,8 +11,12 @@ class PortalTests: XCTestCase {
     static let allTests = [
         ("testPortalResult", testPortalResult),
         ("testPortalFailure", testPortalFailure),
+        ("testPortalNotCalled", testPortalNotCalled),
+        ("testPortalTimedOut", testPortalTimedOut),
+        ("testTimeout", testTimeout),
         ("testDuplicateResults", testDuplicateResults),
-        ("testDuplicateErrors", testDuplicateErrors)
+        ("testDuplicateErrors", testDuplicateErrors),
+        ("testPortalThrowHandler", testPortalThrowHandler),
     ]
 
     func testPortalResult() throws {
@@ -115,5 +119,11 @@ class PortalTests: XCTestCase {
         } catch {
             XCTFail("Unexpected error thrown")
         }
+    }
+
+    func testPortalThrowHandler() throws {
+        do {
+            _ = try Portal<Int>.open { _ in throw PortalTestError.someError }
+        } catch PortalTestError.someError {}
     }
 }
