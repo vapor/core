@@ -8,20 +8,6 @@ private enum PortalTestError: Error {
 }
 
 class PortalTests: XCTestCase {
-
-//    #if os(Linux)
-//    /*
-//    Temporary until we get libdispatch support on Linux, then remove this section.
-//    */
-//    static let allTests = [
-//        ("testLinux", testLinux)
-//    ]
-//
-//    func testLinux() {
-//        print("Not yet available on linux")
-//    }
-//
-//    #else
     static let allTests = [
         ("testPortalResult", testPortalResult),
         ("testPortalFailure", testPortalFailure),

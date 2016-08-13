@@ -15,22 +15,15 @@ class SemaphoreTests: XCTestCase {
 
         collection.append("a")
         try Core.background {
-            print("MADE IT TO BACKGROUND: \(collection)")
             collection.append("b")
-            print(collection)
-            sleep(1)
-            print(collection)
+            sleep(1) // seconds
             collection.append("c")
-            print(collection)
             semaphore.signal()
         }
         collection.append("e")
-        print("ENABLING SEMAPHORE")
-        let result = semaphore.wait(timeout: 999_999.999)
-        print("SEMAPHORE RESULT: \(result)")
+        _ = semaphore.wait(timeout: 30)
         collection.append("f")
 
-        print("**** I RAN ****")
         let expectation = ["a", "e", "b", "c", "f"]
         XCTAssert(collection == expectation, "got: \(collection), expected: \(expectation)")
     }
@@ -38,19 +31,24 @@ class SemaphoreTests: XCTestCase {
     func testSemaphoreTimeout() throws {
         try (1...3).forEach { timeoutTest in
             let semaphore = Semaphore()
-            print("¶¶1")
             try background {
-                print("¶¶2")
                 let sleeptime = timeoutTest * 2
-                print("¶¶3 \(sleeptime)")
                 sleep(UInt32(sleeptime))
-                print("¶¶4")
                 semaphore.signal()
-                print("¶¶5")
             }
-            print("¶¶6")
             let result = semaphore.wait(timeout: Double(timeoutTest))
-            print("¶¶7 \(result)")
+            XCTAssert(result == .timedOut)
+        }
+
+        try (1...3).forEach { timeoutTest in
+            let semaphore = Semaphore()
+            try background {
+                let microseconds = timeoutTest * 1_000_000
+                let usleeptime = UInt32(microseconds) + 1 // 1 microsecond of variance for timeout
+                usleep(usleeptime) // usleep is microseconds
+                semaphore.signal()
+            }
+            let result = semaphore.wait(timeout: Double(timeoutTest))
             XCTAssert(result == .timedOut)
         }
     }

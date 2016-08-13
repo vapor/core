@@ -27,8 +27,6 @@ extension Double {
         init(secondsFromNow: Double) {
             let now = mach_absolute_time() * NUMER
             let nano = secondsFromNow.nanoseconds
-            print("NOW: \(now)")
-            print("NANO: \(nano)")
             self.init(uptimeNanoseconds: now + nano)
         }
     }
@@ -70,20 +68,13 @@ extension timespec {
             return
         }
 
-        var nsecondsChars = split[1].characters.array
-        let difference = 8 - nsecondsChars.count
-        if difference > 0 {
-            nsecondsChars += [Character](repeating: "0", count: difference)
-        } else {
-            nsecondsChars = nsecondsChars[0...7].array
-        }
-
-        let nseconds = Int(String(nsecondsChars)) ?? 0
+        let nseconds = Int(split[1])?.makeBillions() ?? 0
         self = timespec(tv_sec: seconds, tv_nsec: nseconds)
     }
 }
 
 extension Int {
+    // ugly, but considerably faster than string variant
     private func makeBillions() -> Int {
         if self >= 1_000_000_000 { return 0 }
         if self == 0 { return 0 }
@@ -119,9 +110,7 @@ public class Semaphore {
         #if os(macOS)
             semaphore = DispatchSemaphore(value: Int(value))
         #else
-            print("SEMAPHORE PRE: \(semaphore)")
             sem_init(semaphore, 0, UInt32(value))
-            print("SEMAPHORE POST: \(semaphore)")
         #endif
     }
 
@@ -146,7 +135,6 @@ public class Semaphore {
 
         #else
             var ts = timespec(secondsFromNow: timeout)
-            print("TS: \(ts)")
             let wait = sem_timedwait(semaphore, &ts)
 
             /*
@@ -248,9 +236,6 @@ extension Portal {
             guard let result = sender.result else { throw PortalError.portalNotClosed }
             return try result.extract()
         case .timedOut:
-            if let res = sender.result {
-                print("WTF, WE HAVE A THING: \(res)")
-            }
             throw PortalError.timedOut
         }
     }
