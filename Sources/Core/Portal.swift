@@ -92,7 +92,6 @@ extension Portal {
          Execute timeout operations
     */
     static func timeout(_ timeout: Double, operation: () throws -> T) throws -> T {
-        // TODO: async is locked, it needs to be something like `block` or `lockForAsync`
         return try Portal<T>.open(timeout: timeout) { portal in
             let value = try operation()
             portal.close(with: value)
