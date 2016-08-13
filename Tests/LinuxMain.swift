@@ -5,6 +5,7 @@ import XCTest
 
 XCTMain([
     testCase(SemaphoreTests.allTests),
+    testCase(TimespecTests.allTests),
     testCase(ArrayTests.allTests),
     testCase(BoolTests.allTests),
     testCase(BytesTests.allTests),
