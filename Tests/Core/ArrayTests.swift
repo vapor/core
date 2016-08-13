@@ -55,7 +55,7 @@ class StrandTests: XCTestCase {
             XCTAssert(collection == [0, 2])
         }
     }
-    
+
     func testCancel() throws {
         var collection = [0]
 
@@ -110,29 +110,28 @@ public enum StrandError: Error {
 }
 
 public class Strand {
-    #if os(Linux)
+
     private var pthread: pthread_t
-    #else
-    private var pthread: pthread_t
-    #endif
 
     public init(_ closure: () -> Void) throws {
         let holder = Unmanaged.passRetained(StrandClosure(closure))
-        let pointer = UnsafeMutablePointer<Void>(holder.toOpaque())
+        let closurePointer = UnsafeMutablePointer<Void>(holder.toOpaque())
 
         #if os(Linux)
-            guard pthread_create(&pthread, nil, runner, pointer) == 0 else {
-                holder.release()
-                throw StrandError.threadCreationFailed
-            }
+            var thread: pthread_t = 0
         #else
-            var pt: pthread_t?
-            guard pthread_create(&pt, nil, runner, pointer) == 0, let value = pt else {
-                holder.release()
-                throw StrandError.threadCreationFailed
-            }
-            pthread = value
+            var thread: pthread_t?
         #endif
+
+        let result = pthread_create(&thread, nil, runner, closurePointer)
+        // back to optional so works either way (linux vs macos).
+        let inner: pthread_t? = thread
+
+        guard result == 0, let value = inner else {
+            holder.release()
+            throw StrandError.threadCreationFailed
+        }
+        pthread = value
     }
 
     deinit {
