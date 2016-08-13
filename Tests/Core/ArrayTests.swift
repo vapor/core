@@ -32,19 +32,8 @@ class SemaphoreTests: XCTestCase {
         try (1...3).forEach { timeoutTest in
             let semaphore = Semaphore()
             try background {
-                let sleeptime = timeoutTest * 2
-                sleep(UInt32(sleeptime))
-                semaphore.signal()
-            }
-            let result = semaphore.wait(timeout: Double(timeoutTest))
-            XCTAssert(result == .timedOut)
-        }
-
-        try (1...3).forEach { timeoutTest in
-            let semaphore = Semaphore()
-            try background {
                 let microseconds = timeoutTest * 1_000_000
-                let usleeptime = UInt32(microseconds) + 1 // 1 microsecond of variance for timeout
+                let usleeptime = UInt32(microseconds) + 10 // 10 microsecond of variance for timeout
                 usleep(usleeptime) // usleep is microseconds
                 semaphore.signal()
             }
