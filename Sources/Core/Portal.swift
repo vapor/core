@@ -20,7 +20,6 @@ public final class Portal<T> {
     */
     public func close(with value: T) {
         lock.locked {
-            // TODO: Fatal error or throw? It's REALLY convenient NOT to throw here. Should at least log warning
             guard result == nil else { return }
             result = .success(value)
             semaphore.signal()
@@ -69,12 +68,18 @@ extension Portal {
         _ handler: (Portal) throws -> Void
         ) throws -> T {
         let semaphore = Semaphore(value: 0)
-        let sender = Portal<T>(semaphore)
-        try handler(sender)
+        let portal = Portal<T>(semaphore)
+        try background {
+            do {
+                try handler(portal)
+            } catch {
+                portal.close(with: error)
+            }
+        }
         let waitResult = semaphore.wait(timeout: timeout)
         switch waitResult {
         case .success:
-            guard let result = sender.result else { throw PortalError.portalNotClosed }
+            guard let result = portal.result else { throw PortalError.portalNotClosed }
             return try result.extract()
         case .timedOut:
             throw PortalError.timedOut
@@ -84,7 +89,7 @@ extension Portal {
 
 extension Portal {
     /**
-         Execute timeout operations synchronously.
+         Execute timeout operations
     */
     static func timeout(_ timeout: Double, operation: () throws -> T) throws -> T {
         // TODO: async is locked, it needs to be something like `block` or `lockForAsync`

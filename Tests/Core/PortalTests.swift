@@ -85,7 +85,7 @@ class PortalTests: XCTestCase {
     }
 
     func testTimeout() throws {
-        let result = try Portal<Int>.timeout(0) {
+        let result = try Portal<Int>.timeout(1) {
             return 1
         }
 
