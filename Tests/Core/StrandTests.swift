@@ -1,5 +1,4 @@
 import libc
-@testable import Core
 
 class StrandTests: XCTestCase {
     static let allTests = [
