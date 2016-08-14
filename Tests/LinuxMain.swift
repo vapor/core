@@ -4,6 +4,7 @@ import XCTest
 @testable import CoreTestSuite
 
 XCTMain([
+    testCase(StrandTests.allTests),
     testCase(SemaphoreTests.allTests),
     testCase(TimespecTests.allTests),
     testCase(ArrayTests.allTests),
