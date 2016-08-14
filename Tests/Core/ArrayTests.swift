@@ -93,80 +93,50 @@ class StrandTests: XCTestCase {
         collection.append(4)
         XCTAssert(collection == [0, 3, 1, 2, 4])
     }
-}
 
-private class StrandClosure {
-    let closure: () -> Void
-
-    init(_ closure: () -> Void) {
-        self.closure = closure
+    func testDetachFail() throws {
+        let strand = try Strand {}
+        try strand.detach()
+        do {
+            try strand.detach()
+            XCTFail("detaching already detached thread should fail")
+        } catch StrandError.detachFailed {}
     }
-}
 
-public enum StrandError: Error {
-    case threadCreationFailed
-    case threadCancellationFailed(Int)
-    case threadJoinFailed(Int)
-}
+    func testJoinFail() throws {
+        let strand = try Strand { sleep(1) }
+        try strand.detach()
+        do {
+            try strand.join()
+            XCTFail("join detached thread should fail")
+        } catch StrandError.joinFailed {}
+    }
 
-public class Strand {
+    func testCancelFail() throws {
+        let strand = try Strand {}
+        try strand.detach()
+        do {
+            try strand.cancel()
+            XCTFail("cancel detached thread should fail")
+        } catch StrandError.cancellationFailed {}
+    }
 
-    private var pthread: pthread_t
-
-    public init(_ closure: () -> Void) throws {
-        let holder = Unmanaged.passRetained(StrandClosure(closure))
-        let closurePointer = UnsafeMutablePointer<Void>(holder.toOpaque())
-
-        #if os(Linux)
-            var thread: pthread_t = 0
-        #else
-            var thread: pthread_t?
-        #endif
-
-        let result = pthread_create(&thread, nil, runner, closurePointer)
-        // back to optional so works either way (linux vs macos).
-        let inner: pthread_t? = thread
-
-        guard result == 0, let value = inner else {
-            holder.release()
-            throw StrandError.threadCreationFailed
+    func testCreateFail() throws {
+        var strands: [Strand] = []
+        defer {
+            try! strands.forEach { strand in
+                try strand.cancel()
+            }
         }
-        pthread = value
-    }
 
-    deinit {
-        pthread_detach(pthread)
-    }
-
-    public func join() throws {
-        let status = pthread_join(pthread, nil)
-        guard status == 0 else { throw StrandError.threadJoinFailed(Int(status)) }
-    }
-
-    public func cancel() throws {
-        let status = pthread_cancel(pthread)
-        guard status == 0 else { throw StrandError.threadCancellationFailed(Int(status)) }
-    }
-
-    public class func exit(code: Int) {
-        var code = code
-        pthread_exit(&code)
+        do {
+            try (1...9_999).forEach { _ in
+                let strand = try Strand {
+                    sleep(1)
+                }
+                strands.append(strand)
+            }
+            XCTFail("create should fail at least once, too many")
+        } catch StrandError.creationFailed {}
     }
 }
-
-//#if os(Linux)
-    private func runner(arg: UnsafeMutablePointer<Void>?) -> UnsafeMutablePointer<Void>? {
-        guard let arg = arg else { return nil }
-        let unmanaged = Unmanaged<StrandClosure>.fromOpaque(arg)
-        unmanaged.takeUnretainedValue().closure()
-        unmanaged.release()
-        return nil
-    }
-//#else
-    private func runner(arg: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void>? {
-        let unmanaged = Unmanaged<StrandClosure>.fromOpaque(arg)
-        unmanaged.takeUnretainedValue().closure()
-        unmanaged.release()
-        return nil
-    }
-//#endif

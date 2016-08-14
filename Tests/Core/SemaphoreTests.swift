@@ -33,8 +33,8 @@ class SemaphoreTests: XCTestCase {
             let semaphore = Semaphore()
             try background {
                 let microseconds = timeoutTest * 1_000_000
-                // 250 microsecond of variance for timeout
-                let usleeptime = UInt32(microseconds) + 250
+                // 1000 microsecond of variance for timeout
+                let usleeptime = UInt32(microseconds) + 1000
                 usleep(usleeptime) // usleep is microseconds
                 semaphore.signal()
             }
