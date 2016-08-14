@@ -1,14 +1,13 @@
 #if os(Linux)
 
 import XCTest
-@testable import CoreTestSuite
+@testable import CoreTests
 
 XCTMain([
     testCase(StrandTests.allTests),
     testCase(SemaphoreTests.allTests),
     testCase(TimespecTests.allTests),
     testCase(ArrayTests.allTests),
-    testCase(BoolTests.allTests),
     testCase(BytesTests.allTests),
     testCase(ExtractableTests.allTests),
     testCase(PercentEncodingTests.allTests),

@@ -17,11 +17,12 @@ public enum PortalError: Error {
      This class is designed to make it possible to use asynchronous contexts in a synchronous environment.
 */
 public final class Portal<T> {
-    private var result: Result<T>? = .none
     private let semaphore: Semaphore
     private let lock = Core.Lock()
 
-    private init(_ semaphore: Semaphore) {
+    fileprivate var result: Result<T>? = .none
+
+    fileprivate init(_ semaphore: Semaphore) {
         self.semaphore = semaphore
     }
 
@@ -75,7 +76,7 @@ extension Portal {
     */
     public static func open(
         timeout: Double = ((60 * 60) * 24),
-        _ handler: (Portal) throws -> Void
+        _ handler: @escaping (Portal) throws -> Void
         ) throws -> T {
         let semaphore = Semaphore(value: 0)
         let portal = Portal<T>(semaphore)
@@ -101,7 +102,7 @@ extension Portal {
     /**
          Execute timeout operations
     */
-    static func timeout(_ timeout: Double, operation: () throws -> T) throws -> T {
+    static func timeout(_ timeout: Double, operation: @escaping () throws -> T) throws -> T {
         return try Portal<T>.open(timeout: timeout) { portal in
             let value = try operation()
             portal.close(with: value)

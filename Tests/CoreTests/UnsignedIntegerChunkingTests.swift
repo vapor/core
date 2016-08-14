@@ -3,16 +3,14 @@ import XCTest
 @testable import Core
 
 class UnsignedIntegerChunkingTests: XCTestCase {
-    static var allTests: [(String, (UnsignedIntegerChunkingTests) -> () throws -> Void)] {
-        return [
-            ("testUIntChunking8", testUIntChunking8),
-            ("testUIntChunking16", testUIntChunking16),
-            ("testUIntChunking32", testUIntChunking32),
-            ("testUIntChunking64", testUIntChunking64),
-            ("testByteArrayToUInt", testByteArrayToUInt),
-            ("testHex", testHex)
-        ]
-    }
+    static let allTests = [
+        ("testUIntChunking8", testUIntChunking8),
+        ("testUIntChunking16", testUIntChunking16),
+        ("testUIntChunking32", testUIntChunking32),
+        ("testUIntChunking64", testUIntChunking64),
+        ("testByteArrayToUInt", testByteArrayToUInt),
+        ("testHex", testHex)
+    ]
 
     func testUIntChunking8() {
         let value: UInt8 = 0x1A
@@ -27,6 +25,7 @@ class UnsignedIntegerChunkingTests: XCTestCase {
         XCTAssert(bytes == [0x1A, 0x2B])
         XCTAssert(UInt16(bytes) == value)
     }
+
     func testUIntChunking32() {
         let value: UInt32 = 0x1A_2B_3C_4E
         let bytes = value.bytes()

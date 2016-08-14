@@ -6,7 +6,15 @@ import XCTest
 class PercentEncodingTests: XCTestCase {
     static let allTests = [
         ("testEncoding", testEncoding),
-        ("testDecoding", testDecoding)
+        ("testEncodingShould", testEncodingShould),
+        ("testEncodingZero", testEncodingZero),
+        ("testDecoding", testDecoding),
+        ("testDecodingInvalidLength", testDecodingInvalidLength),
+        ("testDecodingInvalidCharacters", testDecodingInvalidCharacters),
+        ("testDecodingExtra", testDecodingExtra),
+        ("testDecodingTransform", testDecodingTransform),
+        ("testDecodingArraySlice", testDecodingArraySlice),
+        ("testDecodingArraySliceTransform", testDecodingArraySliceTransform),
     ]
 
     func testEncoding() throws {
@@ -17,6 +25,24 @@ class PercentEncodingTests: XCTestCase {
             XCTAssertTrue(string == encoding, "\(character) -- \(string) didn't equal expected encoding \(encoding)")
 
         }
+    }
+
+    func testEncodingShould() throws {
+        let bytes: Bytes = [.f, .a, .zero]
+        let result = try percentEncoded(bytes) { byte in
+            return byte != .a
+        }
+
+        XCTAssertEqual(result, "%66a%30".bytes)
+    }
+
+    func testEncodingZero() throws {
+        let bytes: Bytes = [0]
+        let result = try percentEncoded(bytes) { byte in
+            return byte != .a
+        }
+
+        XCTAssertEqual(result, "%00".bytes)
     }
 
     func testDecoding() {
@@ -98,24 +124,6 @@ class PercentEncodingTests: XCTestCase {
 
         let expected: Bytes = [0xFF, .space, 0x0]
         XCTAssertEqual(result, expected)
-    }
-
-    func testEncodingShould() throws {
-        let bytes: Bytes = [.f, .a, .zero]
-        let result = try percentEncoded(bytes) { byte in
-            return byte != .a
-        }
-
-        XCTAssertEqual(result, "%66a%30".bytes)
-    }
-
-    func testEncodingZero() throws {
-        let bytes: Bytes = [0]
-        let result = try percentEncoded(bytes) { byte in
-            return byte != .a
-        }
-
-        XCTAssertEqual(result, "%00".bytes)
     }
 }
 

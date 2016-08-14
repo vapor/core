@@ -4,7 +4,7 @@ import XCTest
 
 class UtilityTests: XCTestCase {
 
-    static var allTests = [
+    static let allTests = [
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
         ("testEquals", testEquals)
