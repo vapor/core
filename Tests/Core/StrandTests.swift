@@ -101,8 +101,10 @@ class StrandTests: XCTestCase {
     func testCreateFail() throws {
         var strands: [Strand] = []
         defer {
-            try! strands.forEach { strand in
-                try strand.cancel()
+            strands.forEach { strand in
+                do {
+                    try strand.cancel()
+                } catch {}
             }
         }
 
