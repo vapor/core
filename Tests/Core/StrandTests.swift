@@ -1,6 +1,7 @@
 import libc
 import Foundation
 import XCTest
+import Core
 
 class StrandTests: XCTestCase {
     static let allTests = [
