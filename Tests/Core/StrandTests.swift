@@ -12,7 +12,7 @@ class StrandTests: XCTestCase {
         ("testJoinFail", testJoinFail),
         ("testCancelFail", testCancelFail),
         ("testCreateFail", testCreateFail),
-        ]
+    ]
 
     func testStrand() throws {
         try (1...10).forEach { _ in

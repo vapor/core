@@ -16,7 +16,7 @@ public enum StrandError: Error {
     case detachFailed(Int)
 }
 
-public class Strand {
+public final class Strand {
     public typealias Closure = () -> Void
 
     private var pthread: pthread_t

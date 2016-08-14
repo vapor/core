@@ -1,7 +1,7 @@
 /**
      Box encapsulates values in a reference type for scenarios where it is required
 */
-public class Box<T> {
+public final class Box<T> {
 
     /**
          The underlying value

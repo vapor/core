@@ -30,6 +30,8 @@ extension Double {
         var ts = timespec(tv_sec: seconds, tv_nsec: 0)
         let nsec = self.description
             .components(separatedBy: ".")[safe: 1]
+            // MUST pad 0's here for situations like `0.00484` where the leading 0's must be
+            // preserved BEFORE mapping to Int.
             .flatMap { Int($0.paddedZeros(targetLength: 9)) }
         if let nsec = nsec {
             ts.tv_nsec = nsec
