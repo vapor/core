@@ -92,6 +92,7 @@ class StrandTests: XCTestCase {
         }
         try strand.detach()
         do {
+            sleep(1)
             try strand.cancel()
             XCTFail("cancel detached thread should fail")
         } catch StrandError.cancellationFailed {}
@@ -106,7 +107,7 @@ class StrandTests: XCTestCase {
         }
 
         do {
-            try (1...9_999).forEach { _ in
+            try (1...99_999).forEach { _ in
                 let strand = try Strand {
                     sleep(1)
                 }
