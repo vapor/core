@@ -1,6 +1,4 @@
 #if os(Linux)
-import Strand
-
 public func background(_ function: () -> Void) throws {
     let _ = try Strand(function)
 }
