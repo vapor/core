@@ -24,13 +24,14 @@ public final class Strand {
     public init(_ closure: Closure) throws {
         let box = Box(closure)
         let holder = Unmanaged.passRetained(box)
-        let closurePointer = UnsafeMutablePointer<Void>(holder.toOpaque())
+        let closurePointer = holder.toOpaque()
 
         #if os(Linux)
             var thread: pthread_t = 0
         #else
             var thread: pthread_t?
         #endif
+
 
         let result = pthread_create(&thread, nil, runner, closurePointer)
         // back to optional so works either way (linux vs macos).
@@ -74,7 +75,7 @@ private func runner(_ arg: UnsafeMutablePointer<Void>?) -> UnsafeMutablePointer<
 }
 #endif
 
-private func runner(_ arg: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void>? {
+private func runner(_ arg: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
     let unmanaged = Unmanaged<Box<() -> Void>>.fromOpaque(arg)
     unmanaged.takeUnretainedValue().value()
     unmanaged.release()

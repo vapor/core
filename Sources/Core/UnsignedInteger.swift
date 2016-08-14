@@ -6,7 +6,7 @@ extension UnsignedInteger {
     */
     public init(_ bytes: [Byte]) {
         // 8 bytes in UInt64, etc. clips overflow
-        let prefix = bytes.prefix(sizeof(Self.self))
+        let prefix = bytes.prefix(MemoryLayout<Self>.size)
         var value: UIntMax = 0
         prefix.forEach { byte in
             value <<= 8 // 1 byte is 8 bits
@@ -18,7 +18,7 @@ extension UnsignedInteger {
 
     public func bytes() -> [Byte] {
         let byteMask: Self = 0b1111_1111
-        let size = sizeof(Self.self)
+        let size = MemoryLayout<Self>.size
         var copy = self
         var bytes: [Byte] = []
         (1...size).forEach { _ in
