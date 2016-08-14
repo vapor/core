@@ -4,6 +4,6 @@ let package = Package(
     name: "Core",
     targets: [
         Target(name: "Core", dependencies: ["libc"]),
-		    Target(name: "libc")
-	  ]
+        Target(name: "libc")
+    ]
 )
