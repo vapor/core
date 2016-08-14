@@ -69,7 +69,7 @@ class StrandTests: XCTestCase {
     }
 
     func testDetachFail() throws {
-        let strand = try Strand {}
+        let strand = try Strand { sleep(1) }
         try strand.detach()
         do {
             try strand.detach()
@@ -87,7 +87,9 @@ class StrandTests: XCTestCase {
     }
 
     func testCancelFail() throws {
-        let strand = try Strand {}
+        let strand = try Strand {
+            Strand.exit(code: 0)
+        }
         try strand.detach()
         do {
             try strand.cancel()
