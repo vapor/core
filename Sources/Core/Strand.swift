@@ -68,9 +68,11 @@ public class Strand {
     }
 }
 
+#if os(Linux)
 private func runner(_ arg: UnsafeMutablePointer<Void>?) -> UnsafeMutablePointer<Void>? {
     return arg.flatMap { runner($0) }
 }
+#endif
 
 private func runner(_ arg: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void>? {
     let unmanaged = Unmanaged<Box<() -> Void>>.fromOpaque(arg)
