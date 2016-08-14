@@ -70,7 +70,7 @@ public final class Strand {
 }
 
 #if os(Linux)
-private func runner(_ arg: UnsafeMutablePointer<Void>?) -> UnsafeMutablePointer<Void>? {
+private func runner(_ arg: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     return arg.flatMap { runner($0) }
 }
 #endif
