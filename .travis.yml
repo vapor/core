@@ -7,4 +7,4 @@ dist: trusty
 osx_image: xcode8
 script:
   - eval "$(curl -sL swift.qutheory.io/ci)"
-  - eval "$(curl -sL swift.qutheory.io/codecov)"
+  - eval "$(curl -sL https://raw.githubusercontent.com/vapor/swift/code-cov/codecov)"
