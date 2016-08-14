@@ -3,8 +3,7 @@ import XCTest
 @testable import Core
 
 class StringTests: XCTestCase {
-
-    static var allTests = [
+    static let allTests = [
         ("testStringCaseInsensitiveCompare", testStringCaseInsensitiveCompare),
         ("testStringFinished", testStringFinished),
     ]

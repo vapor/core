@@ -3,7 +3,7 @@ import XCTest
 @testable import Core
 
 class ExtractableTests: XCTestCase {
-    static var allTests = [
+    static let allTests = [
         ("testPresent", testPresent),
         ("testNil", testNil)
     ]

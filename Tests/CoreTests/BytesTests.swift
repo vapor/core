@@ -4,7 +4,7 @@ import XCTest
 
 class BytesTests: XCTestCase {
 
-    static var allTests = [
+    static let allTests = [
         ("testStringError", testStringError),
         ("testPatternMatch", testPatternMatch),
         ("testPatternArrayMatch", testPatternArrayMatch),
@@ -17,7 +17,9 @@ class BytesTests: XCTestCase {
         ("testDecimalIntError", testDecimalIntError),
         ("testTrim", testTrim),
         ("testTrimEmpty", testTrimEmpty),
-        ("testTrimAll", testTrimAll)
+        ("testTrimAll", testTrimAll),
+        ("testStringConvertible", testStringConvertible),
+        ("testDataConvertible", testDataConvertible)
     ]
 
     func testStringError() {

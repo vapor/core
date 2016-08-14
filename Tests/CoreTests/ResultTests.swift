@@ -2,12 +2,12 @@ import Foundation
 import XCTest
 @testable import Core
 
-class ResultTests: XCTestCase {
-    private enum TestError: Error {
-        case test
-    }
+private enum TestError: Error {
+    case test
+}
 
-    static var allTests = [
+class ResultTests: XCTestCase {
+    static let allTests = [
         ("testValue", testValue),
         ("testValueNil", testValueNil),
     ]

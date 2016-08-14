@@ -3,7 +3,7 @@ import XCTest
 @testable import Core
 
 class ArrayTests: XCTestCase {
-    static var allTests = [
+    static let allTests = [
         ("testChunked", testChunked),
         ("testSafeAccess", testSafeAccess),
     ]

@@ -4,7 +4,7 @@ import XCTest
 
 class ByteTests: XCTestCase {
 
-    static var allTests = [
+    static let allTests = [
         ("testRandom", testRandom),
         ("testIsCases", testIsCases),
         ("testPatternMatching", testPatternMatching),
@@ -23,7 +23,7 @@ class ByteTests: XCTestCase {
         XCTAssert(one != two)
     }
 
-    public func testIsCases() {
+    func testIsCases() {
         // white space
         XCTAssertEqual(" ".bytes.first?.isWhitespace, true)
         XCTAssertEqual("\n".bytes.first?.isWhitespace, true)
@@ -51,7 +51,7 @@ class ByteTests: XCTestCase {
         XCTAssertEqual("g".bytes.first?.isHexDigit, false)
     }
 
-    public func testPatternMatching() {
+    func testPatternMatching() {
         switch Byte.a {
         case Byte.f:
             XCTFail()
@@ -62,7 +62,7 @@ class ByteTests: XCTestCase {
         }
     }
 
-    public func testBase64() {
+    func testBase64() {
         XCTAssertEqual("dmFwb3I=".base64DecodedString, "vapor")
         XCTAssertEqual("⚠️".base64DecodedString, "")
         XCTAssertEqual("hello".bytes.base64String, "aGVsbG8=")

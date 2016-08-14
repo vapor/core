@@ -3,7 +3,7 @@ import XCTest
 @testable import Core
 
 class StaticDataBufferTests: XCTestCase {
-    static var allTests = [
+    static let allTests = [
         ("testNext", testNext),
         ("testNextMatchesAny", testNextMatchesAny),
         ("testNextMatches", testNextMatches),

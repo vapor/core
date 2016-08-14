@@ -5,7 +5,7 @@ import libc
 
 class UnsignedIntegerTests: XCTestCase {
 
-    static var allTests = [
+    static let allTests = [
         ("testMask", testMask)
     ]
 
