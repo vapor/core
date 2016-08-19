@@ -5,7 +5,7 @@ extension Bool {
         Any variant of `yes`, `y`, `true`, `t`, or any 
         numerical value greater than 0 will be considered `true`
     */
-    public init?(_ string: String) {
+    public init?(fuzzy string: String) {
         switch string.lowercased() {
         case "y", "1", "yes", "t", "true":
             self = true

@@ -8,13 +8,13 @@ class BoolTests: XCTestCase {
     ]
 
     func testStringConvert() {
-        XCTAssertEqual(Bool("y"), true)
-        XCTAssertEqual(Bool("yes"), true)
-        XCTAssertEqual(Bool("true"), true)
-        XCTAssertEqual(Bool("n"), false)
-        XCTAssertEqual(Bool(""), nil)
-        XCTAssertEqual(Bool("NO"), false)
-        XCTAssertEqual(Bool("asdf"), nil)
-        XCTAssertEqual(Bool("234234"), nil)
+        XCTAssertEqual(Bool(fuzzy: "y"), true)
+        XCTAssertEqual(Bool(fuzzy: "yes"), true)
+        XCTAssertEqual(Bool(fuzzy: "true"), true)
+        XCTAssertEqual(Bool(fuzzy: "n"), false)
+        XCTAssertEqual(Bool(fuzzy: ""), nil)
+        XCTAssertEqual(Bool(fuzzy: "NO"), false)
+        XCTAssertEqual(Bool(fuzzy: "asdf"), nil)
+        XCTAssertEqual(Bool(fuzzy: "234234"), nil)
     }
 }
