@@ -24,7 +24,7 @@ public final class Strand {
     public init(_ closure: Closure) throws {
         let box = Box(closure)
         let holder = Unmanaged.passRetained(box)
-        let closurePointer = UnsafeMutablePointer<Void>(holder.toOpaque())
+        let closurePointer = UnsafeMutableRawPointer(holder.toOpaque())
 
         #if os(Linux)
             var thread: pthread_t = 0
@@ -69,12 +69,12 @@ public final class Strand {
 }
 
 #if os(Linux)
-private func runner(_ arg: UnsafeMutablePointer<Void>?) -> UnsafeMutablePointer<Void>? {
+private func runner(_ arg: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     return arg.flatMap { runner($0) }
 }
 #endif
 
-private func runner(_ arg: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void>? {
+private func runner(_ arg: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
     let unmanaged = Unmanaged<Box<() -> Void>>.fromOpaque(arg)
     unmanaged.takeUnretainedValue().value()
     unmanaged.release()
