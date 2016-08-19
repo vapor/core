@@ -59,4 +59,4 @@ Core has been tested on OS X 10.11, Ubuntu 14.04, and Ubuntu 15.10.
 
 ## 👥 Authors
 
-Made by [Tanner Nelson](https://twitter.com/tanner0101), [Logan Wright](https://twitter.com/logmaestro), and the hundreds of members of the Qutheory community.
+Made by [Tanner Nelson](https://twitter.com/tanner0101), [Logan Wright](https://twitter.com/logmaestro), and the hundreds of members of the Vapor community.
