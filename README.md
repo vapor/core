@@ -9,7 +9,7 @@
 
 # Core
 
-![Swift](http://img.shields.io/badge/swift-v3.0--dev.07.25-brightgreen.svg)
+![Swift](http://img.shields.io/badge/swift-v3.0--dev.08.18-brightgreen.svg)
 [![Build Status](https://travis-ci.org/vapor/core.svg?branch=master)](https://travis-ci.org/vapor/core)
 [![CircleCI](https://circleci.com/gh/vapor/core.svg?style=shield)](https://circleci.com/gh/vapor/core)
 [![Code Coverage](https://codecov.io/gh/vapor/core/branch/master/graph/badge.svg)](https://codecov.io/gh/vapor/core)
@@ -41,17 +41,18 @@ Core is a collection of useful protocols, extensions, type-aliases, functions, a
 
 |Core|Xcode|Swift|
 |:-:|:-:|:-:|
+|0.4.x|8.0 Beta **7**|DEVELOPMENT-SNAPSHOT-2016-08-18-a|
 |0.3.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
 |0.2.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-20-qutheory|
 |0.1.x|8.0 Beta **2**|3.0-PREVIEW-2|
 
 ## 📖 Documentation
 
-Visit the Vapor web framework's [documentation](http://docs.qutheory.io) for instructions on how to install Swift 3. 
+Visit the Vapor web framework's [documentation](http://docs.vapor.codes) for instructions on how to install Swift 3. 
 
 ## 💧 Community
 
-We pride ourselves on providing a diverse and welcoming community. Join your fellow Qutheory developers in [our slack](slack.qutheory.io) and take part in the conversation.
+We pride ourselves on providing a diverse and welcoming community. Join your fellow Qutheory developers in [our slack](http://vapor.team) and take part in the conversation.
 
 ## 🔧 Compatibility
 
