@@ -4,9 +4,6 @@ import XCTest
 @testable import CoreTests
 
 XCTMain([
-    testCase(StrandTests.allTests),
-    testCase(SemaphoreTests.allTests),
-    testCase(TimespecTests.allTests),
     testCase(ArrayTests.allTests),
     testCase(BoolTests.allTests),
     testCase(BytesTests.allTests),
@@ -15,9 +12,13 @@ XCTMain([
     testCase(PercentEncodingTests.allTests),
     testCase(PortalTests.allTests),
     testCase(ResultTests.allTests),
+    testCase(RFC1123Tests.allTests),
+    testCase(SemaphoreTests.allTests),
     testCase(StaticDataBufferTests.allTests),
-    testCase(UnsignedIntegerChunkingTests.allTests),
+    // testCase(StrandTests.allTests),
     testCase(StringTests.allTests),
+    testCase(TimespecTests.allTests),
+    testCase(UnsignedIntegerChunkingTests.allTests),
     testCase(UnsignedIntegerTests.allTests),
     testCase(UtilityTests.allTests),
 ])
