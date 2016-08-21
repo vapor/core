@@ -44,7 +44,7 @@ extension Sequence where Iterator.Element == Byte {
             case .error:
                 break
             case .scalarValue(let unicodeScalar):
-                str.append(unicodeScalar)
+                str.append(String(unicodeScalar))
             }
         }
     }
