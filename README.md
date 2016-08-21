@@ -41,7 +41,7 @@ Core is a collection of useful protocols, extensions, type-aliases, functions, a
 
 |Core|Xcode|Swift|
 |:-:|:-:|:-:|
-|0.4.x|8.0 Beta **7**|DEVELOPMENT-SNAPSHOT-2016-08-18-a|
+|0.4.x|8.0 Beta **6**|DEVELOPMENT-SNAPSHOT-2016-08-18-a|
 |0.3.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
 |0.2.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-20-qutheory|
 |0.1.x|8.0 Beta **2**|3.0-PREVIEW-2|

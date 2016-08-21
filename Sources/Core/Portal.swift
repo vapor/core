@@ -17,7 +17,7 @@ public enum PortalError: Error {
      This class is designed to make it possible to use asynchronous contexts in a synchronous environment.
 */
 public final class Portal<T> {
-    var result: Result<T>? = .none
+    fileprivate var result: Result<T>? = .none
     private let semaphore: Semaphore
     private let lock = Core.Lock()
 
