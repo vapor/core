@@ -15,6 +15,7 @@ class StrandTests: XCTestCase {
     ]
 
     func testStrand() throws {
+        // Not a perfect test, but close enough ...
         try (1...5).forEach { _ in
             var ran = false
             let t = try Strand {
