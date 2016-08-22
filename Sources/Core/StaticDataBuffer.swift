@@ -5,7 +5,7 @@
     It's intent is to be subclassed so the next 
     function can be overridden with further rules.
 */
-public class StaticDataBuffer {
+open class StaticDataBuffer {
     private var localBuffer: [Byte] = []
     private var buffer: AnyIterator<Byte>
 
@@ -16,7 +16,7 @@ public class StaticDataBuffer {
 
     // MARK: Next
 
-    public func next() throws -> Byte? {
+    open func next() throws -> Byte? {
         /*
             Local buffer is used to maintain last bytes 
             while still interacting w/ byte buffer.
