@@ -15,7 +15,7 @@ XCTMain([
     testCase(RFC1123Tests.allTests),
     testCase(SemaphoreTests.allTests),
     testCase(StaticDataBufferTests.allTests),
-    // testCase(StrandTests.allTests),
+    testCase(StrandTests.allTests),
     testCase(StringTests.allTests),
     testCase(TimespecTests.allTests),
     testCase(UnsignedIntegerChunkingTests.allTests),
