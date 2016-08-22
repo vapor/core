@@ -9,7 +9,7 @@ public class StaticDataBuffer {
     private var localBuffer: [Byte] = []
     private var buffer: AnyIterator<Byte>
 
-    public init<S: Sequence where S.Iterator.Element == Byte>(bytes: S) {
+    public init<S: Sequence>(bytes: S) where S.Iterator.Element == Byte {
         var any = bytes.makeIterator()
         self.buffer = AnyIterator { return any.next() }
     }
