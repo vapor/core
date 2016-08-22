@@ -15,18 +15,37 @@ class StrandTests: XCTestCase {
     ]
 
     func testStrand() throws {
-        try (1...10).forEach { _ in
-            var collection = [Int]()
-
-            collection.append(0)
-            _ = try Strand {
+        // Not a perfect test, but close enough ...
+        try (1...5).forEach { _ in
+            var ran = false
+            let t = try Strand {
                 sleep(1)
-                collection.append(1)
-                XCTAssert(collection == [0, 2, 1], "got [0]")
+                ran = true
             }
+            XCTAssertFalse(ran)
+            try t.join()
+            XCTAssertTrue(ran)
+        }
+    }
 
+    func asdf() throws {
+        try (1...3).forEach { _ in
+            var collection = [Int]()
+            print("0: \(collection)")
+            collection.append(0)
+            print("1: \(collection)")
+            _ = try Strand {
+                print("2: \(collection)")
+                // sleep(1)
+                usleep(500)
+                print("3: \(collection)")
+                collection.append(1)
+                print("4: \(collection)")
+                XCTAssert(collection == [0, 2, 1], "got \(collection)")
+            }
+            print("5: \(collection)")
             collection.append(2)
-            XCTAssert(collection == [0, 2])
+            print("6: \(collection)")
         }
     }
 
@@ -41,7 +60,7 @@ class StrandTests: XCTestCase {
             XCTFail("Should have cancelled")
         }
 
-        sleep(3)
+        sleep(4)
         try strand.cancel()
         XCTAssert(collection == [0, 1])
     }
