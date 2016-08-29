@@ -1,8 +1,6 @@
 #if os(Linux)
-public func background(_ function: @escaping () -> Void) throws {
-    let _ = try Strand(function)
-}
-#else
+import Dispatch
+#endif
 import Foundation
 
 let background = DispatchQueue.global()
@@ -10,4 +8,4 @@ let background = DispatchQueue.global()
 public func background(function: @escaping () -> Void) throws {
     background.async(execute: function)
 }
-#endif
+
