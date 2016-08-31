@@ -2,13 +2,13 @@ import libc
 
 extension timespec {
     internal static var now: timespec {
-        #if os(macOS)
-            return mach_absolute_time().ts
-        #else
+        #if os(Linux)
             var ts = UnsafeMutablePointer<timespec>.allocate(capacity: 1)
             defer { ts.deinitialize() }
             clock_gettime(CLOCK_REALTIME, ts)
             return ts.pointee
+        #else
+            return mach_absolute_time().ts
         #endif
     }
 

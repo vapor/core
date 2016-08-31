@@ -14,25 +14,25 @@ public class Semaphore {
         case timedOut
     }
 
-    #if os(macOS)
-    private let semaphore: DispatchSemaphore
-    #else
+    #if os(Linux)
     private let semaphore = UnsafeMutablePointer<sem_t>.allocate(capacity: 1)
+    #else
+    private let semaphore: DispatchSemaphore
     #endif
 
     /**
         - parameter value: of 0 for 2 threads corresponding, more for specific thread pool.
     */
     public init(value: Int32 = 0) {
-        #if os(macOS)
-            semaphore = DispatchSemaphore(value: Int(value))
-        #else
+        #if os(Linux)
             sem_init(semaphore, 0, UInt32(value))
+        #else
+            semaphore = DispatchSemaphore(value: Int(value))
         #endif
     }
 
     deinit {
-        #if !os(macOS)
+        #if os(Linux)
             sem_destroy(semaphore)
             semaphore.deinitialize()
         #endif
@@ -45,7 +45,19 @@ public class Semaphore {
         - return: the result of the underlying wait operation
     */
     public func wait(timeout: Double) -> WaitResult {
-        #if os(macOS)
+        #if os(Linux)
+            var ts = timespec(secondsFromNow: timeout)
+            let wait = sem_timedwait(semaphore, &ts)
+
+            /*
+             EDEADLK: Resource deadlock avoided
+             EINTR: Interrupted system call
+             EINVAL: Invalid argument
+             ETIMEDOUT: Connection timed out
+             */
+            guard wait != -1 else { return .timedOut }
+            return .success
+        #else
             let time = DispatchTime(secondsFromNow: timeout)
             let result = semaphore.wait(timeout: time)
             switch result {
@@ -54,19 +66,6 @@ public class Semaphore {
             case .timedOut:
                 return .timedOut
             }
-
-        #else
-            var ts = timespec(secondsFromNow: timeout)
-            let wait = sem_timedwait(semaphore, &ts)
-
-            /*
-                 EDEADLK: Resource deadlock avoided
-                 EINTR: Interrupted system call
-                 EINVAL: Invalid argument
-                 ETIMEDOUT: Connection timed out
-            */
-            guard wait != -1 else { return .timedOut }
-            return .success
         #endif
     }
 
@@ -74,10 +73,10 @@ public class Semaphore {
         Signal waiting semaphores
     */
     public func signal() {
-        #if os(macOS)
-            semaphore.signal()
-        #else
+        #if os(Linux)
             sem_post(semaphore)
+        #else
+            semaphore.signal()
         #endif
     }
 }
