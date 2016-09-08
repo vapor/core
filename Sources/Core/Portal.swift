@@ -1,3 +1,5 @@
+import Dispatch
+
 /**
     There was an error thrown by the portal itself vs a user thrown variable
 */
@@ -18,10 +20,10 @@ public enum PortalError: Error {
 */
 public final class Portal<T> {
     fileprivate var result: Result<T>? = .none
-    private let semaphore: Semaphore
+    private let semaphore: DispatchSemaphore
     private let lock = Core.Lock()
 
-    fileprivate init(_ semaphore: Semaphore) {
+    fileprivate init(_ semaphore: DispatchSemaphore) {
         self.semaphore = semaphore
     }
 
@@ -77,7 +79,7 @@ extension Portal {
         timeout: Double = ((60 * 60) * 24),
         _ handler: @escaping (Portal) throws -> Void
         ) throws -> T {
-        let semaphore = Semaphore(value: 0)
+        let semaphore = DispatchSemaphore(value: 0)
         let portal = Portal<T>(semaphore)
         try background {
             do {
