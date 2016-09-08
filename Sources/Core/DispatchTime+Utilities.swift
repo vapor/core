@@ -1,7 +1,6 @@
 import libc
 import Foundation
 
-#if !os(Linux)
 private let info: mach_timebase_info = {
     var info = mach_timebase_info(numer: 0, denom: 0)
     mach_timebase_info(&info)
@@ -35,4 +34,3 @@ extension DispatchTime {
         self.init(uptimeNanoseconds: now + nano)
     }
 }
-#endif
