@@ -1,5 +1,6 @@
 import libc
 import Foundation
+import Dispatch
 
 private let info: mach_timebase_info = {
     var info = mach_timebase_info(numer: 0, denom: 0)
