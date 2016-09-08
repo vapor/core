@@ -1,8 +1,4 @@
-#if os(Linux)
-    import Glibc
-#else
-    import Darwin
-#endif
+import libc
 
 /**
     A Swift wrapper around pthread_mutex from

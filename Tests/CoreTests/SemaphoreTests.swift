@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 import libc
+import Dispatch
 @testable import Core
 
 class SemaphoreTests: XCTestCase {
@@ -11,7 +12,7 @@ class SemaphoreTests: XCTestCase {
 
     func testSemaphore() throws {
         var collection = [String]()
-        let semaphore = Semaphore()
+        let semaphore = DispatchSemaphore(value: 0)
 
         collection.append("a")
         try Core.background {
@@ -30,7 +31,7 @@ class SemaphoreTests: XCTestCase {
 
     func testSemaphoreTimeout() throws {
         try (1...3).forEach { timeoutTest in
-            let semaphore = Semaphore()
+            let semaphore = DispatchSemaphore(value: 0)
             try background {
                 let microseconds = timeoutTest * 1_000_000
                 // 10_000 microsecond of variance for timeout
