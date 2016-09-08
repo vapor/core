@@ -15,17 +15,16 @@ class SemaphoreTests: XCTestCase {
         let semaphore = DispatchSemaphore(value: 0)
 
         collection.append("a")
-        try Core.background {
-            collection.append("b")
+        DispatchQueue.global().async {
             sleep(1) // seconds
             collection.append("c")
             semaphore.signal()
         }
-        collection.append("e")
+        collection.append("b")
         _ = semaphore.wait(timeout: 30)
-        collection.append("f")
+        collection.append("d")
 
-        let expectation = ["a", "e", "b", "c", "f"]
+        let expectation = ["a", "b", "c", "d"]
         XCTAssert(collection == expectation, "got: \(collection), expected: \(expectation)")
     }
 
