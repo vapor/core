@@ -4,7 +4,7 @@ import Dispatch
 
 extension Double {
     internal var nanoseconds: UInt64 {
-        return UInt64(self * NSEC_PER_SEC)
+        return UInt64(self * Double(NSEC_PER_SEC))
     }
 }
 
