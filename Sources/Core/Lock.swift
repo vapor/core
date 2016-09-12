@@ -28,7 +28,9 @@ public class Lock {
 
     public func locked(closure: () throws -> Void) rethrows {
         lock()
+        // MUST be deferred to ensure lock releases on throws
+        defer { unlock() }
+        
         try closure()
-        unlock()
     }
 }
