@@ -9,55 +9,15 @@
 
 # Core
 
-![Swift](http://img.shields.io/badge/swift-v3.0--dev.08.18-brightgreen.svg)
+![Swift](http://img.shields.io/badge/swift-3.0-brightgreen.svg)
 [![Build Status](https://travis-ci.org/vapor/core.svg?branch=master)](https://travis-ci.org/vapor/core)
 [![CircleCI](https://circleci.com/gh/vapor/core.svg?style=shield)](https://circleci.com/gh/vapor/core)
 [![Code Coverage](https://codecov.io/gh/vapor/core/branch/master/graph/badge.svg)](https://codecov.io/gh/vapor/core)
 [![Codebeat](https://codebeat.co/badges/a793ad97-47e3-40d9-82cf-2aafc516ef4e)](https://codebeat.co/projects/github-com-vapor-core)
 [![Slack Status](http://vapor.team/badge.svg)](http://vapor.team)
 
-Core is a collection of useful protocols, extensions, type-aliases, functions, and libraries. It is used extensively in almost all of Qutheory's packages and in [Vapor](https://github.com/vapor/vapor).
-
-## 🚀 Features 
-
-- 100% test coverage
-- Documented methods
-- Extensions
-    - Array
-    - Bool
-    - Sequence
-    - Equatable
-- Collection subscripts
-- Extractable protocol
-- Atomic Locking
-- Percent encoding/decoding
-- Promises
-- Result enum
-- Dispatch
-- Bytes and Byte
-- StaticDataBuffer
-
-## 🌏 Environment
-
-|Core|Xcode|Swift|
-|:-:|:-:|:-:|
-|0.4.x|8.0 Beta **6**|DEVELOPMENT-SNAPSHOT-2016-08-18-a|
-|0.3.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-25-a|
-|0.2.x|8.0 Beta **3**|DEVELOPMENT-SNAPSHOT-2016-07-20-qutheory|
-|0.1.x|8.0 Beta **2**|3.0-PREVIEW-2|
+Core is a collection of useful protocols, extensions, type-aliases, functions, and libraries. It is used extensively in almost all of [Vapor](https://github.com/vapor/vapor)'s packages.
 
 ## 📖 Documentation
 
-Visit the Vapor web framework's [documentation](http://docs.vapor.codes) for instructions on how to install Swift 3. 
-
-## 💧 Community
-
-We pride ourselves on providing a diverse and welcoming community. Join your fellow Qutheory developers in [our slack](http://vapor.team) and take part in the conversation.
-
-## 🔧 Compatibility
-
-Core has been tested on OS X 10.11, Ubuntu 14.04, and Ubuntu 15.10.
-
-## 👥 Authors
-
-Made by [Tanner Nelson](https://twitter.com/tanner0101), [Logan Wright](https://twitter.com/logmaestro), and the hundreds of members of the Vapor community.
+Visit the Vapor web framework's [documentation](http://docs.vapor.codes) for instructions on how to use this package. 
