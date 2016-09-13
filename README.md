@@ -24,7 +24,7 @@ Visit the Vapor web framework's [documentation](http://docs.vapor.codes) for ins
 
 ## 💧 Community
 
-Join the welcoming community of fellow Vapor developers in [our slack](http://vapor.team).
+Join the welcoming community of fellow Vapor developers in [slack](http://vapor.team).
 
 ## 🔧 Compatibility
 
