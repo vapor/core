@@ -28,4 +28,4 @@ Join the welcoming community of fellow Vapor developers in [slack](http://vapor.
 
 ## 🔧 Compatibility
 
-Core has been tested on macOS and Ubuntu.
+This package has been tested on macOS and Ubuntu.
