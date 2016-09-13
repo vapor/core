@@ -21,3 +21,11 @@ Core is a collection of useful protocols, extensions, type-aliases, functions, a
 ## 📖 Documentation
 
 Visit the Vapor web framework's [documentation](http://docs.vapor.codes) for instructions on how to use this package. 
+
+## 💧 Community
+
+Need help? Join the welcoming community of fellow Vapor developers in [our slack](http://vapor.team).
+
+## 🔧 Compatibility
+
+Core has been tested on macOS 10.11, 10.12 and Ubuntu 14.04, 15.10, 16.04.
