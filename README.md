@@ -28,4 +28,4 @@ Need help? Join the welcoming community of fellow Vapor developers in [our slack
 
 ## 🔧 Compatibility
 
-Core has been tested on macOS 10.11, 10.12 and Ubuntu 14.04, 15.10, 16.04.
+Core has been tested on macOS and Ubuntu.
