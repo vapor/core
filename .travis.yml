@@ -7,5 +7,4 @@ dist: trusty
 osx_image: xcode8
 script:
   - eval "$(curl -sL swift.vapor.sh/ci)"
-  # holding off on code cov until Travis has GM
-  # - eval "$(curl -sL swift.vapor.sh/codecov)"
+  - eval "$(curl -sL swift.vapor.sh/codecov)"
