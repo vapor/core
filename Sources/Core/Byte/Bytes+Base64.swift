@@ -49,6 +49,7 @@ extension Sequence where Iterator.Element == Byte {
 }
 
 extension String {
+    @available(*, deprecated: 1.1, message: "Use `String.bytes.base64Decoded.string` instead.")
     public var base64DecodedString: String {
         guard let data = NSData(base64Encoded: self, options: []) else { return "" }
         var bytes = Bytes(repeating: 0, count: data.length)
