@@ -65,7 +65,7 @@ class ByteTests: XCTestCase {
     public func testBase64() {
         XCTAssertEqual("dmFwb3I=".base64DecodedString, "vapor")
         XCTAssertEqual("⚠️".base64DecodedString, "")
-        XCTAssertEqual("hello".bytes.base64String, "aGVsbG8=")
-        XCTAssertEqual("hello".bytes.base64Data, "aGVsbG8=".bytes)
+        XCTAssertEqual("hello".bytes.base64Encoded.string, "aGVsbG8=")
+        XCTAssertEqual("hello".bytes.base64Encoded, "aGVsbG8=".bytes)
     }
 }
