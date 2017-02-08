@@ -8,7 +8,6 @@ XCTMain([
     testCase(BlackBoxTests.allTests),
     testCase(BoolTests.allTests),
     testCase(BytesTests.allTests),
-    testCase(ExtractableTests.allTests),
     testCase(FileProtocolTests.allTests),
     testCase(PercentEncodingTests.allTests),
     testCase(PortalTests.allTests),
