@@ -82,7 +82,7 @@ extension Portal {
         ) throws -> T {
         let semaphore = DispatchSemaphore(value: 0)
         let portal = Portal<T>(semaphore)
-        try background {
+        background {
             do {
                 try handler(portal)
             } catch {

@@ -25,7 +25,7 @@ class PortalTests: XCTestCase {
         array.append(1)
         let result: Int = try Portal.open { portal in
             array.append(2)
-            _ = try background {
+            background {
                 sleep(1)
                 array.append(4)
                 portal.close(with: 42)
@@ -45,7 +45,7 @@ class PortalTests: XCTestCase {
             array.append(1)
             let _ = try Portal<Int>.open { portal in
                 array.append(2)
-                _ = try background {
+                background {
                     sleep(1)
                     array.append(4)
                     portal.close(with: PortalTestError.someError)

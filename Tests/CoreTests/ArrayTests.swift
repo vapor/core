@@ -6,6 +6,9 @@ class ArrayTests: XCTestCase {
     static var allTests = [
         ("testChunked", testChunked),
         ("testSafeAccess", testSafeAccess),
+        ("testTrim", testTrim),
+        ("testTrimEmpty", testTrimEmpty),
+        ("testTrimAll", testTrimAll),
     ]
 
     func testChunked() {
@@ -27,5 +30,20 @@ class ArrayTests: XCTestCase {
         XCTAssertEqual(array[safe: 4], nil)
         XCTAssertEqual(array[safe: 0], 1)
         XCTAssertEqual(array[safe: -1], nil)
+    }
+
+    func testTrim() {
+        let result = Array("==hello==".characters).trimmed(["="])
+        XCTAssertEqual(String(result), "hello")
+    }
+
+    func testTrimEmpty() {
+        let result = Array("".characters).trimmed([])
+        XCTAssertEqual(String(result), "")
+    }
+
+    func testTrimAll() {
+        let result = Array("~~".characters).trimmed(["~"])
+        XCTAssertEqual(String(result), "")
     }
 }

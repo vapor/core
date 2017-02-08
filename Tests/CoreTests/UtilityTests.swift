@@ -7,7 +7,8 @@ class UtilityTests: XCTestCase {
     static var allTests = [
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
-        ("testEquals", testEquals)
+        ("testEquals", testEquals),
+        ("testIntHex", testIntHex),
     ]
 
     func testLowercase() {
@@ -33,5 +34,10 @@ class UtilityTests: XCTestCase {
     func testEquals() {
         XCTAssertEqual(1.equals(any: [0, 1, 2]), true)
         XCTAssertEqual(1.equals(any: 5, 2, 3), false)
+    }
+
+    func testIntHex() {
+        let hex = 255.hex
+        XCTAssertEqual(hex, "FF")
     }
 }
