@@ -5,5 +5,8 @@ let package = Package(
     targets: [
         Target(name: "Core", dependencies: ["libc"]),
         Target(name: "libc")
+    ],
+    dependencies: [
+        .Package(url: "https://github.com/vapor/bits.git", Version(0,0,0))
     ]
 )

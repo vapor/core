@@ -25,30 +25,30 @@ class ByteTests: XCTestCase {
 
     public func testIsCases() {
         // white space
-        XCTAssertEqual(" ".bytes.first?.isWhitespace, true)
-        XCTAssertEqual("\n".bytes.first?.isWhitespace, true)
-        XCTAssertEqual("\r".bytes.first?.isWhitespace, true)
-        XCTAssertEqual("\t".bytes.first?.isWhitespace, true)
-        XCTAssertEqual("=".bytes.first?.isWhitespace, false)
+        XCTAssertEqual(" ".makeBytes().first?.isWhitespace, true)
+        XCTAssertEqual("\n".makeBytes().first?.isWhitespace, true)
+        XCTAssertEqual("\r".makeBytes().first?.isWhitespace, true)
+        XCTAssertEqual("\t".makeBytes().first?.isWhitespace, true)
+        XCTAssertEqual("=".makeBytes().first?.isWhitespace, false)
 
         // letters
-        XCTAssertEqual("a".bytes.first?.isLetter, true)
-        XCTAssertEqual("F".bytes.first?.isLetter, true)
-        XCTAssertEqual("g".bytes.first?.isLetter, true)
-        XCTAssertEqual("é".bytes.first?.isLetter, false)
+        XCTAssertEqual("a".makeBytes().first?.isLetter, true)
+        XCTAssertEqual("F".makeBytes().first?.isLetter, true)
+        XCTAssertEqual("g".makeBytes().first?.isLetter, true)
+        XCTAssertEqual("é".makeBytes().first?.isLetter, false)
 
         // digits
         for i in 0...9 {
-            XCTAssertEqual(i.description.bytes.first?.isDigit, true)
-            XCTAssertEqual(i.description.bytes.first?.isAlphanumeric, true)
+            XCTAssertEqual(i.description.makeBytes().first?.isDigit, true)
+            XCTAssertEqual(i.description.makeBytes().first?.isAlphanumeric, true)
         }
-        XCTAssertEqual("f".bytes.first?.isDigit, false)
+        XCTAssertEqual("f".makeBytes().first?.isDigit, false)
 
         // hex digits
         for character in "0123456789abcdefABCDEF".characters {
-            XCTAssertEqual(String(character).bytes.first?.isHexDigit, true)
+            XCTAssertEqual(String(character).makeBytes().first?.isHexDigit, true)
         }
-        XCTAssertEqual("g".bytes.first?.isHexDigit, false)
+        XCTAssertEqual("g".makeBytes().first?.isHexDigit, false)
     }
 
     public func testPatternMatching() {
@@ -65,7 +65,7 @@ class ByteTests: XCTestCase {
     public func testBase64() {
         XCTAssertEqual("dmFwb3I=".base64DecodedString, "vapor")
         XCTAssertEqual("⚠️".base64DecodedString, "")
-        XCTAssertEqual("hello".bytes.base64String, "aGVsbG8=")
-        XCTAssertEqual("hello".bytes.base64Data, "aGVsbG8=".bytes)
+        XCTAssertEqual("hello".makeBytes().base64String, "aGVsbG8=")
+        XCTAssertEqual("hello".makeBytes().base64Data, "aGVsbG8=".makeBytes())
     }
 }

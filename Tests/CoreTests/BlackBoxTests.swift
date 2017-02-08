@@ -17,7 +17,7 @@ class BlackBoxTests: XCTestCase {
             }
         }
 
-        let buffer = MyStaticDataBuffer(bytes: "hello".bytes)
+        let buffer = MyStaticDataBuffer(bytes: "hello".makeBytes())
         XCTAssertEqual(try buffer.next(), nil)
     }
 }
