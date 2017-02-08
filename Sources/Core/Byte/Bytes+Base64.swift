@@ -37,7 +37,7 @@ extension Sequence where Iterator.Element == Byte {
     public var base64Decoded: Bytes {
         let bytes = [Byte](self)
         let dataBase64 = Data(bytes: bytes)
-        guard let dataDecoded = Data(base64Encoded: dataBase64) else {
+        guard let dataDecoded = Data(base64Encoded: dataBase64, options: .ignoreUnknownCharacters) else {
             return []
         }
         
