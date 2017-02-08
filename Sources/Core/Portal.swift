@@ -1,3 +1,4 @@
+import Foundation
 import Dispatch
 
 /**
@@ -21,7 +22,7 @@ public enum PortalError: Error {
 public final class Portal<T> {
     fileprivate var result: Result<T>? = .none
     private let semaphore: DispatchSemaphore
-    private let lock = Core.Lock()
+    private let lock = NSLock()
 
     fileprivate init(_ semaphore: DispatchSemaphore) {
         self.semaphore = semaphore
