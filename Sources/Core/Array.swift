@@ -19,6 +19,11 @@ extension Array {
 
 extension Array where Element: Hashable {
     /**
+         Trims the head and tail of the array to remove contained elements.
+     
+         [0,1,2,1,0,1,0,0,0,0].trimmed([0])
+         // == [1,2,1,0,1]
+     
          This function is intended to be as performant as possible, which is part of the reason
          why some of the underlying logic may seem a bit more tedious than is necessary
     */
