@@ -1,3 +1,4 @@
+import Foundation
 import Dispatch
 
 /**
@@ -21,7 +22,7 @@ public enum PortalError: Error {
 public final class Portal<T> {
     fileprivate var result: Result<T>? = .none
     private let semaphore: DispatchSemaphore
-    private let lock = Core.Lock()
+    private let lock = NSLock()
 
     fileprivate init(_ semaphore: DispatchSemaphore) {
         self.semaphore = semaphore
@@ -61,6 +62,8 @@ extension Portal {
     /**
          This function is used to enter an asynchronous supported context with a portal
          object that can be used to complete a given operation.
+     
+         timeout in SECONDS
 
              let value = try Portal<Int>.open { portal in
                  // .. do whatever necessary passing around `portal` object
@@ -73,15 +76,15 @@ extension Portal {
                  portal.close(with: errorSignifyingFailure)
              }
 
-         - warning: Calling a `portal` multiple times will have no effect.
+         - warning: Calling close on a `portal` multiple times will have no effect.
     */
     public static func open(
-        timeout: Double = ((60 * 60) * 24),
+        timeout: Double = (60 * 60),
         _ handler: @escaping (Portal) throws -> Void
         ) throws -> T {
         let semaphore = DispatchSemaphore(value: 0)
         let portal = Portal<T>(semaphore)
-        try background {
+        background {
             do {
                 try handler(portal)
             } catch {

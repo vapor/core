@@ -15,19 +15,19 @@ class StaticDataBufferTests: XCTestCase {
     ]
 
     func testNext() throws {
-        let buffer = StaticDataBuffer(bytes: "hello".bytes)
-        XCTAssertEqual(try buffer.next(), "h".bytes.first)
+        let buffer = StaticDataBuffer(bytes: "hello".makeBytes())
+        XCTAssertEqual(try buffer.next(), "h".makeBytes().first)
     }
 
     func testNextMatchesAny() throws {
-        let buffer = StaticDataBuffer(bytes: "h".bytes)
+        let buffer = StaticDataBuffer(bytes: "h".makeBytes())
 
-        guard let l = "l".bytes.first else {
+        guard let l = "l".makeBytes().first else {
             XCTFail("Could not convert l.")
             return
         }
 
-        guard let h = "h".bytes.first else {
+        guard let h = "h".makeBytes().first else {
             XCTFail("Could not convert h.")
             return
         }
@@ -39,35 +39,35 @@ class StaticDataBufferTests: XCTestCase {
     }
 
     func testNextMatches() throws {
-        let buffer = StaticDataBuffer(bytes: "h".bytes)
+        let buffer = StaticDataBuffer(bytes: "h".makeBytes())
 
         XCTAssertEqual(try buffer.next(matches: { byte in
-            return byte == "h".bytes.first
+            return byte == "h".makeBytes().first
         }), true)
 
         _ = try buffer.next() // empty buffer
 
         XCTAssertEqual(try buffer.next(matches: { byte in
-            return byte == "h".bytes.first
+            return byte == "h".makeBytes().first
         }), false)
     }
 
     func testLocalBuffer() throws {
-        let buffer = StaticDataBuffer(bytes: "hi".bytes)
+        let buffer = StaticDataBuffer(bytes: "hi".makeBytes())
         buffer.returnToBuffer(.a)
         XCTAssertEqual(try buffer.next(), .a)
     }
 
     func testCollect() throws {
-        let buffer = StaticDataBuffer(bytes: "ferret".bytes)
+        let buffer = StaticDataBuffer(bytes: "ferret".makeBytes())
 
         let firstThree = try buffer.collect(next: 3)
-        XCTAssertEqual(firstThree, "fer".bytes)
+        XCTAssertEqual(firstThree, "fer".makeBytes())
 
         try buffer.discardNext(1)
 
         let lastTwo = try buffer.collect(next: 2)
-        XCTAssertEqual(lastTwo, "et".bytes)
+        XCTAssertEqual(lastTwo, "et".makeBytes())
 
         let none = try buffer.collect(next: 0)
         XCTAssertEqual(none, [])
@@ -77,23 +77,23 @@ class StaticDataBufferTests: XCTestCase {
     }
 
     func testLeadingBuffer() throws {
-        let buffer = StaticDataBuffer(bytes: "vapor".bytes)
-        XCTAssertEqual(try buffer.checkLeadingBuffer(matches: "vap".bytes), true)
+        let buffer = StaticDataBuffer(bytes: "vapor".makeBytes())
+        XCTAssertEqual(try buffer.checkLeadingBuffer(matches: "vap".makeBytes()), true)
         XCTAssertEqual(try buffer.checkLeadingBuffer(matches: .a, .f), false)
     }
 
     func testCollectUntil() throws {
-        let buffer = StaticDataBuffer(bytes: "123456789".bytes)
+        let buffer = StaticDataBuffer(bytes: "123456789".makeBytes())
         let collected = try buffer.collect(until: .nine)
-        XCTAssertEqual(collected, "12345678".bytes)
-        XCTAssertEqual(try buffer.collectRemaining(), "9".bytes)
+        XCTAssertEqual(collected, "12345678".makeBytes())
+        XCTAssertEqual(try buffer.collectRemaining(), "9".makeBytes())
     }
 
     func testCollectUntilConverting() throws {
-        let buffer = StaticDataBuffer(bytes: "123456789".bytes)
+        let buffer = StaticDataBuffer(bytes: "123456789".makeBytes())
         let collected = try buffer.collect(until: .nine) { byte in
-            return byte == "5".bytes.first ? .nine : byte
+            return byte == "5".makeBytes().first ? .nine : byte
         }
-        XCTAssertEqual(collected, "12349678".bytes)
+        XCTAssertEqual(collected, "12349678".makeBytes())
     }
 }

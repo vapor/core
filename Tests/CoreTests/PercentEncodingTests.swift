@@ -32,18 +32,18 @@ class PercentEncodingTests: XCTestCase {
     }
 
     func testDecodingInvalidLength() {
-        let input = "%2D%A".bytes // last character is invalid, only 1 character
+        let input = "%2D%A".makeBytes() // last character is invalid, only 1 character
         let result = percentDecoded(input)
         XCTAssertNil(result)
     }
 
     func testDecodingInvalidCharacters() {
-        let result = percentDecoded("%--".bytes)
+        let result = percentDecoded("%--".makeBytes())
         XCTAssertNil(result)
     }
 
     func testDecodingExtra() {
-        guard let result = percentDecoded("%FF%00A".bytes) else {
+        guard let result = percentDecoded("%FF%00A".makeBytes()) else {
             XCTFail("Unable to decode.")
             return
         }
@@ -61,7 +61,7 @@ class PercentEncodingTests: XCTestCase {
             }
         }
 
-        guard let result = percentDecoded("%FF+%00".bytes, nonEncodedTransform: transform) else {
+        guard let result = percentDecoded("%FF+%00".makeBytes(), nonEncodedTransform: transform) else {
             XCTFail("Unable to decode.")
             return
         }
@@ -71,7 +71,7 @@ class PercentEncodingTests: XCTestCase {
     }
 
     func testDecodingArraySlice() {
-        let slice = "%FF+%00A".bytes[0...6]
+        let slice = "%FF+%00A".makeBytes()[0...6]
         guard let result = percentDecoded(slice) else {
             XCTFail("Unable to decode.")
             return
@@ -90,7 +90,7 @@ class PercentEncodingTests: XCTestCase {
             }
         }
 
-        let slice = "%FF+%00A".bytes[0...6]
+        let slice = "%FF+%00A".makeBytes()[0...6]
         guard let result = percentDecoded(slice, nonEncodedTransform: transform) else {
             XCTFail("Unable to decode.")
             return
@@ -106,7 +106,7 @@ class PercentEncodingTests: XCTestCase {
             return byte != .a
         }
 
-        XCTAssertEqual(result, "%66a%30".bytes)
+        XCTAssertEqual(result, "%66a%30".makeBytes())
     }
 
     func testEncodingZero() throws {
@@ -115,7 +115,7 @@ class PercentEncodingTests: XCTestCase {
             return byte != .a
         }
 
-        XCTAssertEqual(result, "%00".bytes)
+        XCTAssertEqual(result, "%00".makeBytes())
     }
 }
 

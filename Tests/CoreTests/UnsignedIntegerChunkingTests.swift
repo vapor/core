@@ -16,34 +16,34 @@ class UnsignedIntegerChunkingTests: XCTestCase {
 
     func testUIntChunking8() {
         let value: UInt8 = 0x1A
-        let bytes = value.bytes()
+        let bytes = value.makeBytes()
         XCTAssert(bytes == [0x1A])
-        XCTAssert(UInt8(bytes) == value)
+        XCTAssert(UInt8(bytes: bytes) == value)
     }
 
     func testUIntChunking16() {
         let value: UInt16 = 0x1A_2B
-        let bytes = value.bytes()
+        let bytes = value.makeBytes()
         XCTAssert(bytes == [0x1A, 0x2B])
-        XCTAssert(UInt16(bytes) == value)
+        XCTAssert(UInt16(bytes: bytes) == value)
     }
     func testUIntChunking32() {
         let value: UInt32 = 0x1A_2B_3C_4E
-        let bytes = value.bytes()
+        let bytes = value.makeBytes()
         XCTAssert(bytes == [0x1A, 0x2B, 0x3C, 0x4E])
-        XCTAssert(UInt32(bytes) == value)
+        XCTAssert(UInt32(bytes: bytes) == value)
     }
 
     func testUIntChunking64() {
         let value: UInt64 = 0x1A_2B_3C_4E_5F_6A_7B_8C
-        let bytes = value.bytes()
+        let bytes = value.makeBytes()
         XCTAssert(bytes == [0x1A, 0x2B, 0x3C, 0x4E, 0x5F, 0x6A, 0x7B, 0x8C])
-        XCTAssert(UInt64(bytes) == value)
+        XCTAssert(UInt64(bytes: bytes) == value)
     }
 
     func testByteArrayToUInt() {
         func expect<U: UnsignedInteger>(_ bytes: Byte..., equalTo expected: U) {
-            let received = U.init(bytes)
+            let received = U.init(bytes: bytes)
             XCTAssert(expected == received)
         }
 

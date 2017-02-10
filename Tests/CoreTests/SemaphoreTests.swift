@@ -28,10 +28,10 @@ class SemaphoreTests: XCTestCase {
         XCTAssert(collection == expectation, "got: \(collection), expected: \(expectation)")
     }
 
-    func testSemaphoreTimeout() throws {
-        try (1...3).forEach { timeoutTest in
+    func testSemaphoreTimeout() {
+        (1...3).forEach { timeoutTest in
             let semaphore = DispatchSemaphore(value: 0)
-            try background {
+            background {
                 let microseconds = timeoutTest * 1_000_000
                 // 10_000 microsecond of variance for timeout
                 let usleeptime = UInt32(microseconds) + 10_000

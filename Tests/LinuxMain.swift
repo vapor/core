@@ -6,9 +6,6 @@ import XCTest
 XCTMain([
     testCase(ArrayTests.allTests),
     testCase(BlackBoxTests.allTests),
-    testCase(BoolTests.allTests),
-    testCase(BytesTests.allTests),
-    testCase(ExtractableTests.allTests),
     testCase(FileProtocolTests.allTests),
     testCase(PercentEncodingTests.allTests),
     testCase(PortalTests.allTests),
@@ -18,7 +15,6 @@ XCTMain([
     testCase(StaticDataBufferTests.allTests),
     testCase(StringTests.allTests),
     testCase(UnsignedIntegerChunkingTests.allTests),
-    testCase(UnsignedIntegerTests.allTests),
     testCase(UtilityTests.allTests),
 ])
 
