@@ -108,7 +108,7 @@ open class StaticDataBuffer {
     }
 
     /**
-        
+        Collect any remaining bytes until buffer is empty
     */
     public func collectRemaining() throws -> [Byte] {
         var complete: [Byte] = []

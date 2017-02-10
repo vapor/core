@@ -62,6 +62,8 @@ extension Portal {
     /**
          This function is used to enter an asynchronous supported context with a portal
          object that can be used to complete a given operation.
+     
+         timeout in SECONDS
 
              let value = try Portal<Int>.open { portal in
                  // .. do whatever necessary passing around `portal` object
@@ -74,10 +76,10 @@ extension Portal {
                  portal.close(with: errorSignifyingFailure)
              }
 
-         - warning: Calling a `portal` multiple times will have no effect.
+         - warning: Calling close on a `portal` multiple times will have no effect.
     */
     public static func open(
-        timeout: Double = ((60 * 60) * 24),
+        timeout: Double = (60 * 60),
         _ handler: @escaping (Portal) throws -> Void
         ) throws -> T {
         let semaphore = DispatchSemaphore(value: 0)
