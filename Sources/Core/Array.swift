@@ -1,4 +1,13 @@
 extension Array {
+    /**
+        Turn into an array of various chunk sizes
+     
+        Last component may not be equal size as others.
+     
+        [1,2,3,4,5].chunked(size: 2)
+        ==
+        [[1,2],[3,4],[5]]
+    */
     public func chunked(size: Int) -> [[Element]] {
         return stride(from: 0, to: count, by: size).map { startIndex in
             let next = startIndex.advanced(by: size)
@@ -10,9 +19,9 @@ extension Array {
 
 extension Array where Element: Hashable {
     /**
-     This function is intended to be as performant as possible, which is part of the reason
-     why some of the underlying logic may seem a bit more tedious than is necessary
-     */
+         This function is intended to be as performant as possible, which is part of the reason
+         why some of the underlying logic may seem a bit more tedious than is necessary
+    */
     public func trimmed(_ elements: [Element]) -> SubSequence {
         guard !isEmpty else { return [] }
 

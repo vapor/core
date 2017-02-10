@@ -80,7 +80,10 @@ open class StaticDataBuffer {
         return body
     }
 
-    /*
+    /**
+        Collect until delimitters are reached, optionally convert 
+        specific bytes along the way
+
         When in Query segment, `+` should be interpreted as ` ` (space), 
         not sure useful outside of that point.
     */
@@ -104,6 +107,9 @@ open class StaticDataBuffer {
         return collected
     }
 
+    /**
+        
+    */
     public func collectRemaining() throws -> [Byte] {
         var complete: [Byte] = []
         while let next = try next() {

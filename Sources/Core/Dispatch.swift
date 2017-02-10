@@ -1,7 +1,8 @@
 import Dispatch
 
-let background = DispatchQueue.global()
-
+/**
+    A simple background function that uses dispatch to send to a global queue
+*/
 public func background(function: @escaping () -> Void) {
-    background.async(execute: function)
+    DispatchQueue.global().async(execute: function)
 }

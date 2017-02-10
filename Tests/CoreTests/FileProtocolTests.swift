@@ -6,6 +6,7 @@ import XCTest
 class FileProtocolTests: XCTestCase {
     static let allTests = [
         ("testLoad", testLoad),
+        ("testLoadFail", testLoadFail),
         ("testSave", testSave),
     ]
 
@@ -17,26 +18,41 @@ class FileProtocolTests: XCTestCase {
 
     func testLoadFail() throws {
         let path = "!!!ferret!!!"
+
         do {
-            let file = DataFile()
-            _ = try file.load(path: path)
+            let body = try DataFile.load(path: path)
+            print(body.string)
             XCTFail("Shouldn't have loaded")
-        } catch DataFile.Error.fileLoad(let p) {
-            XCTAssertEqual(path, p)
         } catch {
-            XCTFail("Wrong error: \(error)")
+            let description = error.localizedDescription
+            XCTAssertTrue(description.contains("no such file"))
         }
     }
 
-    func testSave() {
-        let file = DataFile()
+    func testSave() throws {
+        let writeableDir = #file.components(separatedBy: "/").dropLast().joined(separator: "/")
+        let filePath = writeableDir + "/testfile.text"
         do {
-            try file.save(bytes: [], to: #file)
-            XCTFail("Shouldn't have saved.")
-        } catch DataFile.Error.unimplemented {
-            //
+            _ = try DataFile.load(path: filePath)
+            var message = "Filepath shouldn't already exist, a previous test likely failed."
+            message += "\nDelete the file at `\(filePath)` before continuing ..."
+            XCTFail(message)
+            return
         } catch {
-            XCTFail("Wrong error: \(error)")
+            let description = error.localizedDescription
+            XCTAssertTrue(description.contains("no such file"))
         }
+
+        let create = "TEST FILE --- DELETE IF FOUND"
+        try DataFile.save(bytes: create.makeBytes(), to: filePath)
+        let createRecovered = try DataFile.load(path: filePath)
+        XCTAssertEqual(create, createRecovered.string)
+
+        let overwrite = "new contents test ... TEST FILE --- DELETE IF FOUND"
+        try DataFile.save(bytes: overwrite.makeBytes(), to: filePath)
+        let overwriteRecovered = try DataFile.load(path: filePath)
+        XCTAssertEqual(overwrite, overwriteRecovered.string)
+
+        try DataFile.delete(at: filePath)
     }
 }

@@ -7,6 +7,6 @@ let package = Package(
         Target(name: "libc")
     ],
     dependencies: [
-        .Package(url: "https://github.com/vapor/bits.git", Version(0,0,0))
+        .Package(url: "https://github.com/vapor/bits.git", Version(0,1,0))
     ]
 )
