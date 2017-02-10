@@ -20,12 +20,12 @@ class FileProtocolTests: XCTestCase {
         let path = "!!!ferret!!!"
 
         do {
-            let body = try DataFile.load(path: path)
-            print(body.string)
+            _ = try DataFile.load(path: path)
             XCTFail("Shouldn't have loaded")
+        } catch DataFile.Error.load {
+            // ok
         } catch {
-            let description = error.localizedDescription
-            XCTAssertTrue(description.contains("no such file"))
+            XCTFail("Unexpected error \(error)")
         }
     }
 
@@ -38,10 +38,9 @@ class FileProtocolTests: XCTestCase {
             message += "\nDelete the file at `\(filePath)` before continuing ..."
             XCTFail(message)
             return
-        } catch {
-            let description = error.localizedDescription
-            XCTAssertTrue(description.contains("no such file"))
-        }
+        } catch DataFile.Error.load {
+            // ok
+        } // will throw other errors here
 
         let create = "TEST FILE --- DELETE IF FOUND"
         try DataFile.save(bytes: create.makeBytes(), to: filePath)

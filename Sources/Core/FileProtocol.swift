@@ -27,7 +27,8 @@ public protocol FileProtocol {
 */
 public final class DataFile: FileProtocol {
     public enum Error: Swift.Error {
-        case createFailed
+        case create(String)
+        case load(String)
         case unspecified(Swift.Error)
     }
 
@@ -40,9 +41,13 @@ public final class DataFile: FileProtocol {
         @see - FileProtocol.load
     */
     public func load(path: String) throws -> Bytes {
-        let url = URL(fileURLWithPath: path)
-        let data = try Data(contentsOf: url)
-        return data.makeBytes()
+        guard let data = NSData(contentsOfFile: path) else {
+            throw Error.load(path)
+        }
+
+        var bytes = Bytes(repeating: 0, count: data.length)
+        data.getBytes(&bytes, length: bytes.count)
+        return bytes
     }
 
     /**
@@ -70,7 +75,7 @@ public final class DataFile: FileProtocol {
             contents: data,
             attributes: nil
         )
-        guard success else { throw Error.createFailed }
+        guard success else { throw Error.create(path) }
     }
 
     private func fileExists(at path: String) -> Bool {
