@@ -5,7 +5,8 @@ import XCTest
 class RFC1123Tests: XCTestCase {
 
     static var allTests = [
-        ("testBasic", testBasic)
+        ("testBasic", testBasic),
+        ("testFail", testFail)
     ]
 
     func testBasic() {
