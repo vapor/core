@@ -1,5 +1,6 @@
 import XCTest
 import Core
+import Bits
 
 class BlackBoxTests: XCTestCase {
     static var allTests = [
@@ -8,7 +9,7 @@ class BlackBoxTests: XCTestCase {
 
     func testStaticDataBufferSubclassing() throws {
         class MyStaticDataBuffer: StaticDataBuffer {
-            init(bytes: Bytes) {
+            override init<S: Sequence>(bytes: S) where S.Iterator.Element == Byte {
                 super.init(bytes: bytes)
             }
 
