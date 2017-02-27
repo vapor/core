@@ -141,13 +141,14 @@ extension DataFile.Error {
         switch self {
         case .create:
             return [
-                "no have write permissions at specified path",
+                "missing write permissions at specified path",
                 "attempted to write corrupted data",
                 "system issue"
             ]
         case .load:
             return [
                 "file doesn't exist",
+                "missing read permissions at specified path",
                 "data read is corrupted",
                 "system issue"
             ]

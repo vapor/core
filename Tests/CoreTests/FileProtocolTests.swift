@@ -54,4 +54,12 @@ class FileProtocolTests: XCTestCase {
 
         try DataFile.delete(at: filePath)
     }
+
+    func testDataFileDebugging() {
+        XCTAssertEqual(DataFile.Error.readableName, "Data File Error")
+        XCTAssertTrue(DataFile.Error.create(path: "foo").printable.contains("missing write permissions"))
+        XCTAssertTrue(DataFile.Error.load(path: "foo").printable.contains("missing read permissions"))
+        let unspecified = DataFile.Error.unspecified(PortalError.notClosed)
+        XCTAssertTrue(unspecified.printable.contains("not originally supported by this version"))
+    }
 }

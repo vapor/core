@@ -17,6 +17,7 @@ class PortalTests: XCTestCase {
         ("testDuplicateResults", testDuplicateResults),
         ("testDuplicateErrors", testDuplicateErrors),
         ("testPortalThrowHandler", testPortalThrowHandler),
+        ("testPortalErrorDebugging", testPortalErrorDebugging),
     ]
 
     func testPortalResult() throws {
@@ -125,5 +126,10 @@ class PortalTests: XCTestCase {
         do {
             _ = try Portal<Int>.open { _ in throw PortalTestError.someError }
         } catch PortalTestError.someError {}
+    }
+
+    func testPortalErrorDebugging() {
+        XCTAssertTrue(PortalError.notClosed.printable.contains("not properly closed"))
+        XCTAssertTrue(PortalError.timedOut.printable.contains("timed out"))
     }
 }
