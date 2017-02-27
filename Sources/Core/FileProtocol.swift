@@ -1,4 +1,5 @@
 import Foundation
+@_exported import Debugging
 
 /**
     Objects conforming to this protocol
@@ -26,9 +27,9 @@ public protocol FileProtocol {
     Basic Foundation implementation of FileProtocols
 */
 public final class DataFile: FileProtocol {
-    public enum Error: Swift.Error {
-        case create(String)
-        case load(String)
+    public enum Error: Debuggable {
+        case create(path: String)
+        case load(path: String)
         case unspecified(Swift.Error)
     }
 
@@ -42,7 +43,7 @@ public final class DataFile: FileProtocol {
     */
     public func load(path: String) throws -> Bytes {
         guard let data = NSData(contentsOfFile: path) else {
-            throw Error.load(path)
+            throw Error.load(path: path)
         }
 
         var bytes = Bytes(repeating: 0, count: data.length)
@@ -75,7 +76,7 @@ public final class DataFile: FileProtocol {
             contents: data,
             attributes: nil
         )
-        guard success else { throw Error.create(path) }
+        guard success else { throw Error.create(path: path) }
     }
 
     private func fileExists(at path: String) -> Bool {
@@ -110,5 +111,63 @@ extension DataFile {
     */
     public static func delete(at path: String) throws {
         try DataFile().delete(at: path)
+    }
+}
+
+extension DataFile.Error {
+    public var identifier: String {
+        switch self {
+        case .create:
+            return "create"
+        case .load:
+            return "load"
+        case .unspecified:
+            return "unspecified"
+        }
+    }
+
+    public var reason: String {
+        switch self {
+        case .create(let path):
+            return "unable to create the file at path \(path)"
+        case .load(let path):
+            return "unable to load file at path \(path)"
+        case .unspecified(let error):
+            return "received an unspecified or extended error: \(error)"
+        }
+    }
+
+    public var possibleCauses: [String] {
+        switch self {
+        case .create:
+            return [
+                "missing write permissions at specified path",
+                "attempted to write corrupted data",
+                "system issue"
+            ]
+        case .load:
+            return [
+                "file doesn't exist",
+                "missing read permissions at specified path",
+                "data read is corrupted",
+                "system issue"
+            ]
+        case .unspecified:
+            return [
+                "received an error not originally supported by this version"
+            ]
+        }
+    }
+
+    public var suggestedFixes: [String] {
+        return [
+            "ensure that file permissions are correct for specified paths"
+        ]
+    }
+
+    public var documentationLinks: [String] {
+        return [
+            "https://developer.apple.com/reference/foundation/filemanager",
+        ]
     }
 }
