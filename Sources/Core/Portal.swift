@@ -4,7 +4,7 @@ import Dispatch
 /**
     There was an error thrown by the portal itself vs a user thrown variable
 */
-public enum PortalError: Error {
+public enum PortalError: String, Debuggable {
     /**
         Portal was destroyed w/o being closed
     */
@@ -111,5 +111,33 @@ extension Portal {
             let value = try operation()
             portal.close(with: value)
         }
+    }
+}
+
+extension PortalError {
+    public var identifier: String {
+        return rawValue
+    }
+
+    public var reason: String {
+        switch self {
+        case .notClosed:
+            return "the portal finished, but was somehow not properly closed"
+        case .timedOut:
+            return "the portal timed out before it could finish its operation"
+        }
+    }
+
+    public var possibleCauses: [String] {
+        return [
+            "user forgot to call `portal.close(with: )`"
+        ]
+    }
+
+    public var suggestedFixes: [String] {
+        return [
+            "ensure the timeout length is adequate for required operation time",
+            "make sure that `portal.close(with: )` is being called with an error or valid value"
+        ]
     }
 }
