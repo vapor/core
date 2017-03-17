@@ -34,7 +34,7 @@ extension Array where Element == Byte {
                 guard secondHex < self.count else { return nil }
                 let bytes = self[firstHex...secondHex].array
 
-                let str = bytes.string
+                let str = bytes.makeString()
                 guard
                     !str.isEmpty,
                     let encodedByte = Byte(str, radix: 16)
