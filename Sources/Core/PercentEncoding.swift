@@ -1,9 +1,12 @@
+import Foundation
+
 extension ArraySlice where Element == Byte {
     /// Percent decodes an array slice.
     ///
     /// - see: percentDecoded(_: Bytes, nonEncodedTransform: (Byte) -> (Byte)) -> [Byte]
+    @available(*, deprecated: 1.0, message: "use foundation apis directly")
     public func percentDecoded(nonEncodedTransform: (Byte) -> (Byte) = { $0 }) -> Bytes? {
-        return Array(self).percentDecoded(nonEncodedTransform: nonEncodedTransform)
+        return self.map(nonEncodedTransform).makeString().removingPercentEncoding?.makeBytes()
     }
 }
 
@@ -19,37 +22,9 @@ extension Array where Element == Byte {
     /// - return: Returns the decoded array of bytes
     /// or returns `nil` if the bytes could not
     /// be decoded.
-    public func percentDecoded(nonEncodedTransform: (Byte) -> (Byte) = { $0 }) -> [Byte]? {
-        var idx = 0
-        var group: [Byte] = []
-        while idx < self.count {
-            let next = self[idx]
-            if next == .percent {
-                // %  2  A
-                // i +1 +2
-                let firstHex = idx + 1
-                let secondHex = idx + 2
-                idx = secondHex + 1
-
-                guard secondHex < self.count else { return nil }
-                let bytes = self[firstHex...secondHex].array
-
-                let str = bytes.makeString()
-                guard
-                    !str.isEmpty,
-                    let encodedByte = Byte(str, radix: 16)
-                    else {
-                        return nil
-                }
-
-                group.append(encodedByte)
-            } else {
-                let transformed = nonEncodedTransform(next)
-                group.append(transformed)
-                idx += 1 // don't put outside of else
-            }
-        }
-        return group
+    @available(*, deprecated: 1.0, message: "use foundation apis directly")
+    public func percentDecoded(nonEncodedTransform: (Byte) -> (Byte) = { $0 }) -> Bytes? {
+        return self.map(nonEncodedTransform).makeString().removingPercentEncoding?.makeBytes()
     }
 
     /// Percent encodes an array of bytes.
@@ -59,7 +34,8 @@ extension Array where Element == Byte {
     /// choose which bytes should be encoded.
     ///
     /// - return: Returns percent-encoded bytes.
-    public func percentEncoded(shouldEncode: (Byte) throws -> Bool = { _ in true }) throws -> [Byte] {
+    @available(*, deprecated: 1.0, message: "use foundation apis directly")
+    public func percentEncoded(shouldEncode: (Byte) throws -> Bool = { _ in true }) throws -> Bytes? {
         var group: [Byte] = []
         try self.forEach { byte in
             if try shouldEncode(byte) {
