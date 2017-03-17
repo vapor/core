@@ -1,16 +1,6 @@
 import Foundation
 
-extension ArraySlice where Element == Byte {
-    /// Percent decodes an array slice.
-    ///
-    /// - see: percentDecoded(_: Bytes, nonEncodedTransform: (Byte) -> (Byte)) -> [Byte]
-    @available(*, deprecated: 1.0, message: "use foundation apis directly")
-    public func percentDecoded(nonEncodedTransform: (Byte) -> (Byte) = { $0 }) -> Bytes? {
-        return self.map(nonEncodedTransform).makeString().removingPercentEncoding?.makeBytes()
-    }
-}
-
-extension Array where Element == Byte {
+extension Sequence where Iterator.Element == Byte {
     /// Percent decodes an array of bytes.
     ///
     /// - param input: The percent encoded array of bytes.
