@@ -3,7 +3,6 @@ import XCTest
 @testable import Core
 
 class UtilityTests: XCTestCase {
-
     static var allTests = [
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
@@ -14,7 +13,7 @@ class UtilityTests: XCTestCase {
         let test = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()"
 
         XCTAssertEqual(
-            test.makeBytes().lowercased.string,
+            test.makeBytes().lowercased.makeString(),
             test.lowercased(),
             "Data utility did not match Foundation"
         )
@@ -24,7 +23,7 @@ class UtilityTests: XCTestCase {
         let test = "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()"
 
         XCTAssertEqual(
-            test.makeBytes().uppercased.string,
+            test.makeBytes().uppercased.makeString(),
             test.uppercased(),
             "Data utility did not match Foundation"
         )
