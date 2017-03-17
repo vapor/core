@@ -6,13 +6,21 @@ import XCTest
 class PercentEncodingTests: XCTestCase {
     static let allTests = [
         ("testEncoding", testEncoding),
-        ("testDecoding", testDecoding)
+        ("testDecoding", testDecoding),
+        ("testDecodingInvalidLength", testDecodingInvalidLength),
+        ("testDecodingInvalidCharacters", testDecodingInvalidCharacters),
+        ("testDecodingExtra", testDecodingExtra),
+        ("testDecodingTransform", testDecodingTransform),
+        ("testDecodingArraySlice", testDecodingArraySlice),
+        ("testDecodingArraySliceTransform", testDecodingArraySliceTransform),
+        ("testEncodingShould", testEncodingShould),
+        ("testEncodingZero", testEncodingZero),
     ]
 
     func testEncoding() throws {
         try utf8TestCases.forEach { character, encoding in
             let bytes = character.utf8
-            let encoded = try percentEncoded(bytes.array)
+            let encoded = try bytes.array.percentEncoded()
             let string = encoded.string.uppercased()
             XCTAssertTrue(string == encoding, "\(character) -- \(string) didn't equal expected encoding \(encoding)")
 
@@ -22,7 +30,7 @@ class PercentEncodingTests: XCTestCase {
     func testDecoding() {
         utf8TestCases.forEach { character, encoding in
             let encoded = encoding.utf8.array
-            guard let decoded = percentDecoded(encoded) else {
+            guard let decoded = encoded.percentDecoded() else {
                 XCTFail("Unable to percent decode string: \(encoded)")
                 return
             }
@@ -33,17 +41,17 @@ class PercentEncodingTests: XCTestCase {
 
     func testDecodingInvalidLength() {
         let input = "%2D%A".makeBytes() // last character is invalid, only 1 character
-        let result = percentDecoded(input)
+        let result = input.percentDecoded()
         XCTAssertNil(result)
     }
 
     func testDecodingInvalidCharacters() {
-        let result = percentDecoded("%--".makeBytes())
+        let result = "%--".makeBytes().percentDecoded()
         XCTAssertNil(result)
     }
 
     func testDecodingExtra() {
-        guard let result = percentDecoded("%FF%00A".makeBytes()) else {
+        guard let result = "%FF%00A".makeBytes().percentDecoded() else {
             XCTFail("Unable to decode.")
             return
         }
@@ -61,7 +69,7 @@ class PercentEncodingTests: XCTestCase {
             }
         }
 
-        guard let result = percentDecoded("%FF+%00".makeBytes(), nonEncodedTransform: transform) else {
+        guard let result = "%FF+%00".makeBytes().percentDecoded(nonEncodedTransform: transform) else {
             XCTFail("Unable to decode.")
             return
         }
@@ -72,7 +80,7 @@ class PercentEncodingTests: XCTestCase {
 
     func testDecodingArraySlice() {
         let slice = "%FF+%00A".makeBytes()[0...6]
-        guard let result = percentDecoded(slice) else {
+        guard let result = slice.percentDecoded() else {
             XCTFail("Unable to decode.")
             return
         }
@@ -91,7 +99,7 @@ class PercentEncodingTests: XCTestCase {
         }
 
         let slice = "%FF+%00A".makeBytes()[0...6]
-        guard let result = percentDecoded(slice, nonEncodedTransform: transform) else {
+        guard let result = slice.percentDecoded(nonEncodedTransform: transform) else {
             XCTFail("Unable to decode.")
             return
         }
@@ -102,7 +110,7 @@ class PercentEncodingTests: XCTestCase {
 
     func testEncodingShould() throws {
         let bytes: Bytes = [.f, .a, .zero]
-        let result = try percentEncoded(bytes) { byte in
+        let result = try bytes.percentEncoded() { byte in
             return byte != .a
         }
 
@@ -111,7 +119,7 @@ class PercentEncodingTests: XCTestCase {
 
     func testEncodingZero() throws {
         let bytes: Bytes = [0]
-        let result = try percentEncoded(bytes) { byte in
+        let result = try bytes.percentEncoded() { byte in
             return byte != .a
         }
 

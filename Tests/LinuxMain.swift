@@ -16,6 +16,7 @@ XCTMain([
     testCase(StringTests.allTests),
     testCase(UnsignedIntegerChunkingTests.allTests),
     testCase(UtilityTests.allTests),
+    testCase(PolymorphicTests.allTests),
 ])
 
 #endif
