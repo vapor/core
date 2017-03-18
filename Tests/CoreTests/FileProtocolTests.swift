@@ -13,7 +13,7 @@ class FileProtocolTests: XCTestCase {
     func testLoad() throws {
         let file = DataFile()
         let bytes = try file.load(path: #file)
-        XCTAssert(bytes.string.contains("foobar")) // inception
+        XCTAssert(bytes.makeString().contains("foobar")) // inception
     }
 
     func testLoadFail() throws {
@@ -45,12 +45,12 @@ class FileProtocolTests: XCTestCase {
         let create = "TEST FILE --- DELETE IF FOUND"
         try DataFile.save(bytes: create.makeBytes(), to: filePath)
         let createRecovered = try DataFile.load(path: filePath)
-        XCTAssertEqual(create, createRecovered.string)
+        XCTAssertEqual(create, createRecovered.makeString())
 
         let overwrite = "new contents test ... TEST FILE --- DELETE IF FOUND"
         try DataFile.save(bytes: overwrite.makeBytes(), to: filePath)
         let overwriteRecovered = try DataFile.load(path: filePath)
-        XCTAssertEqual(overwrite, overwriteRecovered.string)
+        XCTAssertEqual(overwrite, overwriteRecovered.makeString())
 
         try DataFile.delete(at: filePath)
     }
