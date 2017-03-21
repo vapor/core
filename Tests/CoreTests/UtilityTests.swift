@@ -7,6 +7,7 @@ class UtilityTests: XCTestCase {
         ("testLowercase", testLowercase),
         ("testUppercase", testUppercase),
         ("testIntHex", testIntHex),
+        ("testWorkDir", testWorkDir)
     ]
 
     func testLowercase() {
@@ -35,5 +36,13 @@ class UtilityTests: XCTestCase {
 
         let unsignedHex = Byte(125).hex
         XCTAssertEqual(unsignedHex, "7D")
+    }
+
+    func testWorkDir() {
+        let file = #file
+
+        let workDir = workingDirectory()
+        XCTAssert(file.hasPrefix(workDir))
+        XCTAssertNotEqual(workDir, file)
     }
 }
