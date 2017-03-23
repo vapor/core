@@ -46,23 +46,25 @@ extension String {
 
     /// Attempts to convert the `String` to a `String`.
     /// This always works.
-    public var string: String? {
+    public var string: String {
         return self
     }
 
+    /// Converts the string to a UTF8 array of bytes.
+    public var bytes: [UInt8] {
+        return [UInt8](self.utf8)
+    }
+}
+
+extension String {
     /// Attempts to convert the `String` to an `Array`.
     /// Comma separated items will be split into
     /// multiple entries.
-    public var array: [String]? {
+    public func commaSeparatedArray() -> [String] {
         return characters
             .split(separator: ",")
             .map { String($0) }
             .map { $0.trimmedWhitespace() }
-    }
-
-    /// Converts the string to a UTF8 array of bytes.
-    public var bytes: [UInt8]? {
-        return [UInt8](self.utf8)
     }
 }
 
