@@ -28,7 +28,7 @@ class PolymorphicTests: XCTestCase {
 
     func testArray() {
         let list = "oranges, apples , bananas, grapes"
-        let fruits = list.array?.flatMap { $0.string } ?? []
+        let fruits = list.commaSeparatedArray()
         XCTAssert(fruits == ["oranges", "apples", "bananas", "grapes"])
     }
 
