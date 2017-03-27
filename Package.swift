@@ -1,6 +1,6 @@
 import PackageDescription
 
-let beta1 = Version(1,0,0, prereleaseIdentifiers: ["beta", "1"])
+let beta1 = Version(1,0,0, prereleaseIdentifiers: ["beta1"])
 
 let package = Package(
     name: "Core",
