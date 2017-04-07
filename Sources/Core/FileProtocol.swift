@@ -1,6 +1,9 @@
 import Foundation
 @_exported import Debugging
 
+/// An empty protocol to use with Credentials
+public protocol Credentials {}
+
 /**
     Objects conforming to this protocol
     can load and save files to a persistent
@@ -15,7 +18,7 @@ public protocol FileProtocol {
     /**
         Save the bytes to a given path
     */
-    func save(bytes: Bytes, to path: String) throws
+    func save(bytes: Bytes, to path: String, with credentials: Credentials?) throws
 
     /**
         Deletes the file at a given path
@@ -54,7 +57,7 @@ public final class DataFile: FileProtocol {
     /**
         @see - FileProtocol.save
     */
-    public func save(bytes: Bytes, to path: String) throws {
+    public func save(bytes: Bytes, to path: String, with credentials: Credentials? = nil) throws {
         if !fileExists(at: path) {
             try create(at: path, bytes: bytes)
         } else {
@@ -102,8 +105,8 @@ extension DataFile {
     /**
         Save the bytes to a given path
     */
-    public static func save(bytes: Bytes, to path: String) throws {
-        try DataFile().save(bytes: bytes, to: path)
+    public static func save(bytes: Bytes, to path: String, with credentials: Credentials? = nil) throws {
+        try DataFile().save(bytes: bytes, to: path, credentials: credentials)
     }
 
     /**
