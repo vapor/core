@@ -1,31 +1,20 @@
 <p align="center">
-    <img 
-        src="https://userscontent2.emaze.com/images/bbbef209-eddb-4593-b39e-00a07f035730/0929829d-60e7-42f8-9319-39b38fb729f6.png" 
-        align="center" 
-        alt="Core"
-        width="500px"
-    >
-</p>
-
-# Core
-
-![Swift](http://img.shields.io/badge/swift-3.0-brightgreen.svg)
-[![Build Status](https://travis-ci.org/vapor/core.svg?branch=master)](https://travis-ci.org/vapor/core)
-[![CircleCI](https://circleci.com/gh/vapor/core.svg?style=shield)](https://circleci.com/gh/vapor/core)
-[![Code Coverage](https://codecov.io/gh/vapor/core/branch/master/graph/badge.svg)](https://codecov.io/gh/vapor/core)
-[![Codebeat](https://codebeat.co/badges/a793ad97-47e3-40d9-82cf-2aafc516ef4e)](https://codebeat.co/projects/github-com-vapor-core)
-[![Slack Status](http://vapor.team/badge.svg)](http://vapor.team)
-
-Core is a collection of useful protocols, extensions, type-aliases, functions, and libraries. It is used extensively in almost all of [Vapor](https://github.com/vapor/vapor)'s packages.
-
-## 📖 Documentation
-
-Visit the Vapor web framework's [documentation](http://docs.vapor.codes) for instructions on how to use this package. 
-
-## 💧 Community
-
-Join the welcoming community of fellow Vapor developers in [slack](http://vapor.team).
-
-## 🔧 Compatibility
-
-This package has been tested on macOS and Ubuntu.
+    <img src="https://cloud.githubusercontent.com/assets/1342803/24859350/7065f420-1df0-11e7-9796-577b04d6b35b.png" width="320" alt="Core">
+    <br>
+    <br>
+    <a href="http://beta.docs.vapor.codes/core">
+        <img src="http://img.shields.io/badge/read_the-docs-92A8D1.svg" alt="Documentation">
+    </a>
+    <a href="http://vapor.team">
+        <img src="http://vapor.team/badge.svg" alt="Slack Team">
+    </a>
+    <a href="LICENSE">
+        <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
+    </a>
+    <a href="https://circleci.com/gh/vapor/core">
+        <img src="https://circleci.com/gh/vapor/core.svg?style=shield" alt="Continuous Integration">
+    </a>
+    <a href="https://swift.org">
+        <img src="http://img.shields.io/badge/swift-3.1-brightgreen.svg" alt="Swift 3.1">
+    </a>
+</center>
