@@ -11,6 +11,10 @@ class ByteTests: XCTestCase {
         ("testBase64", testBase64),
     ]
 
+    private let base64Dec = "Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott Hello こんにちは 你好 안녕하세요 Здравствуйте! Grüß Gott"
+
+    private let base64Enc = "SGVsbG8g44GT44KT44Gr44Gh44GvIOS9oOWlvSDslYjrhZXtlZjshLjsmpQg0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1ISBHcsO8w58gR290dCBIZWxsbyDjgZPjgpPjgavjgaHjga8g5L2g5aW9IOyViOuFle2VmOyEuOyalCDQl9C00YDQsNCy0YHRgtCy0YPQudGC0LUhIEdyw7zDnyBHb3R0IEhlbGxvIOOBk+OCk+OBq+OBoeOBryDkvaDlpb0g7JWI64WV7ZWY7IS47JqUINCX0LTRgNCw0LLRgdGC0LLRg9C50YLQtSEgR3LDvMOfIEdvdHQgSGVsbG8g44GT44KT44Gr44Gh44GvIOS9oOWlvSDslYjrhZXtlZjshLjsmpQg0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1ISBHcsO8w58gR290dCBIZWxsbyDjgZPjgpPjgavjgaHjga8g5L2g5aW9IOyViOuFle2VmOyEuOyalCDQl9C00YDQsNCy0YHRgtCy0YPQudGC0LUhIEdyw7zDnyBHb3R0IEhlbGxvIOOBk+OCk+OBq+OBoeOBryDkvaDlpb0g7JWI64WV7ZWY7IS47JqUINCX0LTRgNCw0LLRgdGC0LLRg9C50YLQtSEgR3LDvMOfIEdvdHQgSGVsbG8g44GT44KT44Gr44Gh44GvIOS9oOWlvSDslYjrhZXtlZjshLjsmpQg0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1ISBHcsO8w58gR290dCBIZWxsbyDjgZPjgpPjgavjgaHjga8g5L2g5aW9IOyViOuFle2VmOyEuOyalCDQl9C00YDQsNCy0YHRgtCy0YPQudGC0LUhIEdyw7zDnyBHb3R0IEhlbGxvIOOBk+OCk+OBq+OBoeOBryDkvaDlpb0g7JWI64WV7ZWY7IS47JqUINCX0LTRgNCw0LLRgdGC0LLRg9C50YLQtSEgR3LDvMOfIEdvdHQgSGVsbG8g44GT44KT44Gr44Gh44GvIOS9oOWlvSDslYjrhZXtlZjshLjsmpQg0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1ISBHcsO8w58gR290dA=="
+    
     func testRandom() {
         var one: Bytes = []
         var two: Bytes = []
@@ -63,9 +67,13 @@ class ByteTests: XCTestCase {
     }
 
     public func testBase64() {
-        XCTAssertEqual("dmFwb3I=".bytes.base64Decoded.string, "vapor")
-        XCTAssertEqual("⚠️".bytes.base64Decoded.string, "")
-        XCTAssertEqual("hello".bytes.base64Encoded.string, "aGVsbG8=")
-        XCTAssertEqual("hello".bytes.base64Encoded, "aGVsbG8=".bytes)
+        for _ in 0..<1000 {
+            XCTAssertEqual("dmFwb3I=".bytes.base64Decoded.string, "vapor")
+            XCTAssertEqual("⚠️".bytes.base64Decoded.string, "")
+            XCTAssertEqual("hello".bytes.base64Encoded.string, "aGVsbG8=")
+            XCTAssertEqual("hello".bytes.base64Encoded, "aGVsbG8=".bytes)
+            XCTAssertEqual(base64Dec.bytes.base64Encoded, base64Enc.bytes)
+            XCTAssertEqual(base64Enc.bytes.base64Decoded, base64Dec.bytes)
+        }
     }
 }
