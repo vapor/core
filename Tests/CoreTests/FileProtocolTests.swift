@@ -12,7 +12,7 @@ class FileProtocolTests: XCTestCase {
 
     func testLoad() throws {
         let file = DataFile()
-        let bytes = try file.load(path: #file)
+        let bytes = try file.read(at: #file)
         XCTAssert(bytes.makeString().contains("foobar")) // inception
     }
 
@@ -20,7 +20,7 @@ class FileProtocolTests: XCTestCase {
         let path = "!!!ferret!!!"
 
         do {
-            _ = try DataFile.load(path: path)
+            _ = try DataFile.read(at: path)
             XCTFail("Shouldn't have loaded")
         } catch DataFileError.load {
             // ok
@@ -33,7 +33,7 @@ class FileProtocolTests: XCTestCase {
         let writeableDir = #file.components(separatedBy: "/").dropLast().joined(separator: "/")
         let filePath = writeableDir + "/testfile.text"
         do {
-            _ = try DataFile.load(path: filePath)
+            _ = try DataFile.read(at: filePath)
             var message = "Filepath shouldn't already exist, a previous test likely failed."
             message += "\nDelete the file at `\(filePath)` before continuing ..."
             XCTFail(message)
@@ -43,13 +43,13 @@ class FileProtocolTests: XCTestCase {
         } // will throw other errors here
 
         let create = "TEST FILE --- DELETE IF FOUND"
-        try DataFile.save(bytes: create.makeBytes(), to: filePath)
-        let createRecovered = try DataFile.load(path: filePath)
+        try DataFile.write(create.makeBytes(), to: filePath)
+        let createRecovered = try DataFile.read(at: filePath)
         XCTAssertEqual(create, createRecovered.makeString())
 
         let overwrite = "new contents test ... TEST FILE --- DELETE IF FOUND"
-        try DataFile.save(bytes: overwrite.makeBytes(), to: filePath)
-        let overwriteRecovered = try DataFile.load(path: filePath)
+        try DataFile.write(overwrite.makeBytes(), to: filePath)
+        let overwriteRecovered = try DataFile.read(at: filePath)
         XCTAssertEqual(overwrite, overwriteRecovered.makeString())
 
         try DataFile.delete(at: filePath)

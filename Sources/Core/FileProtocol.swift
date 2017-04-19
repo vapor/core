@@ -3,10 +3,10 @@
 /// data store.
 public protocol FileProtocol {
     /// Load the bytes at a given path
-    func load(path: String) throws -> Bytes
+    func read(at path: String) throws -> Bytes
 
     /// Save the bytes to a given path
-    func save(bytes: Bytes, to path: String) throws
+    func write(_ bytes: Bytes, to path: String) throws
 
     /// Deletes the file at a given path
     func delete(at path: String) throws
@@ -14,13 +14,13 @@ public protocol FileProtocol {
 
 extension FileProtocol where Self: EmptyInitializable {
     /// Load the bytes at a given path
-    public static func load(path: String) throws -> Bytes {
-        return try Self().load(path: path)
+    public static func read(at path: String) throws -> Bytes {
+        return try Self().read(at: path)
     }
     
     /// Save the bytes to a given path
-    public static func save(bytes: Bytes, to path: String) throws {
-        try Self().save(bytes: bytes, to: path)
+    public static func write(_ bytes: Bytes, to path: String) throws {
+        try Self().write(bytes, to: path)
     }
     
     /// Deletes the file at a given path

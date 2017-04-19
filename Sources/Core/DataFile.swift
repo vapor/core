@@ -12,7 +12,7 @@ public final class DataFile: FileProtocol {
     }
     
     /// @see - FileProtocol.load
-    public func load(path: String) throws -> Bytes {
+    public func read(at path: String) throws -> Bytes {
         let path = makeAbsolute(path: path)
         guard let data = NSData(contentsOfFile: path) else {
             throw DataFileError.load(path: path)
@@ -24,7 +24,7 @@ public final class DataFile: FileProtocol {
     }
     
     /// @see - FileProtocol.save
-    public func save(bytes: Bytes, to path: String) throws {
+    public func write(_ bytes: Bytes, to path: String) throws {
         let path = makeAbsolute(path: path)
         if !fileExists(at: path) {
             try create(at: path, bytes: bytes)
