@@ -12,7 +12,7 @@ class FileProtocolTests: XCTestCase {
 
     func testLoad() throws {
         let file = DataFile()
-        let bytes = try file.load(path: #file)
+        let bytes = try file.read(at: #file)
         XCTAssert(bytes.makeString().contains("foobar")) // inception
     }
 
@@ -20,9 +20,9 @@ class FileProtocolTests: XCTestCase {
         let path = "!!!ferret!!!"
 
         do {
-            _ = try DataFile.load(path: path)
+            _ = try DataFile.read(at: path)
             XCTFail("Shouldn't have loaded")
-        } catch DataFile.Error.load {
+        } catch DataFileError.load {
             // ok
         } catch {
             XCTFail("Unexpected error \(error)")
@@ -33,33 +33,33 @@ class FileProtocolTests: XCTestCase {
         let writeableDir = #file.components(separatedBy: "/").dropLast().joined(separator: "/")
         let filePath = writeableDir + "/testfile.text"
         do {
-            _ = try DataFile.load(path: filePath)
+            _ = try DataFile.read(at: filePath)
             var message = "Filepath shouldn't already exist, a previous test likely failed."
             message += "\nDelete the file at `\(filePath)` before continuing ..."
             XCTFail(message)
             return
-        } catch DataFile.Error.load {
+        } catch DataFileError.load {
             // ok
         } // will throw other errors here
 
         let create = "TEST FILE --- DELETE IF FOUND"
-        try DataFile.save(bytes: create.makeBytes(), to: filePath)
-        let createRecovered = try DataFile.load(path: filePath)
+        try DataFile.write(create.makeBytes(), to: filePath)
+        let createRecovered = try DataFile.read(at: filePath)
         XCTAssertEqual(create, createRecovered.makeString())
 
         let overwrite = "new contents test ... TEST FILE --- DELETE IF FOUND"
-        try DataFile.save(bytes: overwrite.makeBytes(), to: filePath)
-        let overwriteRecovered = try DataFile.load(path: filePath)
+        try DataFile.write(overwrite.makeBytes(), to: filePath)
+        let overwriteRecovered = try DataFile.read(at: filePath)
         XCTAssertEqual(overwrite, overwriteRecovered.makeString())
 
         try DataFile.delete(at: filePath)
     }
 
     func testDataFileDebugging() {
-        XCTAssertEqual(DataFile.Error.readableName, "Data File Error")
-        XCTAssertTrue(DataFile.Error.create(path: "foo").printable.contains("missing write permissions"))
-        XCTAssertTrue(DataFile.Error.load(path: "foo").printable.contains("missing read permissions"))
-        let unspecified = DataFile.Error.unspecified(PortalError.notClosed)
+        XCTAssertEqual(DataFileError.readableName, "Data File Error")
+        XCTAssertTrue(DataFileError.create(path: "foo").printable.contains("missing write permissions"))
+        XCTAssertTrue(DataFileError.load(path: "foo").printable.contains("missing read permissions"))
+        let unspecified = DataFileError.unspecified(PortalError.notClosed)
         XCTAssertTrue(unspecified.printable.contains("not originally supported by this version"))
     }
 }
