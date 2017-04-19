@@ -22,7 +22,7 @@ class FileProtocolTests: XCTestCase {
         do {
             _ = try DataFile.load(path: path)
             XCTFail("Shouldn't have loaded")
-        } catch DataFile.Error.load {
+        } catch DataFileError.load {
             // ok
         } catch {
             XCTFail("Unexpected error \(error)")
@@ -38,7 +38,7 @@ class FileProtocolTests: XCTestCase {
             message += "\nDelete the file at `\(filePath)` before continuing ..."
             XCTFail(message)
             return
-        } catch DataFile.Error.load {
+        } catch DataFileError.load {
             // ok
         } // will throw other errors here
 
@@ -56,10 +56,10 @@ class FileProtocolTests: XCTestCase {
     }
 
     func testDataFileDebugging() {
-        XCTAssertEqual(DataFile.Error.readableName, "Data File Error")
-        XCTAssertTrue(DataFile.Error.create(path: "foo").printable.contains("missing write permissions"))
-        XCTAssertTrue(DataFile.Error.load(path: "foo").printable.contains("missing read permissions"))
-        let unspecified = DataFile.Error.unspecified(PortalError.notClosed)
+        XCTAssertEqual(DataFileError.readableName, "Data File Error")
+        XCTAssertTrue(DataFileError.create(path: "foo").printable.contains("missing write permissions"))
+        XCTAssertTrue(DataFileError.load(path: "foo").printable.contains("missing read permissions"))
+        let unspecified = DataFileError.unspecified(PortalError.notClosed)
         XCTAssertTrue(unspecified.printable.contains("not originally supported by this version"))
     }
 }
