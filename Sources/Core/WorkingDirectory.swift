@@ -1,17 +1,33 @@
+import libc
+
+private let defaultCwd: String = {
+    let file = #file
+    let directory: String?
+
+    if file.contains(".build") {
+        // most dependencies are in `./.build/`
+        directory = file.components(separatedBy: "/.build").first
+    } else if file.contains("Packages") {
+        // when editing a dependency, it is in `./Packages/`
+        directory = file.components(separatedBy: "/Packages").first
+    } else {
+        // when dealing with current repository, file is in `./Sources/`
+        directory = file.components(separatedBy: "/Sources").first
+    }
+
+    return directory?.finished(with: "/") ?? "./"
+}()
+
 /// This function will attempt to get the current
 /// working directory of the application
 public func workingDirectory() -> String {
-    let file = #file
-    let directory: String?
-    // most dependencies are in `./.build/`
-    if file.contains(".build") {
-        directory = file.components(separatedBy: "/.build").first
-    // when editing a dependency, it is in `./Packages/`
-    } else if file.contains("Packages") {
-        directory = file.components(separatedBy: "/Packages").first
-    // when dealing with current repository, file is in `./Sources/`
-    } else {
-        directory = file.components(separatedBy: "/Sources").first
+    guard let cwd = getcwd(nil, Int(PATH_MAX)) else {
+        return defaultCwd
     }
-    return directory?.finished(with: "/") ?? "./"
+    
+    defer {
+        free(cwd)
+    }
+    
+    return String(validatingUTF8: cwd)?.finished(with: "/") ?? defaultCwd
 }
