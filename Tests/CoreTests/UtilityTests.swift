@@ -39,10 +39,7 @@ class UtilityTests: XCTestCase {
     }
 
     func testWorkDir() {
-        let file = #file
-
         let workDir = workingDirectory()
-        XCTAssert(file.hasPrefix(workDir))
-        XCTAssertNotEqual(workDir, file)
+        XCTAssertNotEqual(workDir, "")
     }
 }
