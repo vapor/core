@@ -1,33 +1,44 @@
 import libc
 
-private let defaultCwd: String = {
-    let file = #file
-    let directory: String?
-
-    if file.contains(".build") {
-        // most dependencies are in `./.build/`
-        directory = file.components(separatedBy: "/.build").first
-    } else if file.contains("Packages") {
-        // when editing a dependency, it is in `./Packages/`
-        directory = file.components(separatedBy: "/Packages").first
-    } else {
-        // when dealing with current repository, file is in `./Sources/`
-        directory = file.components(separatedBy: "/Sources").first
-    }
-
-    return directory?.finished(with: "/") ?? "./"
-}()
-
 /// This function will attempt to get the current
 /// working directory of the application
 public func workingDirectory() -> String {
-    guard let cwd = getcwd(nil, Int(PATH_MAX)) else {
-        return defaultCwd
+    let fileBasedWorkDir: String?
+    
+    #if Xcode
+    // attempt to find working directory through #file
+    let file = #file
+        
+    if file.contains(".build") {
+        // most dependencies are in `./.build/`
+        fileBasedWorkDir = file.components(separatedBy: "/.build").first
+    } else if file.contains("Packages") {
+        // when editing a dependency, it is in `./Packages/`
+        fileBasedWorkDir = file.components(separatedBy: "/Packages").first
+    } else {
+        // when dealing with current repository, file is in `./Sources/`
+        fileBasedWorkDir = file.components(separatedBy: "/Sources").first
+    }
+    #else
+        fileBasedWorkDir = nil
+    #endif
+    
+    let workDir: String
+    if let fileBasedWorkDir = fileBasedWorkDir {
+        workDir = fileBasedWorkDir
+    } else {
+        // get actual working directory
+        let cwd = getcwd(nil, Int(PATH_MAX))
+        defer {
+            free(cwd)
+        }
+        
+        if let cwd = cwd, let string = String(validatingUTF8: cwd) {
+            workDir = string
+        } else {
+            workDir = "./"
+        }
     }
     
-    defer {
-        free(cwd)
-    }
-    
-    return String(validatingUTF8: cwd)?.finished(with: "/") ?? defaultCwd
+    return workDir.finished(with: "/")
 }
