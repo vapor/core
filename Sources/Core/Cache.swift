@@ -110,6 +110,4 @@ fileprivate struct OrderedDictionary<Key: Hashable, Value> {
             list.remove(at: idx)
         }
     }
-
-
 }
