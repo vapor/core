@@ -18,7 +18,7 @@ class CacheTests: XCTestCase {
         let b = Bytes(repeating: .b, count: 25).makeString()
         let c = Bytes(repeating: .c, count: 5).makeString()
 
-        let cache = MemoryCache<String>(maxSize: 100)
+        let cache = SystemCache<String>(maxSize: 100)
 
         cache["a"] = a
         XCTAssertNotNil(cache["a"])
