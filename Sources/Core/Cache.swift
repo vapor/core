@@ -4,7 +4,7 @@ public protocol Cacheable {
     func cacheSize() ->  Size
 }
 
-public final class MemoryCache<Wrapped: Cacheable> {
+public final class SystemCache<Wrapped: Cacheable> {
     public let maxSize: Size
 
     private var ordered: OrderedDictionary<String, Wrapped> = .init()
