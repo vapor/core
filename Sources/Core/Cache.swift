@@ -4,13 +4,7 @@ public protocol Cacheable {
     func cacheSize() ->  Size
 }
 
-public protocol CacheProtocol {
-    associatedtype Wrapped: Cacheable
-    init(maxSize: Size)
-    subscript(key: String) -> Wrapped? { get set }
-}
-
-public final class Cache<Wrapped: Cacheable>: CacheProtocol {
+public final class MemoryCache<Wrapped: Cacheable> {
     public let maxSize: Size
 
     private var ordered: OrderedDictionary<String, Wrapped> = .init()
@@ -30,10 +24,7 @@ public final class Cache<Wrapped: Cacheable>: CacheProtocol {
     }
 
     private func vent() {
-        let total = totalSize()
-        guard total <= maxSize else { return }
-
-        var dropTotal = total - maxSize
+        var dropTotal = totalSize() - maxSize
         while dropTotal > 0 {
             let next = dropOldest()
             guard let size = next?.cacheSize() else { break }
@@ -45,7 +36,7 @@ public final class Cache<Wrapped: Cacheable>: CacheProtocol {
         return ordered.unorderedItems.map { $0.cacheSize() } .reduce(0, +)
     }
 
-    func dropOldest() -> Wrapped? {
+    private func dropOldest() -> Wrapped? {
         guard let oldest = ordered.oldest else { return nil }
         ordered[oldest.key] = nil
         return oldest.value
