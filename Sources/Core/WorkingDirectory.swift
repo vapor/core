@@ -1,4 +1,6 @@
+#if !COCOAPODS
 import libc
+#endif
 
 /// This function will attempt to get the current
 /// working directory of the application
