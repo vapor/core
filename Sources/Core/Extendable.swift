@@ -3,7 +3,7 @@
 /// 
 /// Extensions can utilize this arbitrary data store
 /// to simulate optional stored properties.
-public protocol Extendable {
+public protocol Extendable: class {
     /// Arbitrary key-value data store.
     var extend: [String: Any] { get set }
 }
