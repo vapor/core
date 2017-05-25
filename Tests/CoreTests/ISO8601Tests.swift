@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import Core
 
-class RFC1123Tests: XCTestCase {
+class ISO8601Tests: XCTestCase {
 
     static var allTests = [
         ("testBasic", testBasic),
@@ -10,12 +10,12 @@ class RFC1123Tests: XCTestCase {
     ]
 
     func testBasic() {
-        let date = Date(rfc1123: "Sun, 21 Aug 2016 20:07:31 GMT")
-        XCTAssertEqual(date?.rfc1123, "Sun, 21 Aug 2016 20:07:31 GMT")
+        let date = Date(iso8601: "2016-06-18T05:18:27.935Z")
+        XCTAssertEqual(date?.iso8601, "2016-06-18T05:18:27.935Z")
     }
 
     func testFail() {
-        let date = Date(rfc1123: "Ferret")
+        let date = Date(iso8601: "Ferret")
         XCTAssertNil(date)
     }
 }
