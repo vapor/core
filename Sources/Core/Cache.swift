@@ -59,9 +59,15 @@ fileprivate struct OrderedDictionary<Key: Hashable, Value> {
     }
 
     // theoretically slightly faster
-    fileprivate var unorderedItems: Dictionary<Key, Value>.Values {
-        return backing.values
-    }
+    #if swift(>=4)
+        fileprivate var unorderedItems: Dictionary<Key, Value>.Values {
+            return backing.values
+        }
+    #else
+        fileprivate var unorderedItems: LazyMapCollection<Dictionary<Key, Value>, Value> {
+            return backing.values
+        }
+    #endif
 
     private var list: [Key] = []
     private var backing: [Key: Value] = [:]

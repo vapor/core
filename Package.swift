@@ -1,25 +1,14 @@
-// swift-tools-version:4.0
+// swift-tools-version:3.0
 import PackageDescription
 
 let package = Package(
     name: "Core",
-    products: [
-        .library(name: "libc", targets: ["libc"]),
-        .library(name: "Core", targets: ["Core"]),
+    targets: [
+        Target(name: "Core", dependencies: ["libc"]),
+        Target(name: "libc")
     ],
     dependencies: [
-        .package(
-            url: "https://github.com/vapor/bits.git",
-            .branchItem("beta")
-        ),
-        .package(
-            url: "https://github.com/vapor/debugging.git",
-            .branchItem("beta")
-        ),
-    ],
-    targets: [
-        .target(name: "libc"),
-        .target(name: "Core", dependencies: ["libc", "Bits", "Debugging"]),
-        .testTarget(name: "CoreTests", dependencies: ["Core"]),
+        .Package(url: "https://github.com/vapor/bits.git", majorVersion: 1),
+        .Package(url: "https://github.com/vapor/debugging.git", majorVersion: 1),
     ]
 )
