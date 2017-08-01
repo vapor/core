@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Bits",
+        "repositoryURL": "https://github.com/vapor/bits.git",
+        "state": {
+          "branch": "beta",
+          "revision": "fd8f95de50f0c6f903a2321a10d8d3a7f95e9942",
+          "version": null
+        }
+      },
+      {
+        "package": "Debugging",
+        "repositoryURL": "https://github.com/vapor/debugging.git",
+        "state": {
+          "branch": "beta",
+          "revision": "6fa8e9131195ad41d8fd4f9bfe3dcac86c74831f",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

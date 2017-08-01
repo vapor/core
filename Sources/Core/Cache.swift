@@ -59,7 +59,7 @@ fileprivate struct OrderedDictionary<Key: Hashable, Value> {
     }
 
     // theoretically slightly faster
-    fileprivate var unorderedItems: LazyMapCollection<Dictionary<Key, Value>, Value> {
+    fileprivate var unorderedItems: Dictionary<Key, Value>.Values {
         return backing.values
     }
 
