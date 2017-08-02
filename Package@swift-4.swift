@@ -8,14 +8,8 @@ let package = Package(
         .library(name: "Core", targets: ["Core"]),
     ],
     dependencies: [
-        .package(
-            url: "https://github.com/vapor/bits.git",
-            .branchItem("beta")
-        ),
-        .package(
-            url: "https://github.com/vapor/debugging.git",
-            .branchItem("beta")
-        ),
+        .package(url: "https://github.com/vapor/bits.git", from: "1.1.0"),
+        .package(url: "https://github.com/vapor/debugging.git", from: "1.1.0"),
     ],
     targets: [
         .target(name: "libc"),
