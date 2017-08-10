@@ -8,4 +8,9 @@ test:
     - swift build
     - swift build -c release
     - swift test
+    - sudo apt-get remove swift
+    - sudo apt-get install swift-beta
+    - swift build
+    - swift build -c release
+    - swift test
     
