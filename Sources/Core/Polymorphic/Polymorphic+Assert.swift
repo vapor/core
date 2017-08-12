@@ -82,7 +82,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard int <= Int8.max else {
+        guard int <= Int(Int8.max) else {
             return nil
         }
 
@@ -102,7 +102,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard int <= Int16.max else {
+        guard int <= Int(Int16.max) else {
             return nil
         }
 
@@ -122,7 +122,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard int <= Int32.max else {
+        guard int <= Int(Int32.max) else {
             return nil
         }
 
@@ -142,7 +142,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard int <= Int64.max else {
+        guard int <= Int(Int64.max) else {
             return nil
         }
 
@@ -182,7 +182,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard uint <= UInt8.max else {
+        guard uint <= UInt(UInt8.max) else {
             return nil
         }
 
@@ -202,7 +202,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard uint <= UInt16.max else {
+        guard uint <= UInt(UInt16.max) else {
             return nil
         }
 
@@ -222,7 +222,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard uint <= UInt32.max else {
+        guard uint <= UInt(UInt32.max) else {
             return nil
         }
 
@@ -242,7 +242,7 @@ extension Polymorphic {
             return nil
         }
 
-        guard uint <= UInt64.max else {
+        guard uint <= UInt(UInt64.max) else {
             return nil
         }
 
