@@ -39,7 +39,7 @@ internal final class PolymorphicContainer<
     var allKeys: [K] {
         return data.dictionary?.keys.flatMap {
             Key(stringValue: $0)
-            } ?? []
+        } ?? []
     }
 
     var codingPath: [CodingKey] {
@@ -62,7 +62,7 @@ internal final class PolymorphicContainer<
         return allKeys.contains(where: { $0.stringValue == key.stringValue })
     }
 
-    // MARK: Nested
+    // MARK: Nested Unkeyed
 
     func nestedContainer<NestedKey>(
         keyedBy type: NestedKey.Type
@@ -80,9 +80,12 @@ internal final class PolymorphicContainer<
         let key = StringKey(currentIndex.description)
         return try decoder.with(pushedKey: key) {
             let data = try self.data.assertArray()[currentIndex]
+            currentIndex += 1
             return PolymorphicContainer<Data, Key>(decoder: decoder, mode: .unkeyed, data: data)
         }
     }
+
+    // MARK: Nested Keyed
 
     func nestedContainer<NestedKey>(
         keyedBy type: NestedKey.Type,
