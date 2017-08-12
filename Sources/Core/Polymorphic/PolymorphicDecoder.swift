@@ -5,7 +5,7 @@ public final class PolymorphicDecoder<Data: Polymorphic>: Decoder {
     public var userInfo: [CodingUserInfoKey : Any]
     private var data: Data
 
-    public typealias CodingKeyMap = (CodingKey) -> (CodingKey)
+    public typealias CodingKeyMap = (CodingKey) -> (CodingKey?)
     public var codingKeyMap: CodingKeyMap
 
     public typealias DecoderFactory =

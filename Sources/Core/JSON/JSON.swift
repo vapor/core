@@ -4,7 +4,7 @@ internal struct JSON {
     var raw: Any
 }
 
-extension JSONData: Polymorphic {
+extension JSON: Polymorphic {
     var string: String? {
         if let string = raw as? String {
             return string
@@ -35,7 +35,7 @@ extension JSONData: Polymorphic {
         return raw as? Bool
     }
 
-    var dictionary: [String : JSONData]? {
+    var dictionary: [String : JSON]? {
         guard let dict = raw as? [String: Any] else {
             return nil
         }
@@ -47,7 +47,7 @@ extension JSONData: Polymorphic {
         return raw as? NSNull != nil
     }
 
-    var array: [JSONData]? {
+    var array: [JSON]? {
         guard let array = raw as? [Any] else {
             return nil
         }

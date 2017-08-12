@@ -1,4 +1,3 @@
-import Core
 import Foundation
 
 public protocol JSONDecodable: Decodable {
@@ -13,8 +12,8 @@ extension JSONDecodable {
             with: data,
             options: options
         )
-        let json = JSONData(raw: raw)
-        let decoder = PolymorphicDecoder<JSONData>(
+        let json = JSON(raw: raw)
+        let decoder = PolymorphicDecoder<JSON>(
             data: json,
             codingPath: [],
             codingKeyMap: Self._jsonKeyMap,
@@ -27,7 +26,7 @@ extension JSONDecodable {
                 codingKeyMap = type._jsonKeyMap
             }
 
-            return PolymorphicDecoder<JSONData>.init(
+            return PolymorphicDecoder<JSON>.init(
                 data: data,
                 codingPath: decoder.codingPath,
                 codingKeyMap: codingKeyMap,

@@ -1,6 +1,5 @@
+import Core
 import XCTest
-import JSON
-import Dispatch
 
 class JSONTests: XCTestCase {
     func testParse() throws {
@@ -117,7 +116,92 @@ class JSONTests: XCTestCase {
 //        XCTAssertEqual(bytes.makeString(), "\"foo\"")
 //    }
 //
+
+    func testJSONDecode() throws {
+        let data = """
+        {
+            "name": {
+                "first_name": "Gertrude",
+                "last": "Computer"
+            },
+            "age": 109,
+            "lucky_numbers": [3.14, 5.0]
+        }
+        """.data(using: .utf8)!
+
+        let person = try Person(json: data)
+        XCTAssertEqual(person.name.full, "Gertrude Computer")
+        XCTAssertEqual(person.age, 109)
+        XCTAssertEqual(person.luckyNumbers, [3.14, 5.0])
+    }
+
+    func testJSONArrayDecode() throws {
+        let data = """
+        [
+            {
+                "name": {
+                    "first_name": "Gertrude",
+                    "last": "Computer"
+                },
+                "age": 109,
+                "lucky_numbers": [3.14, 5.0]
+            },
+            {
+                "name": {
+                    "first_name": "Gertrude",
+                    "last": "Computer"
+                },
+                "age": 109,
+                "lucky_numbers": [3.14, 5.0]
+            }
+        ]
+        """.data(using: .utf8)!
+
+        let array = try [Person](json: data)
+        XCTAssertEqual(array.count, 2)
+    }
+
     static let allTests = [
+        ("testJSONDecode", testJSONDecode),
+        ("testJSONArrayDecode", testJSONArrayDecode),
         ("testParse", testParse),
     ]
 }
+
+struct Name: JSONCodable {
+    static var jsonKeyMap = [
+        "first": "first_name"
+    ]
+
+    let first: String
+    let last: String
+    var full: String {
+        return first + " " + last
+    }
+}
+
+class Person: JSONCodable {
+    static var jsonKeyMap = [
+        "luckyNumbers": "lucky_numbers"
+    ]
+
+    let name: Name
+    let age: Int
+    let luckyNumbers: [Double]
+
+    init(name: Name, age: Int, luckyNumbers: [Double]) {
+        self.name = name
+        self.age = age
+        self.luckyNumbers = luckyNumbers
+    }
+}
+
+struct KitchenSink: JSONCodable {
+    let array: [String]
+    let bool: Bool
+    let string: String
+    let int: Int
+    let double: Double
+    let object: [String: String]
+}
+

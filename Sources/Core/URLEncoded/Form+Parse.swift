@@ -1,7 +1,8 @@
+import Bits
 import Foundation
 
-extension URLEncodedForm: Content {
-    public static func parse(data: Data) throws -> URLEncodedForm {
+extension URLEncodedForm {
+    static func parse(data: Data) throws -> URLEncodedForm {
         var urlEncoded: [String: URLEncodedForm] = [:]
 
         for pair in data.split(separator: .ampersand) {
@@ -17,27 +18,28 @@ extension URLEncodedForm: Content {
                 omittingEmptySubsequences: false
             )
             if token.count == 2 {
-                keyData = token[0]
+                keyData = try token[0]
                     .makeString()
                     .replacingOccurrences(of: "+", with: " ")
-                    .percentDecoded
+                    .percentDecoded()
                     .makeBytes()
 
-                let valueData = token[1]
+                let valueData = try token[1]
                     .makeString()
                     .replacingOccurrences(of: "+", with: " ")
-                    .percentDecoded
+                    .percentDecoded()
 
                 value = .string(valueData)
             } else if token.count == 1 {
-                keyData = token[0]
+                keyData = try token[0]
                     .makeString()
                     .replacingOccurrences(of: "+", with: " ")
-                    .percentDecoded.makeBytes()
+                    .percentDecoded()
+                    .makeBytes()
 
                 value = .string("true")
             } else {
-                throw URLEncodedError.unexpected(
+                throw URLCodableError.unexpected(
                     reason: "Unexpected split count when parsing: \(pair.makeString())"
                 )
             }
@@ -99,87 +101,14 @@ extension URLEncodedForm: Content {
 
         return .dictionary(urlEncoded)
     }
-
-    public func serialize() throws -> Data {
-        guard case .dictionary(let dict) = self else {
-            throw URLEncodedError.unsupportedTopLevel()
-        }
-
-        var datas: [Data] = []
-
-        for (key, val) in dict {
-            let key = key.formURLEscaped()
-            let data: Data
-
-            switch val {
-            case .dictionary(let dict):
-                var datas: [Data] = []
-                try dict.forEach { subKey, value in
-                    let subKey = subKey.formURLEscaped()
-                    guard let value = value.string else {
-                        throw URLEncodedError.unsupportedNesting(
-                            reason: "Dictionary may only be nested one layer deep."
-                        )
-                    }
-
-                    let string = "\(key)%5B\(subKey)%5D=\(value)"
-                    guard let encoded = string.data(using: .utf8) else {
-                        throw URLEncodedError.unableToEncode(string: string)
-                    }
-                    datas.append(encoded)
-                }
-                data = datas.joined(separatorByte: .ampersand)
-            case .array(let array):
-                var datas: [Data] = []
-                try array.forEach { value in
-                    guard let val = value.string else {
-                        throw URLEncodedError.unsupportedNesting(
-                            reason: "Array values may only be nested one layer deep."
-                        )
-                    }
-
-                    let string = "\(key)%5B%5D=\(val)"
-                    guard let encoded = string.data(using: .utf8) else {
-                        throw URLEncodedError.unableToEncode(string: string)
-                    }
-                    datas.append(encoded)
-                }
-                data = datas.joined(separatorByte: .ampersand)
-            case .string(let string):
-                let string = "\(key)=\(string)"
-                guard let encoded = string.data(using: .utf8) else {
-                    throw URLEncodedError.unableToEncode(string: string)
-                }
-                data = encoded
-            case .null:
-                continue
-            }
-
-            datas.append(data)
-        }
-
-        return datas.joined(separatorByte: .ampersand)
-    }
-}
-
-// MARK: Utilities
-
-extension Array where Element == Data {
-    fileprivate func joined(separatorByte byte: Byte) -> Data {
-        return Data(joined(separator: [byte]))
-    }
 }
 
 extension String {
-    fileprivate func formURLEscaped() -> String {
-        return addingPercentEncoding(withAllowedCharacters: .formURLEncoded) ?? self
-    }
-}
+    fileprivate func percentDecoded() throws -> String {
+        guard let string = self.removingPercentEncoding else {
+            throw URLCodableError.unableToPercentDecode(string: self)
+        }
 
-extension CharacterSet {
-    fileprivate static var formURLEncoded: CharacterSet {
-        var set: CharacterSet = .urlQueryAllowed
-        set.remove(charactersIn: ":#[]@!$&'()*+,;=")
-        return set
+        return string
     }
 }

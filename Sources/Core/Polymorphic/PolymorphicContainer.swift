@@ -30,7 +30,9 @@ internal final class PolymorphicContainer<
     }
 
     func get<K: CodingKey>(key: K) -> Data? {
-        let key = decoder.codingKeyMap(key)
+        guard let key = decoder.codingKeyMap(key) else {
+            return nil
+        }
         return data.dictionary?[key.stringValue]
     }
 

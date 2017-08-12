@@ -1,10 +1,10 @@
-/**
-    This class is intended to make interacting with and 
-    iterating through a static data buffer a simpler process.
+import Bits
 
-    It's intent is to be subclassed so the next 
-    function can be overridden with further rules.
-*/
+/// This class is intended to make interacting with and
+/// iterating through a static data buffer a simpler process.
+///
+/// It's intent is to be subclassed so the next
+/// function can be overridden with further rules.
 open class StaticDataBuffer {
     private var localBuffer: [Byte] = []
     private var buffer: AnyIterator<Byte>
