@@ -1,6 +1,8 @@
+import Bits
+import Core
 import Foundation
 import XCTest
-@testable import Core
+
 
 class UtilityTests: XCTestCase {
     static var allTests = [

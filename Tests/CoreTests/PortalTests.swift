@@ -129,7 +129,7 @@ class PortalTests: XCTestCase {
     }
 
     func testPortalErrorDebugging() {
-        XCTAssertTrue(PortalError.notClosed.printable.contains("not properly closed"))
-        XCTAssertTrue(PortalError.timedOut.printable.contains("timed out"))
+        XCTAssertTrue(PortalError.notClosed.debuggableHelp(format: .long).contains("not properly closed"))
+        XCTAssertTrue(PortalError.timedOut.debuggableHelp(format: .long).contains("timed out"))
     }
 }

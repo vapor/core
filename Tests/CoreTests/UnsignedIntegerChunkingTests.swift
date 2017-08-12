@@ -1,6 +1,7 @@
+import Bits
+import Core
 import Foundation
 import XCTest
-@testable import Core
 
 class UnsignedIntegerChunkingTests: XCTestCase {
     static var allTests: [(String, (UnsignedIntegerChunkingTests) -> () throws -> Void)] {

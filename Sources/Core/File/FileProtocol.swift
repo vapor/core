@@ -1,3 +1,5 @@
+import Bits
+
 /// Objects conforming to this protocol
 /// can load and save files to a persistent
 /// data store.
