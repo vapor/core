@@ -48,21 +48,8 @@ class PolymorphicTests: XCTestCase {
     }
 
     func testBool() {
-        XCTAssert("y".bool == true)
-        XCTAssert("yes".bool == true)
-        XCTAssert("t".bool == true)
         XCTAssert("true".bool == true)
-        XCTAssert("1".bool == true)
-        XCTAssert("on".bool == true)
-
-
-        XCTAssert("n".bool == false)
-        XCTAssert("no".bool == false)
-        XCTAssert("f".bool == false)
         XCTAssert("false".bool == false)
-        XCTAssert("0".bool == false)
-        XCTAssert("off".bool == false)
-
         XCTAssert("nothing".bool == nil)
         XCTAssert("to".bool == nil)
         XCTAssert("see".bool == nil)
@@ -71,7 +58,7 @@ class PolymorphicTests: XCTestCase {
 
     func testBytes() {
         let expectation = [0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x20, 0xF0, 0x9F, 0x91, 0x8B] as [UInt8]
-        let input = "Hello, World 👋".bytes
+        let input = "Hello, World 👋".makeBytes()
         XCTAssertEqual(expectation, input)
     }
 }
