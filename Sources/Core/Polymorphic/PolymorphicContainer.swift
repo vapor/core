@@ -1,3 +1,5 @@
+import Foundation
+
 internal final class PolymorphicContainer<
     Data: Polymorphic, K: CodingKey
 >: UnkeyedDecodingContainer, SingleValueDecodingContainer, KeyedDecodingContainerProtocol {
