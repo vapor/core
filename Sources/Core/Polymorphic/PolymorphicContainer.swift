@@ -110,7 +110,7 @@ internal final class PolymorphicContainer<
     func superDecoder(forKey key: K) throws -> Decoder {
         return try decoder.with(pushedKey: key) {
             let data = try assertGet(key: key)
-            return decoder.duplicate(with: data)
+            return decoder.factory(Any.self, data, decoder)
         }
     }
 
@@ -119,20 +119,22 @@ internal final class PolymorphicContainer<
         return try decoder.with(pushedKey: key) {
             let data = try self.data.assertArray()[currentIndex]
             currentIndex += 1
-            return decoder.duplicate(with: data)
+            return decoder.factory(Any.self, data, decoder)
         }
     }
 
     // MARK: Generic Type
 
     func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
-        return try T(from: decoder.duplicate(with: data))
+        let typed = decoder.factory(T.self, data, decoder)
+        return try T(from: typed)
     }
 
     func decode<T>(_ type: T.Type, forKey key: K) throws -> T where T : Decodable {
         return try decoder.with(pushedKey: key) {
             let data = try assertGet(key: key)
-            return try T(from: decoder.duplicate(with: data))
+            let typed = decoder.factory(T.self, data, decoder)
+            return try T(from: typed)
         }
     }
 
