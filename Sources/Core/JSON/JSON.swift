@@ -28,7 +28,14 @@ extension JSON: Polymorphic {
     }
 
     var double: Double? {
-        return raw as? Double
+        if let double = raw as? Double {
+            return double
+        } else if let int = int {
+            return int.double
+        } else if let uint = uint {
+            return uint.double
+        }
+        return nil
     }
 
     var bool: Bool? {

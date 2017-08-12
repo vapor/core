@@ -38,6 +38,26 @@ extension Int: Polymorphic {
     public var isNull: Bool { return false }
 }
 
+extension UInt: Polymorphic {
+    public var string: String? { return String(self) }
+    public var int: Int? { return Int(self) }
+    public var uint: UInt? { return self }
+    public var double: Double? { return Double(self) }
+    public var bool: Bool? {
+        switch self {
+        case 1:
+            return true
+        case 0:
+            return false
+        default:
+            return nil
+        }
+    }
+    public var dictionary: [String: UInt]? { return nil }
+    public var array: [UInt]? { return nil }
+    public var isNull: Bool { return false }
+}
+
 extension Double: Polymorphic {
     public var string: String? { return String(self) }
     public var int: Int? { return Int(self) }
