@@ -60,16 +60,7 @@ class URLCodableTests: XCTestCase {
 //        XCTAssertNil(req.query)
 //    }
 //
-//    static var allTests = [
-//        ("testRequestSetJSONBody", testRequestSetJSONBody),
-//        ("testRequestSetFormURLEncodedBody", testRequestSetFormURLEncodedBody),
-//        ("testRequestGetFormURLEncodedBody", testRequestGetFormURLEncodedBody),
-//        ("testRequestGetFormURLEncodedBodyInvalidHeader", testRequestGetFormURLEncodedBodyInvalidHeader),
-//        ("testParse", testParse),
-//        ("testFormURLEncoded", testFormURLEncoded),
-//        ("testFormURLEncodedEdge", testFormURLEncodedEdge),
-//        ("testFormURLEncodedDict", testFormURLEncodedDict),
-//        ("testSplitString", testSplitString),
-//        ("testEmptyQuery", testEmptyQuery),
-//    ]
+   static var allTests = [
+       ("testParse", testParse),
+   ]
 }
