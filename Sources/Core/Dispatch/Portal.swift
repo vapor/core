@@ -115,7 +115,7 @@ extension Portal {
     }
 }
 
-extension PortalError {
+extension PortalError: Error {
     public var identifier: String {
         return rawValue
     }

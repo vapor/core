@@ -9,7 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/bits.git", .upToNextMajor(from: "1.1.0")),
-        .package(url: "https://github.com/vapor/debugging.git", .upToNextMajor(from: "1.1.0")),
+        .package(url: "https://github.com/vapor/debugging.git", .branch("beta")),
     ],
     targets: [
         .target(name: "libc"),
