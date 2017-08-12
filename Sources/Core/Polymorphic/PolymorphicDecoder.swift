@@ -6,27 +6,26 @@ public final class PolymorphicDecoder<Data: Polymorphic>: Decoder {
     private var data: Data
 
     public typealias CodingKeyMap = (CodingKey) -> (CodingKey)
-    public var codingKeyMap: (CodingKey) -> (CodingKey)
+    public var codingKeyMap: CodingKeyMap
+
+    public typealias DecoderFactory =
+        (Any.Type, Data, PolymorphicDecoder<Data>)
+            -> PolymorphicDecoder<Data>
+    
+    public var factory: DecoderFactory
 
     public init(
         data: Data,
         codingPath: [CodingKey],
         codingKeyMap: @escaping CodingKeyMap,
-        userInfo: [CodingUserInfoKey: Any]
+        userInfo: [CodingUserInfoKey: Any],
+        factory: @escaping  DecoderFactory
     ) {
         self.codingPath = codingPath
         self.data = data
         self.codingKeyMap = codingKeyMap
         self.userInfo = userInfo
-    }
-
-    func duplicate(with data: Data) -> PolymorphicDecoder<Data> {
-        return PolymorphicDecoder<Data>(
-            data: data,
-            codingPath: codingPath,
-            codingKeyMap: codingKeyMap,
-            userInfo: userInfo
-        )
+        self.factory = factory
     }
 
     func with<T>(pushedKey key: CodingKey, _ work: () throws -> T) rethrows -> T {
