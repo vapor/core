@@ -61,7 +61,7 @@ internal final class PolymorphicContainer<
     }
 
     func contains(_ key: K) -> Bool {
-        return allKeys.contains(where: { $0.stringValue == key.stringValue })
+        return allKeys.contains { $0.stringValue == key.stringValue }
     }
 
     // MARK: Nested Unkeyed
@@ -128,8 +128,13 @@ internal final class PolymorphicContainer<
     // MARK: Generic Type
 
     func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
-        let typed = decoder.factory(T.self, data, decoder)
-        return try T(from: typed)
+        let key = StringKey(currentIndex.description)
+        return try decoder.with(pushedKey: key) {
+            let data = try self.data.assertArray()[currentIndex]
+            currentIndex += 1
+            let typed = decoder.factory(T.self, data, decoder)
+            return try T(from: typed)
+        }
     }
 
     func decode<T>(_ type: T.Type, forKey key: K) throws -> T where T : Decodable {
