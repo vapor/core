@@ -1,6 +1,18 @@
 /// Convenience methods for asserting that a polymorphic
 /// type can be converted to a desired type.
 extension Polymorphic {
+    public var int: Int? {
+        return string?.int
+    }
+
+    public var double: Double? {
+        return string?.double
+    }
+
+    public var bool: Bool? {
+        return string?.bool
+    }
+
     public func assertGet(key: String) throws -> Self {
         guard let value = get(key: key) else {
             throw PolymorphicError.missingKey(self, path: [key])
