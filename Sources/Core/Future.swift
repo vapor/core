@@ -180,7 +180,7 @@ public final class Future<Expectation> : FutureType {
     }
     
     // reduce
-    internal init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Future<Expectation>)), from: FT) throws where FT.Expectation == Base {
+    internal init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Future<Expectation>)), from: FT) where FT.Expectation == Base {
         from.onComplete { result in
             switch result {
             case .expectation(let data):
@@ -255,7 +255,7 @@ extension FutureType {
         return Future<B>(transform: closure, from: self)
     }
     
-    public func replace<B>(_ closure: @escaping ((Expectation) throws -> (Future<B>))) throws -> Future<B> {
-        return try Future<B>(transform: closure, from: self)
+    public func replace<B>(_ closure: @escaping ((Expectation) throws -> (Future<B>))) -> Future<B> {
+        return Future<B>(transform: closure, from: self)
     }
 }
