@@ -8,12 +8,11 @@ let package = Package(
         .library(name: "Core", targets: ["Core"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/bits.git", .upToNextMajor(from: "1.1.0")),
         .package(url: "https://github.com/vapor/debugging.git", .branch("beta")),
     ],
     targets: [
         .target(name: "libc"),
-        .target(name: "Core", dependencies: ["libc", "Bits", "Debugging"]),
+        .target(name: "Core", dependencies: ["libc", "Debugging"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
     ]
 )
