@@ -149,57 +149,6 @@ public class FutureBase<Expectation> : FutureType {
         return try self.await(until: DispatchTime.now() + interval)
     }
     
-    /// Creates a new future by transforming one future into a new future.
-    ///
-    /// The post-transform future will become this future
-    internal init<Base, FT : FutureType, OFT : FutureType>(transform: @escaping ((Base) throws -> (OFT)), from: FT) where FT.Expectation == Base, OFT.Expectation == Expectation {
-        from.onComplete(asynchronously: false) { result in
-            switch result {
-            case .expectation(let data):
-                do {
-                    let promise = try transform(data)
-                    
-                    promise.onComplete(asynchronously: false) { result in
-                        switch result {
-                        case .expectation(let expectation):
-                            self.expectation = expectation
-                        case .error(let error):
-                            self.error = error
-                        }
-                        
-                        self.complete()
-                    }
-                } catch {
-                    self.error = error
-                    self.complete()
-                }
-            case .error(let error):
-                self.error = error
-                self.complete()
-            }
-        }
-    }
-    
     /// Creates a new, uncompleted, unprovoked future
     internal init() {}
-    
-    /// Creates a new future by transforming one future's results into another result.
-    ///
-    /// The post-transform result will be this future's result.
-    internal init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Expectation)), from: FT) where FT.Expectation == Base {
-        from.onComplete(asynchronously: false) { result in
-            switch result {
-            case .expectation(let data):
-                do {
-                    self.expectation = try transform(data)
-                } catch {
-                    self.error = error
-                }
-            case .error(let error):
-                self.error = error
-            }
-            
-            self.complete()
-        }
-    }
 }

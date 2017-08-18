@@ -10,7 +10,6 @@ public final class Base64Stream : Stream {
         case encoding, decoding
     }
     
-    
     public init(allocatedCapacity: Int = 65_507, mode: Mode) {
         self.allocatedCapacity = (allocatedCapacity * 4) / 3
         self.pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: self.allocatedCapacity)
@@ -29,7 +28,7 @@ public final class Base64Stream : Stream {
             input = UnsafeBufferPointer(start: input.baseAddress?.advanced(by: consumed), count: input.count - consumed)
             
             for stream in branchStreams {
-                try stream(UnsafeBufferPointer(start: pointer, count: self.currentCapacity))
+                _ = try stream(UnsafeBufferPointer(start: pointer, count: self.currentCapacity))
             }
         } while !complete
     }
@@ -37,12 +36,12 @@ public final class Base64Stream : Stream {
     /// Registers a closure that must be executed for every `Output` event
     ///
     /// - parameter closure: The closure to execute for each `Output` event
-    public func then(_ closure: @escaping ((UnsafeBufferPointer<UInt8>) throws -> (Void))) {
+    public func then(_ closure: @escaping ((UnsafeBufferPointer<UInt8>) throws -> (Future<Void>))) {
         branchStreams.append(closure)
     }
     
     /// Internal typealias used to define a cascading callback
-    fileprivate typealias ProcessOutputCallback = ((Output) throws -> ())
+    fileprivate typealias ProcessOutputCallback = ((Output) throws -> (Future<Void>))
     
     /// An internal array, used to keep track of all closures waiting for more data from this stream
     fileprivate var branchStreams = [ProcessOutputCallback]()

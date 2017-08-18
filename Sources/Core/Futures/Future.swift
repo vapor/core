@@ -38,13 +38,54 @@ public final class Future<Expectation> : FutureBase<Expectation> {
     ///
     /// The post-transform future will become this future
     internal override init<Base, FT : FutureType, OFT : FutureType>(transform: @escaping ((Base) throws -> (OFT)), from: FT) where FT.Expectation == Base, OFT.Expectation == Expectation {
-        super.init(transform: transform, from: from)
+        super.init()
+        
+        from.onComplete(asynchronously: false) { result in
+            switch result {
+            case .expectation(let data):
+                do {
+                    let promise = try transform(data)
+                    
+                    promise.onComplete(asynchronously: false) { result in
+                        switch result {
+                        case .expectation(let expectation):
+                            self.expectation = expectation
+                        case .error(let error):
+                            self.error = error
+                        }
+                        
+                        self.complete()
+                    }
+                } catch {
+                    self.error = error
+                    self.complete()
+                }
+            case .error(let error):
+                self.error = error
+                self.complete()
+            }
+        }
     }
     
     /// Creates a new future by transforming one future's results into another result.
     ///
     /// The post-transform result will be this future's result.
     internal override init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Expectation)), from: FT) where FT.Expectation == Base {
-        super.init(transform: transform, from: from)
+        super.init()
+        
+        from.onComplete(asynchronously: false) { result in
+            switch result {
+            case .expectation(let data):
+                do {
+                    self.expectation = try transform(data)
+                } catch {
+                    self.error = error
+                }
+            case .error(let error):
+                self.error = error
+            }
+            
+            self.complete()
+        }
     }
 }
