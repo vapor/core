@@ -37,7 +37,7 @@ public final class Future<Expectation> : FutureBase<Expectation> {
     /// Creates a new future by transforming one future into a new future.
     ///
     /// The post-transform future will become this future
-    internal override init<Base, FT : FutureType, OFT : FutureType>(transform: @escaping ((Base) throws -> (OFT)), from: FT) where FT.Expectation == Base, OFT.Expectation == Expectation {
+    internal init<Base, FT : FutureType, OFT : FutureType>(transform: @escaping ((Base) throws -> (OFT)), from: FT) where FT.Expectation == Base, OFT.Expectation == Expectation {
         super.init()
         
         from.onComplete(asynchronously: false) { result in
@@ -70,7 +70,7 @@ public final class Future<Expectation> : FutureBase<Expectation> {
     /// Creates a new future by transforming one future's results into another result.
     ///
     /// The post-transform result will be this future's result.
-    internal override init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Expectation)), from: FT) where FT.Expectation == Base {
+    internal init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Expectation)), from: FT) where FT.Expectation == Base {
         super.init()
         
         from.onComplete(asynchronously: false) { result in
