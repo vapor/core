@@ -6,7 +6,7 @@ import Dispatch
 /// A provider returns a future type that will be completed with the future result
 ///
 /// A future can also contain an error, rather than a result.
-public final class Future<Expectation> : FutureBase<Expectation> {
+public final class Future<Expectation>: FutureBase<Expectation> {
     /// Creates a new future, combining multiple `future` instances of the same type into a single future that completes once all contained futures complete
     public convenience init<FT, S>(_ futures: S) where S : Sequence, S.Element == FT, FT : FutureType, FT.Expectation == Void, Expectation == Void {
         self.init {
