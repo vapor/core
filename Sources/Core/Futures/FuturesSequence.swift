@@ -31,14 +31,14 @@ extension Sequence where Element : FutureType {
         while all.count > 0 {
             let newPromise = all.removeFirst()
             
-            promise.onComplete { result in
+            promise.onComplete(asynchronously: false) { result in
                 heap.append(result)
             }
             
             promise = newPromise
         }
         
-        promise.onComplete { result in
+        promise.onComplete(asynchronously: false) { result in
             heap.append(result)
             handler(heap)
         }

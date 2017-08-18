@@ -14,7 +14,7 @@ extension FutureType {
 public protocol FutureType {
     associatedtype Expectation
     
-    func onComplete(_ handler: @escaping ResultHandler)
+    func onComplete(asynchronously: Bool, _ handler: @escaping ResultHandler)
     func await(until time: DispatchTime) throws -> Expectation
 }
 
