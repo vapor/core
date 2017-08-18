@@ -10,6 +10,7 @@ public final class Base64Stream : Stream {
         case encoding, decoding
     }
     
+    
     public init(allocatedCapacity: Int = 65_507, mode: Mode) {
         self.allocatedCapacity = (allocatedCapacity * 4) / 3
         self.pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: self.allocatedCapacity)
@@ -33,12 +34,11 @@ public final class Base64Stream : Stream {
         } while !complete
     }
     
-    public func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Base64Stream.Output, T> {
-        let stream = StreamTransformer<Output, T>(using: closure)
-        
-        branchStreams.append(stream.process)
-        
-        return stream
+    /// Registers a closure that must be executed for every `Output` event
+    ///
+    /// - parameter closure: The closure to execute for each `Output` event
+    public func then(_ closure: @escaping ((UnsafeBufferPointer<UInt8>) throws -> (Void))) {
+        branchStreams.append(closure)
     }
     
     /// Internal typealias used to define a cascading callback

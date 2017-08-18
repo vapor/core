@@ -3,24 +3,37 @@ public protocol Stream {
     /// The contents of this stream
     associatedtype Output
     
+    /// Registers a closure that must be executed for every `Output` event
+    ///
+    /// - parameter closure: The closure to execute for each `Output` event
+    func then(_ closure: @escaping ((Output) throws -> (Void)))
+}
+
+extension Stream {
     /// Maps this stream to a stream of other information
     ///
     /// - parameter closure: Maps `Output` to a different steam type
     /// - returns: A transformed stream
-    func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T>
-}
-
-extension Stream {
-    /// Runs the closure for every `Output` event
-    ///
-    /// - parameter closure: The closure to execute for each `Output` event
-    public func then(_ closure: @escaping ((Output) throws -> (Void))) {
-        _ = self.map(closure)
+    func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T> {
+        let transformer =  StreamTransformer<Output, T>(using: closure)
+        
+        self.then { input in
+            try transformer.process(input)
+        }
+        
+        return transformer
     }
 }
 
 /// A helper that allows you to transform streams
 open class StreamTransformer<From, To> : Stream {
+    /// Registers a closure that must be executed for every `Output` event
+    ///
+    /// - parameter closure: The closure to execute for each `Output` event
+    public func then(_ closure: @escaping ((To) throws -> (Void))) {
+        branchStreams.append(closure)
+    }
+    
     /// The input, that's being transformed
     public typealias Input = From
     
@@ -42,18 +55,6 @@ open class StreamTransformer<From, To> : Stream {
                 try stream(output)
             }
         }
-    }
-    
-    /// Maps this stream to a stream of other information
-    ///
-    /// - parameter closure: Maps `Output` to a different steam type
-    /// - returns: A transformed stream
-    public func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T> {
-        let stream = StreamTransformer<Output, T>(using: closure)
-        
-        branchStreams.append(stream.process)
-        
-        return stream
     }
     
     /// Internal typealias used to define a cascading callback
