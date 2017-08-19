@@ -14,7 +14,7 @@ extension Stream {
     ///
     /// - parameter closure: Maps `Output` to a different steam type
     /// - returns: A transformed stream
-    func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T> {
+    public func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T> {
         let transformer =  StreamTransformer<Output, T>(using: closure)
         
         self.then { input in
