@@ -133,32 +133,36 @@ final class FutureTests : XCTestCase {
         XCTAssertEqual(try future.await(for: .seconds(1)), 0)
     }
     
-    func testMultipleFutures() throws {
-        var done = 0
+    func testClosureCompletion() throws {
+        let promise = Promise<String>()
+        let future = promise.future
         
-        let future0 = Future { done += 1 }
-        let future1 = Future { done += 1 }
-        let future2 = Future { done += 1 }
-        let future3 = Future { done += 1 }
+        future.then { _ in
+            XCTFail()
+        }
         
-        let futures = [future0, future1, future2, future3]
+        try promise.complete {
+            throw UnknownError()
+        }
         
-        let superFuture = Future<Void>(futures)
-
-        _ = try superFuture.await()
-        XCTAssertEqual(done, 4)
+        XCTAssertThrowsError(try promise.complete {
+            return ""
+        })
+        
+        sleep(1)
     }
     
     func testManualFuture() throws {
-        let future = ManualFuture<String>()
+        let promise = Promise<String>()
+        let future = promise.future
         
         XCTAssertFalse(future.isCompleted)
         
-        try future.complete("Hello world")
+        try promise.complete("Hello world")
         
         XCTAssertTrue(future.isCompleted)
-        XCTAssertThrowsError(try future.complete(CustomError()))
-        XCTAssertThrowsError(try future.complete("Test"))
+        XCTAssertThrowsError(try promise.complete(CustomError()))
+        XCTAssertThrowsError(try promise.complete("Test"))
         
         future.onComplete { result in
             switch result {
@@ -169,11 +173,12 @@ final class FutureTests : XCTestCase {
             }
         }
         
-        let future2 = ManualFuture<String>()
+        let promise2 = Promise<String>()
+        let future2 = promise2.future
         
-        try future2.complete(CustomError())
-        XCTAssertThrowsError(try future.complete(CustomError()))
-        XCTAssertThrowsError(try future.complete("Hello world"))
+        try promise2.complete(CustomError())
+        XCTAssertThrowsError(try promise2.complete(CustomError()))
+        XCTAssertThrowsError(try promise2.complete("Hello world"))
         
         future2.onComplete { result in
             switch result {
@@ -194,7 +199,6 @@ final class FutureTests : XCTestCase {
         ("testUnwrapFutureResult", testUnwrapFutureResult),
         ("testFutureMapping", testFutureMapping),
         ("testNestedFutureReducing", testNestedFutureReducing),
-        ("testMultipleFutures", testMultipleFutures),
         ("testManualFuture", testManualFuture)
     ]
 }

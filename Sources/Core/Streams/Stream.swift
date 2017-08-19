@@ -50,9 +50,23 @@ open class BasicStream<Output> : Stream {
     /// - returns: A future that will be completed when all listeners have finished processing the output
     @discardableResult
     public func write(_ output: Output) throws -> Future<Void> {
-        return Future(try listeners.map { listener in
-            return try listener(output)
-        })
+        let promise = Promise<Void>()
+        var counter = 0
+        
+        // listeners might be appended during execution
+        let expectedCount = listeners.count
+        
+        for listener in listeners {
+            try listener(output).then {
+                counter += 1
+                
+                if counter == expectedCount {
+                    _ = try? promise.complete(())
+                }
+            }
+        }
+        
+        return promise.future
     }
     
     public init() {}
@@ -97,4 +111,3 @@ open class StreamTransformer<From, To> : Stream {
         }
     }
 }
-
