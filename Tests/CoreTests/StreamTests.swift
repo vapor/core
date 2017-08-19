@@ -44,7 +44,7 @@ final class StreamTests : XCTestCase {
     }
 
     static let allTests = [
-        "testBasicStream": testBasicStream,
-        "testStreamMapping": testStreamMapping
+        ("testBasicStream", testBasicStream),
+        ("testStreamMapping", testStreamMapping)
     ]
 }

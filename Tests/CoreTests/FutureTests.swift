@@ -186,16 +186,16 @@ final class FutureTests : XCTestCase {
     }
 
     static let allTests = [
-        "testSimpleFuture": testSimpleFuture,
-        "testFutureThen": testFutureThen,
-        "testTimeoutFuture": testTimeoutFuture,
-        "testErrorFuture": testErrorFuture,
-        "testUnknownError": testUnknownError,
-        "testUnwrapFutureResult": testUnwrapFutureResult,
-        "testFutureMapping": testFutureMapping,
-        "testNestedFutureReducing": testNestedFutureReducing,
-        "testMultipleFutures": testMultipleFutures,
-        "testManualFuture": testManualFuture
+        ("testSimpleFuture", testSimpleFuture),
+        ("testFutureThen", testFutureThen),
+        ("testTimeoutFuture", testTimeoutFuture),
+        ("testErrorFuture", testErrorFuture),
+        ("testUnknownError", testUnknownError),
+        ("testUnwrapFutureResult", testUnwrapFutureResult),
+        ("testFutureMapping", testFutureMapping),
+        ("testNestedFutureReducing", testNestedFutureReducing),
+        ("testMultipleFutures", testMultipleFutures),
+        ("testManualFuture", testManualFutur)e
     ]
 }
 
