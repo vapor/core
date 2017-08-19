@@ -43,13 +43,13 @@ public final class Future<Expectation> : FutureBase<Expectation> {
     internal init<Base, FT : FutureType, OFT : FutureType>(transform: @escaping ((Base) throws -> (OFT)), from: FT) where FT.Expectation == Base, OFT.Expectation == Expectation {
         super.init()
         
-        from.onComplete(asynchronously: false) { result in
+        from.onComplete(asynchronously: nil) { result in
             switch result {
             case .expectation(let data):
                 do {
                     let promise = try transform(data)
                     
-                    promise.onComplete(asynchronously: false) { result in
+                    promise.onComplete(asynchronously: nil) { result in
                         switch result {
                         case .expectation(let expectation):
                             self.expectation = expectation
@@ -76,7 +76,7 @@ public final class Future<Expectation> : FutureBase<Expectation> {
     internal init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Expectation)), from: FT) where FT.Expectation == Base {
         super.init()
         
-        from.onComplete(asynchronously: false) { result in
+        from.onComplete(asynchronously: nil) { result in
             switch result {
             case .expectation(let data):
                 do {

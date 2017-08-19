@@ -11,7 +11,10 @@ public protocol Stream {
 }
 
 extension Stream {
-    public func then(_ closure: @escaping ((Output) throws -> (Void))) {
+    /// Registers a closure that must be executed for every `Output` event
+    ///
+    /// - parameter closure: The closure to execute for each `Output` event
+    public func process(using closure: @escaping ((Output) throws -> (Void))) {
         self.then { output in
             return Future {
                 try closure(output)
@@ -26,7 +29,7 @@ extension Stream {
     public func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T> {
         let transformer =  StreamTransformer<Output, T>(using: closure)
         
-        self.then { input in
+        self.process { input in
             _ = try transformer.process(input)
         }
         
@@ -42,6 +45,10 @@ open class BasicStream<Output> : Stream {
         listeners.append(closure)
     }
     
+    /// Writes output to all listeners
+    ///
+    /// - returns: A future that will be completed when all listeners have finished processing the output
+    @discardableResult
     public func write(_ output: Output) throws -> Future<Void> {
         return Future(try listeners.map { listener in
             return try listener(output)

@@ -10,5 +10,6 @@ let package = Package(
     targets: [
         .target(name: "libc"),
         .target(name: "Core"),
+        .testTarget(name: "CoreTests"),
     ]
 )
