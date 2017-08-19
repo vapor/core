@@ -42,4 +42,9 @@ final class StreamTests : XCTestCase {
             try stream.write(i).await()
         }
     }
+
+    static let allTests = [
+        "testBasicStream": testBasicStream,
+        "testStreamMapping": testStreamMapping
+    ]
 }
