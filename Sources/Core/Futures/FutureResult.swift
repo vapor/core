@@ -2,7 +2,7 @@ import Foundation
 import Dispatch
 
 // Indirect so futures can be nested
-public indirect enum FutureResult<Expectation> : FutureResultType {
+public indirect enum FutureResult<Expectation> {
     case error(Error)
     case expectation(Expectation)
     

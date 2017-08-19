@@ -9,7 +9,7 @@ public protocol OutputStream: class {
     associatedtype Output
     typealias OutputHandler = (Output) throws -> ()
     var output: OutputHandler? { get set }
-}
+
 
 extension OutputStream {
     public func consume(_ handler: @escaping OutputHandler) {
