@@ -13,7 +13,7 @@ public final class Future<Expectation> : FutureBase<Expectation> {
         
         futures.onBulkComplete { _ in
             self.expectation = ()
-            complete()
+            self.complete()
         }
     }
     
