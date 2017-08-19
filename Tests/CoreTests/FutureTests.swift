@@ -195,7 +195,7 @@ final class FutureTests : XCTestCase {
         ("testFutureMapping", testFutureMapping),
         ("testNestedFutureReducing", testNestedFutureReducing),
         ("testMultipleFutures", testMultipleFutures),
-        ("testManualFuture", testManualFutur)e
+        ("testManualFuture", testManualFuture)
     ]
 }
 
