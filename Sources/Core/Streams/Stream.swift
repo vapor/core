@@ -6,10 +6,22 @@ public protocol Stream {
     /// Registers a closure that must be executed for every `Output` event
     ///
     /// - parameter closure: The closure to execute for each `Output` event
-    func then(_ closure: @escaping ((Output) throws -> (Void)))
+    /// - returns: A future that completes when the Output has been processed
+    func then(_ closure: @escaping ((Output) throws -> (Future<Void>)))
 }
 
 extension Stream {
+    /// Registers a closure that must be executed for every `Output` event
+    ///
+    /// - parameter closure: The closure to execute for each `Output` event
+    public func process(using closure: @escaping ((Output) throws -> (Void))) {
+        self.then { output in
+            return Future {
+                try closure(output)
+            }
+        }
+    }
+    
     /// Maps this stream to a stream of other information
     ///
     /// - parameter closure: Maps `Output` to a different steam type
@@ -17,21 +29,51 @@ extension Stream {
     public func map<T>(_ closure: @escaping ((Output) throws -> (T?))) -> StreamTransformer<Output, T> {
         let transformer =  StreamTransformer<Output, T>(using: closure)
         
-        self.then { input in
-            try transformer.process(input)
+        self.process { input in
+            _ = try transformer.process(input)
         }
         
         return transformer
     }
 }
 
-/// A helper that allows you to transform streams
-open class StreamTransformer<From, To> : Stream {
+open class BasicStream<Output> : Stream {
     /// Registers a closure that must be executed for every `Output` event
     ///
     /// - parameter closure: The closure to execute for each `Output` event
-    public func then(_ closure: @escaping ((To) throws -> (Void))) {
-        branchStreams.append(closure)
+    public func then(_ closure: @escaping ((Output) throws -> (Future<Void>))) {
+        listeners.append(closure)
+    }
+    
+    /// Writes output to all listeners
+    ///
+    /// - returns: A future that will be completed when all listeners have finished processing the output
+    @discardableResult
+    public func write(_ output: Output) throws -> Future<Void> {
+        return Future(try listeners.map { listener in
+            return try listener(output)
+        })
+    }
+    
+    public init() {}
+    
+    /// Internal typealias used to define a cascading callback
+    fileprivate typealias Listener = ((Output) throws -> (Future<Void>))
+    
+    /// An internal array, used to keep track of all closures waiting for more data from this stream
+    fileprivate var listeners = [Listener]()
+}
+
+/// A helper that allows you to transform streams
+open class StreamTransformer<From, To> : Stream {
+    /// The underlying stream helper
+    let stream = BasicStream<To>()
+    
+    /// Registers a closure that must be executed for every `Output` event
+    ///
+    /// - parameter closure: The closure to execute for each `Output` event
+    public func then(_ closure: @escaping ((To) throws -> (Future<Void>))) {
+        stream.then(closure)
     }
     
     /// The input, that's being transformed
@@ -51,16 +93,8 @@ open class StreamTransformer<From, To> : Stream {
     /// Transforms the incoming data
     public func process(_ input: Input) throws {
         if let output = try transformer(input) {
-            for stream in branchStreams {
-                try stream(output)
-            }
+            _ = try stream.write(output)
         }
     }
-    
-    /// Internal typealias used to define a cascading callback
-    fileprivate typealias ProcessOutputCallback = ((Output) throws -> ())
-    
-    /// An internal array, used to keep track of all closures waiting for more data from this stream
-    fileprivate var branchStreams = [ProcessOutputCallback]()
 }
 

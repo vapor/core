@@ -10,7 +10,7 @@ public class FutureBase<Expectation> : FutureType {
     public typealias Result = FutureResult<Expectation>
     typealias Handler = ((FutureResult<Expectation>) -> ())
     
-    var awaiters = [(handler: Handler, dispatch: Bool)]()
+    var awaiters = [(handler: Handler, dispatch: DispatchQueue?)]()
     
     /// `true` if the future is already completed.
     public var isCompleted: Bool {
@@ -34,13 +34,17 @@ public class FutureBase<Expectation> : FutureType {
             return
         }
         
-        for (waiter, dispatchAsync) in awaiters where dispatchAsync {
-            DispatchQueue.global().async {
+        for (waiter, dispatchQueue) in awaiters {
+            guard let dispatchQueue = dispatchQueue else {
+                continue
+            }
+            
+            dispatchQueue.async {
                 waiter(result)
             }
         }
         
-        for (waiter, dispatchAsync) in awaiters where !dispatchAsync {
+        for (waiter, dispatchQueue) in awaiters where dispatchQueue == nil {
             waiter(result)
         }
     }
@@ -50,14 +54,14 @@ public class FutureBase<Expectation> : FutureType {
     /// This handler will be executed regardless of the result.
     ///
     ///
-    public func onComplete(asynchronously: Bool = false, _ handler: @escaping ((FutureResult<Expectation>) -> ())) {
+    public func onComplete(asynchronously: DispatchQueue? = nil, _ handler: @escaping ((FutureResult<Expectation>) -> ())) {
         await(dispatch: asynchronously, handler)
     }
     
     /// Internal helper for registering a handler
     ///
     /// Also calls the handler if a result is already stored
-    internal func await(dispatch: Bool = false, _ handler: @escaping ((FutureResult<Expectation>) -> ())) {
+    internal func await(dispatch: DispatchQueue? = nil, _ handler: @escaping ((FutureResult<Expectation>) -> ())) {
         lock.lock()
         defer { lock.unlock() }
         
@@ -77,7 +81,7 @@ public class FutureBase<Expectation> : FutureType {
     /// - parameter asynchronously: Spawns the closure using the result asynchronously, thus preventing influence by other registered handlers
     /// - parameter type: The error type to require for handling
     /// - parameter handler: The handler to execute when the specified error occurred in this future
-    public func `catch`<E: Error>(asynchronously: Bool = false, _ type: E, _ handler: @escaping ((E) -> ())) {
+    public func `catch`<E: Error>(asynchronously: DispatchQueue? = nil, _ type: E.Type, _ handler: @escaping ((E) -> ())) {
         await(dispatch: asynchronously) { result in
             guard case .error(let anyError) = result, let error = anyError as? E else {
                 return
@@ -93,7 +97,7 @@ public class FutureBase<Expectation> : FutureType {
     ///
     /// - parameter asynchronously: Spawns the closure using the result asynchronously, thus preventing influence by other registered handlers
     /// - parameter handler: The handler to execute when an error occurred in this future
-    public func `catch`(asynchronously: Bool = false, _ handler: @escaping ((Error) -> ())) {
+    public func `catch`(asynchronously: DispatchQueue? = nil, _ handler: @escaping ((Error) -> ())) {
         await(dispatch: asynchronously) { result in
             guard case .error(let error) = result else {
                 return
@@ -109,7 +113,7 @@ public class FutureBase<Expectation> : FutureType {
     ///
     /// - parameter asynchronously: Spawns the closure using the result asynchronously, thus preventing influence by other registered handlers
     /// - parameter handler: Handles the expected outcome.
-    public func then(asynchronously: Bool = false, _ handler: @escaping ((Expectation) -> ())) {
+    public func then(asynchronously: DispatchQueue? = nil, _ handler: @escaping ((Expectation) -> ())) {
         await(dispatch: asynchronously) { result in
             guard case .expectation(let expectation) = result else {
                 return
@@ -139,6 +143,7 @@ public class FutureBase<Expectation> : FutureType {
             return try awaitedResult.assertSuccess()
         }
         
+        // this can *never* happen
         throw FutureTimeout()
     }
     
@@ -149,57 +154,6 @@ public class FutureBase<Expectation> : FutureType {
         return try self.await(until: DispatchTime.now() + interval)
     }
     
-    /// Creates a new future by transforming one future into a new future.
-    ///
-    /// The post-transform future will become this future
-    internal init<Base, FT : FutureType, OFT : FutureType>(transform: @escaping ((Base) throws -> (OFT)), from: FT) where FT.Expectation == Base, OFT.Expectation == Expectation {
-        from.onComplete(asynchronously: false) { result in
-            switch result {
-            case .expectation(let data):
-                do {
-                    let promise = try transform(data)
-                    
-                    promise.onComplete(asynchronously: false) { result in
-                        switch result {
-                        case .expectation(let expectation):
-                            self.expectation = expectation
-                        case .error(let error):
-                            self.error = error
-                        }
-                        
-                        self.complete()
-                    }
-                } catch {
-                    self.error = error
-                    self.complete()
-                }
-            case .error(let error):
-                self.error = error
-                self.complete()
-            }
-        }
-    }
-    
     /// Creates a new, uncompleted, unprovoked future
     internal init() {}
-    
-    /// Creates a new future by transforming one future's results into another result.
-    ///
-    /// The post-transform result will be this future's result.
-    internal init<Base, FT : FutureType>(transform: @escaping ((Base) throws -> (Expectation)), from: FT) where FT.Expectation == Base {
-        from.onComplete(asynchronously: false) { result in
-            switch result {
-            case .expectation(let data):
-                do {
-                    self.expectation = try transform(data)
-                } catch {
-                    self.error = error
-                }
-            case .error(let error):
-                self.error = error
-            }
-            
-            self.complete()
-        }
-    }
 }
