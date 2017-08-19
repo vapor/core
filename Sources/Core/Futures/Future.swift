@@ -6,7 +6,7 @@ import Dispatch
 /// A provider returns a future type that will be completed with the future result
 ///
 /// A future can also contain an error, rather than a result.
-public final class Future<Expected> {
+public final class Future<Expected> : FutureType {
     public typealias Expectation = Expected
     
     var error: Error?
@@ -17,6 +17,7 @@ public final class Future<Expected> {
     public typealias Result = FutureResult<Expectation>
     typealias Handler = ((FutureResult<Expectation>) -> ())
     
+    /// A list of all handlers waiting to 
     var awaiters = [(handler: Handler, dispatch: DispatchQueue?)]()
     
     /// `true` if the future is already completed.

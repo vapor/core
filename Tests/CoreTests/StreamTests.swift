@@ -15,7 +15,7 @@ final class StreamTests : XCTestCase {
         
         var readIndex = 0
         
-        stream.process { message in
+        stream.stream { message in
             defer { readIndex += 1 }
             XCTAssertEqual(message, messages[readIndex])
         }
@@ -32,7 +32,7 @@ final class StreamTests : XCTestCase {
         
         var number = 0
         
-        stream.map { String($0) }.process {
+        stream.stream { String($0) }.process {
             defer { number += 1 }
             
             XCTAssertEqual(String(number), $0)
@@ -42,9 +42,32 @@ final class StreamTests : XCTestCase {
             try stream.write(i).await()
         }
     }
+    
+    func testFutureStream() throws {
+        let stream = BasicStream<String>()
+        
+        var executed = false
+        
+        stream.stream { string in
+            return Future {
+                string
+            }
+        }.stream { string in
+            return String(string.reversed())
+        }.process { string in
+            XCTAssertEqual(string, "Hello")
+            executed = true
+        }
+        
+        try stream.write("olleH")
+        
+        sleep(1)
+        XCTAssert(executed)
+    }
 
     static let allTests = [
         ("testBasicStream", testBasicStream),
-        ("testStreamMapping", testStreamMapping)
+        ("testStreamMapping", testStreamMapping),
+        ("testFutureStream", testFutureStream)
     ]
 }
