@@ -1,73 +1,51 @@
 import XCTest
-@testable import Core
+import Core
 
 final class StreamTests : XCTestCase {
-    func testBasicStream() throws {
-        let stream = BasicStream<String>()
-        
-        var messages = [
-            "test",
-            "vapor",
-            "streams",
-            "of",
-            "strings"
-        ]
-        
-        var readIndex = 0
-        
-        stream.stream { message in
-            defer { readIndex += 1 }
-            XCTAssertEqual(message, messages[readIndex])
+    func testPipeline() throws {
+        let numberEmitter = EmitterStream(Int.self)
+        let squareMapStream = MapStream<Int, Int> { int in
+            return int * int
         }
-        
-        for message in messages {
-            try stream.write(message).await()
+
+        var squares: [Int] = []
+
+        numberEmitter.stream(to: squareMapStream).drain { square in
+            squares.append(square)
         }
-        
-        XCTAssertEqual(readIndex, 5)
-    }
-    
-    func testStreamMapping() throws {
-        let stream = BasicStream<Int>()
-        
-        var number = 0
-        
-        stream.stream { String($0) }.process {
-            defer { number += 1 }
-            
-            XCTAssertEqual(String(number), $0)
-        }
-        
-        for i in 0..<10 {
-            try stream.write(i).await()
-        }
-    }
-    
-    func testFutureStream() throws {
-        let stream = BasicStream<String>()
-        
-        var executed = false
-        
-        stream.stream { string in
-            return Future {
-                string
-            }
-        }.stream { string in
-            return String(string.reversed())
-        }.process { string in
-            XCTAssertEqual(string, "Hello")
-            executed = true
-        }
-        
-        try stream.write("olleH")
-        
-        sleep(1)
-        XCTAssert(executed)
+
+        numberEmitter.emit(1)
+        numberEmitter.emit(2)
+        numberEmitter.emit(3)
+
+        XCTAssertEqual(squares, [1, 4, 9])
     }
 
+    func testDelta() throws {
+        let numberEmitter = EmitterStream<Int>()
+        let splitter = OutputStreamSplitter(numberEmitter)
+
+        var output: [Int] = []
+
+        splitter.split { int in
+            output.append(int)
+        }
+        splitter.split { int in
+            output.append(int)
+        }
+
+        numberEmitter.emit(1)
+        numberEmitter.emit(2)
+        numberEmitter.emit(3)
+
+        XCTAssertEqual(output, [1, 1, 2, 2, 3, 3])
+    }
+
+
     static let allTests = [
-        ("testBasicStream", testBasicStream),
-        ("testStreamMapping", testStreamMapping),
-        ("testFutureStream", testFutureStream)
+        ("testPipeline", testPipeline),
+        ("testDelta", testDelta),
     ]
 }
+
+
