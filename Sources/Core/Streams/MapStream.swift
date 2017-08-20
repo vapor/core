@@ -1,5 +1,25 @@
 /// A basic stream implementation that maps input
 /// through a closure.
+///
+/// Example using a number emitter and map stream to square numbers:
+///
+///     let numberEmitter = EmitterStream(Int.self)
+///     let squareMapStream = MapStream<Int, Int> { int in
+///         return int * int
+///     }
+///
+///     var squares: [Int] = []
+///
+///     numberEmitter.stream(to: squareMapStream).drain { square in
+///         squares.append(square)
+///     }
+///
+///     numberEmitter.emit(1)
+///     numberEmitter.emit(2)
+///     numberEmitter.emit(3)
+///
+///     print(squares) // [1, 4, 9]
+///
 public final class MapStream<In, Out>: Stream {
     /// See InputStream.Input
     public typealias Input = In
