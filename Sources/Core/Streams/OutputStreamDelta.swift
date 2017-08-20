@@ -1,6 +1,7 @@
 /// Copies output from an output stream into an array
 /// of stream split deltas.
 public final class OutputStreamSplitter<O: OutputStream> {
+    /// See OutputStream.outputStream
     let outputStream: O
 
     /// Split handlers can throw, we will report

@@ -3,7 +3,7 @@ import Core
 
 final class StreamTests : XCTestCase {
     func testPipeline() throws {
-        let numberEmitter = EmitterStream<Int>()
+        let numberEmitter = EmitterStream(Int.self)
         let squareMapStream = MapStream<Int, Int> { int in
             return int * int
         }
