@@ -141,13 +141,9 @@ final class FutureTests : XCTestCase {
             XCTFail()
         }
         
-        try promise.complete {
+        promise.complete {
             throw UnknownError()
         }
-        
-        XCTAssertThrowsError(try promise.complete {
-            return ""
-        })
         
         sleep(1)
     }
@@ -158,11 +154,9 @@ final class FutureTests : XCTestCase {
         
         XCTAssertFalse(future.isCompleted)
         
-        try promise.complete("Hello world")
+        promise.complete("Hello world")
         
         XCTAssertTrue(future.isCompleted)
-        XCTAssertThrowsError(try promise.complete(CustomError()))
-        XCTAssertThrowsError(try promise.complete("Test"))
         
         future.onComplete { result in
             switch result {
@@ -176,9 +170,7 @@ final class FutureTests : XCTestCase {
         let promise2 = Promise<String>()
         let future2 = promise2.future
         
-        try promise2.complete(CustomError())
-        XCTAssertThrowsError(try promise2.complete(CustomError()))
-        XCTAssertThrowsError(try promise2.complete("Hello world"))
+        promise2.complete(CustomError())
         
         future2.onComplete { result in
             switch result {

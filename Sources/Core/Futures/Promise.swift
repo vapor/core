@@ -1,29 +1,42 @@
 public final class Promise<Expectation> {
-    public init() { }
-    
-    public let future = Future<Expectation>()
-    
-    public func complete(_ error: Error) throws {
+    /// This promise's future.
+    public let future: Future<Expectation>
+
+    /// Create a new promise.
+    public init(_ expectation: Expectation.Type = Expectation.self) {
+        future = .init()
+    }
+
+    /// Fail to fulfill the promise.
+    /// If the promise has already been fulfilled,
+    /// it will quiety ignore the input.
+    public func complete(_ error: Error) {
         guard !future.isCompleted else {
-            throw FutureAlreadyCompleted()
+            return
         }
         
         future.error = error
         future.complete()
     }
-    
-    public func complete(_ expectation: Expectation) throws {
+
+    /// Fulfills the promise.
+    /// If the promise has already been fulfilled,
+    /// it will quiety ignore the input.
+    public func complete(_ expectation: Expectation) {
         guard !future.isCompleted else {
-            throw FutureAlreadyCompleted()
+            return
         }
         
         future.expectation = expectation
         future.complete()
     }
-    
-    public func complete(_ closure: () throws -> (Expectation)) throws {
+
+    /// Fulfills the promise.
+    /// If the promise has already been fulfilled,
+    /// it will quiety ignore the input.
+    public func complete(_ closure: () throws -> (Expectation)) {
         guard !future.isCompleted else {
-            throw FutureAlreadyCompleted()
+            return
         }
         
         do {
@@ -35,5 +48,3 @@ public final class Promise<Expectation> {
         future.complete()
     }
 }
-
-public struct FutureAlreadyCompleted : Error {}
