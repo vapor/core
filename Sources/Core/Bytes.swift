@@ -5,7 +5,7 @@ public typealias MutableByteBuffer = UnsafeMutableBufferPointer<Byte>
 public typealias BytesPointer = UnsafePointer<Byte>
 public typealias MutableBytesPointer = UnsafeMutablePointer<Byte>
 
-func ~=(pattern: Byte, value: Byte?) -> Bool {
+public func ~=(pattern: Byte, value: Byte?) -> Bool {
     return pattern == value
 }
 
