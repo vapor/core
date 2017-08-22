@@ -18,161 +18,161 @@ extension Byte {
     }
 
     /// A
-    static let A: Byte = 0x41
+    public static let A: Byte = 0x41
 
     /// B
-    static let B: Byte = 0x42
+    public static let B: Byte = 0x42
 
     /// C
-    static let C: Byte = 0x43
+    public static let C: Byte = 0x43
 
     /// D
-    static let D: Byte = 0x44
+    public static let D: Byte = 0x44
 
     /// E
-    static let E: Byte = 0x45
+    public static let E: Byte = 0x45
 
     /// F
-    static let F: Byte = 0x46
+    public static let F: Byte = 0x46
 
     /// G
-    static let G: Byte = 0x47
+    public static let G: Byte = 0x47
 
     /// H
-    static let H: Byte = 0x48
+    public static let H: Byte = 0x48
 
     /// I
-    static let I: Byte = 0x49
+    public static let I: Byte = 0x49
 
-    /// J
-    static let J: Byte = 0x4A
+    /// J
+    public static let J: Byte = 0x4A
 
     /// K
-    static let K: Byte = 0x4B
+    public static let K: Byte = 0x4B
 
     /// L
-    static let L: Byte = 0x4C
+    public static let L: Byte = 0x4C
 
     /// M
-    static let M: Byte = 0x4D
+    public static let M: Byte = 0x4D
 
     /// N
-    static let N: Byte = 0x4E
+    public static let N: Byte = 0x4E
 
     /// O
-    static let O: Byte = 0x4F
+    public static let O: Byte = 0x4F
 
     /// P
-    static let P: Byte = 0x50
+    public static let P: Byte = 0x50
 
     /// Q
-    static let Q: Byte = 0x51
+    public static let Q: Byte = 0x51
 
     /// R
-    static let R: Byte = 0x52
+    public static let R: Byte = 0x52
 
     /// S
-    static let S: Byte = 0x53
+    public static let S: Byte = 0x53
 
     /// T
-    static let T: Byte = 0x54
+    public static let T: Byte = 0x54
 
     /// U
-    static let U: Byte = 0x55
+    public static let U: Byte = 0x55
 
     /// V
-    static let V: Byte = 0x56
+    public static let V: Byte = 0x56
 
     /// W
-    static let W: Byte = 0x57
+    public static let W: Byte = 0x57
 
     /// X
-    static let X: Byte = 0x58
+    public static let X: Byte = 0x58
 
     /// Y
-    static let Y: Byte = 0x59
+    public static let Y: Byte = 0x59
 
     /// Z
-    static let Z: Byte = 0x5A
+    public static let Z: Byte = 0x5A
 }
 
 extension Byte {
     /// a
-    static let a: Byte = 0x61
+    public static let a: Byte = 0x61
 
     /// b
-    static let b: Byte = 0x62
+    public static let b: Byte = 0x62
 
     /// c
-    static let c: Byte = 0x63
+    public static let c: Byte = 0x63
 
     /// d
-    static let d: Byte = 0x64
+    public static let d: Byte = 0x64
 
     /// e
-    static let e: Byte = 0x65
+    public static let e: Byte = 0x65
 
     /// f
-    static let f: Byte = 0x66
+    public static let f: Byte = 0x66
 
     /// g
-    static let g: Byte = 0x67
+    public static let g: Byte = 0x67
 
     /// h
-    static let h: Byte = 0x68
+    public static let h: Byte = 0x68
 
     /// i
-    static let i: Byte = 0x69
+    public static let i: Byte = 0x69
 
     /// j
-    static let j: Byte = 0x6A
+    public static let j: Byte = 0x6A
 
     /// k
-    static let k: Byte = 0x6B
+    public static let k: Byte = 0x6B
 
     /// l
-    static let l: Byte = 0x6C
+    public static let l: Byte = 0x6C
 
     /// m
-    static let m: Byte = 0x6D
+    public static let m: Byte = 0x6D
 
     /// n
-    static let n: Byte = 0x6E
+    public static let n: Byte = 0x6E
 
     /// o
-    static let o: Byte = 0x6F
+    public static let o: Byte = 0x6F
 
     /// p
-    static let p: Byte = 0x70
+    public static let p: Byte = 0x70
 
     /// q
-    static let q: Byte = 0x71
+    public static let q: Byte = 0x71
 
     /// r
-    static let r: Byte = 0x72
+    public static let r: Byte = 0x72
 
     /// s
-    static let s: Byte = 0x73
+    public static let s: Byte = 0x73
 
     /// t
-    static let t: Byte = 0x74
+    public static let t: Byte = 0x74
 
     /// u
-    static let u: Byte = 0x75
+    public static let u: Byte = 0x75
 
     /// v
-    static let v: Byte = 0x76
+    public static let v: Byte = 0x76
 
     /// w
-    static let w: Byte = 0x77
+    public static let w: Byte = 0x77
 
     /// x
-    static let x: Byte = 0x78
+    public static let x: Byte = 0x78
 
     /// y
-    static let y: Byte = 0x79
+    public static let y: Byte = 0x79
 
     /// z
-    static let z: Byte = 0x7A
+    public static let z: Byte = 0x7A
 }
 
