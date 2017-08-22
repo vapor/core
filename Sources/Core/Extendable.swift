@@ -1,9 +1,6 @@
-/// Types conforming to this protocol can store
-/// arbitrary key-value data.
-/// 
-/// Extensions can utilize this arbitrary data store
-/// to simulate optional stored properties.
+/// Types conforming to extendable can have stored
+/// properties added in extension by using the
+/// provided dictionary.
 public protocol Extendable: class {
-    /// Arbitrary key-value data store.
     var extend: [String: Any] { get set }
 }
