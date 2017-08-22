@@ -13,7 +13,7 @@ public protocol Extendable: class {
 ///
 /// Extensions are used for convenience and should
 /// not be encoded or decoded.
-public final class Extend: Codable {
+public struct Extend: Codable {
     /// The internal storage.
     public var storage: [String: Any]
 
@@ -28,9 +28,9 @@ public final class Extend: Codable {
     }
 
     /// Decode as an empty object.
-    public convenience init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         // skip
-        self.init()
+        storage = [:]
     }
 
     /// Allow subscripting
