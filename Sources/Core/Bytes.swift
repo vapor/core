@@ -10,7 +10,7 @@ func ~=(pattern: Byte, value: Byte?) -> Bool {
 }
 
 extension Byte {
-    var string: String {
+    public var string: String {
         let unicode = Unicode.Scalar(self)
         let char = Character(unicode)
         return String(char)
