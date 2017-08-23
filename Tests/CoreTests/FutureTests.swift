@@ -26,7 +26,7 @@ final class FutureTests : XCTestCase {
         }
         
         group.wait()
-        XCTAssert(promise.future.isCompleted)
+        try XCTAssert(promise.future.isCompleted.sync())
     }
     
     func testTimeoutFuture() throws {
@@ -36,7 +36,7 @@ final class FutureTests : XCTestCase {
             promise.complete("test")
         }
         
-        XCTAssertFalse(promise.future.isCompleted)
+        try XCTAssertFalse(promise.future.isCompleted.sync())
         XCTAssertThrowsError(try promise.future.sync(timeout: .seconds(1)))
     }
     
@@ -63,7 +63,7 @@ final class FutureTests : XCTestCase {
         
         group.wait()
         XCTAssert(caught)
-        XCTAssertTrue(promise.future.isCompleted)
+        try XCTAssertTrue(promise.future.isCompleted.sync())
         XCTAssertEqual(executed, 1)
     }
 
