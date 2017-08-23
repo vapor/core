@@ -51,7 +51,7 @@ public final class File: FileReader, FileCache {
                 self.sources[fd] = readSource
             }
         } else {
-            promise.fail("foo")
+            promise.fail(FileError(.invalidDescriptor))
         }
 
         return promise.future;
@@ -75,5 +75,3 @@ public final class File: FileReader, FileCache {
         }
     }
 }
-
-extension String: Error { }

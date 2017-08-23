@@ -1,5 +1,6 @@
 import Foundation
 
+/// Capable of caching file data asynchronously.
 public protocol FileCache {
     // Fetches the file from the cache
     func getFile<H: Hashable>(hash: H) -> Future<Data?>
