@@ -5,7 +5,7 @@ import Dispatch
 /// Concretely implemented by `Future<T>`
 public protocol FutureType {
     associatedtype Expectation
-    func completeOrAwait(on queue: DispatchQueue, callback: @escaping ResultCallback)
+    func completeOrAwait(on queue: DispatchQueue?, callback: @escaping ResultCallback)
 }
 
 // MARK: Convenience
@@ -23,11 +23,14 @@ extension FutureType {
     /// Callback for accepting an error.
     public typealias ErrorCallback = ((Error) -> ())
 
+    /// Callback for accepting the expectation.
+    public typealias ExpectationMapCallback<T> = ((Expectation) -> (T))
+
     /// Adds a handler to be asynchronously executed on
     /// completion of this future.
     ///
     /// Will *not* be executed if an error occurrs
-    public func then(on queue: DispatchQueue, callback: @escaping ExpectationCallback) -> Self {
+    public func then(on queue: DispatchQueue? = nil, callback: @escaping ExpectationCallback) -> Self {
         completeOrAwait(on: queue) { result in
             guard let ex = result.expectation else {
                 return
@@ -44,7 +47,7 @@ extension FutureType {
     ///
     /// Will *only* be executed if an error occurred.
     //// Successful results will not call this handler.
-    public func `catch`(on queue: DispatchQueue, callback: @escaping ErrorCallback) {
+    public func `catch`(on queue: DispatchQueue? = nil, callback: @escaping ErrorCallback) {
         completeOrAwait(on: queue) { result in
             guard let er = result.error else {
                 return
@@ -54,6 +57,19 @@ extension FutureType {
         }
     }
 
+    /// Maps a future to a future of a different type.
+    public func map<T>(on queue: DispatchQueue? = nil, callback: @escaping ExpectationMapCallback<T>) -> Future<T> {
+        let promise = Promise(T.self)
+
+        then(on: queue) { expectation in
+            let mapped = callback(expectation)
+            promise.complete(mapped)
+        }.catch { error in
+            promise.fail(error)
+        }
+
+        return promise.future
+    }
 
     /// Waits until the specified time for a result.
     ///
@@ -89,7 +105,7 @@ extension FutureType {
 extension Array where Element: FutureType {
     /// Flattens an array of future results into one
     /// future array result.
-    public func flatten(on queue: DispatchQueue) -> Future<[Element.Expectation]> {
+    public func flatten(on queue: DispatchQueue? = nil) -> Future<[Element.Expectation]> {
         let promise = Promise<[Element.Expectation]>()
 
         var elements: [Element.Expectation] = []

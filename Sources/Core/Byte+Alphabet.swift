@@ -2,9 +2,9 @@
 // MARK: Alphabet
 
 extension Byte {
-    /// Returns whether or not the given byte is an arabic letter
+    /// Returns true if the given byte is between lowercase or uppercase A-Z in UTF8.
     public var isLetter: Bool {
-        return (.a ... .z).contains(self) || (.A ... .Z).contains(self)
+       return (self >= .a && self <= .z) || (self >= .A && self <= .Z)
     }
 
     /// Returns whether or not a given byte represents a UTF8 digit 0 through 9, or an arabic letter
@@ -14,7 +14,7 @@ extension Byte {
 
     /// Returns whether a given byte can be interpreted as a hex value in UTF8, ie: 0-9, a-f, A-F.
     public var isHexDigit: Bool {
-        return (.zero ... .nine).contains(self) || (.A ... .F).contains(self) || (.a ... .f).contains(self)
+        return (self >= .zero && self <= .nine) || (self >= .A && self <= .F) || (self >= .a && self <= .f)
     }
 
     /// A

@@ -17,10 +17,10 @@ final class FutureTests : XCTestCase {
         let group = DispatchGroup()
         group.enter()
 
-        promise.future.then(on: .global()) { result in
+        promise.future.then { result in
             XCTAssertEqual(result, "test")
             group.leave()
-        }.catch(on: .global()) { error in
+        }.catch { error in
             XCTFail("\(error)")
         }
         
@@ -50,10 +50,10 @@ final class FutureTests : XCTestCase {
 
         let group = DispatchGroup()
         group.enter()
-        promise.future.then(on: .global()) { _ in
+        promise.future.then { _ in
             XCTFail()
             executed += 1
-        }.catch(on: .global()) { error in
+        }.catch { error in
             executed += 1
             caught = true
             group.leave()
@@ -74,10 +74,10 @@ final class FutureTests : XCTestCase {
 
         let group = DispatchGroup()
         group.enter()
-        futures.flatten(on: .global()).then(on: .global()) { array in
+        futures.flatten().then { array in
             XCTAssertEqual(array, ["a", "b"])
             group.leave()
-        }.catch(on: .global()) { error in
+        }.catch { error in
             XCTFail("\(error)")
         }
 
@@ -87,12 +87,33 @@ final class FutureTests : XCTestCase {
         group.wait()
     }
 
+    func testFutureMap() throws {
+        let intPromise = Promise(Int.self)
+
+        let group = DispatchGroup()
+        group.enter()
+
+        intPromise.future.map { int in
+            return String(int)
+        }.then { string in
+            XCTAssertEqual(string, "42")
+            group.leave()
+        }.catch { error in
+            XCTFail("\(error)")
+            group.leave()
+        }
+
+        intPromise.complete(42)
+        group.wait()
+    }
+
     static let allTests = [
         ("testSimpleFuture", testSimpleFuture),
         ("testFutureThen", testFutureThen),
         ("testTimeoutFuture", testTimeoutFuture),
         ("testErrorFuture", testErrorFuture),
         ("testArrayFuture", testArrayFuture),
+        ("testFutureMap", testFutureMap),
     ]
 }
 
