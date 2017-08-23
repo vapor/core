@@ -31,11 +31,13 @@ public final class Future<T>: FutureType {
         result = nil
     }
 
+    /// Pre-filled promise future
     public convenience init(_ result: T) {
         self.init()
         self.result = .expectation(result)
     }
 
+    /// Pre-filled failed promise
     public convenience init(error: Error) {
         self.init()
         self.result = .error(error)
