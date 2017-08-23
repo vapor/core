@@ -3,183 +3,88 @@ import XCTest
 
 final class FutureTests : XCTestCase {
     func testSimpleFuture() throws {
-        let future = Future { "test" }
-        
-        XCTAssertEqual(try future.await(), "test")
+        let promise = Promise(String.self)
+        promise.complete("test")
+        XCTAssertEqual(try promise.future.sync(), "test")
     }
     
     func testFutureThen() throws {
-        let future = Future<String> {
-            usleep(5000)
-            return "test"
+        let promise = Promise(String.self)
+        DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+            promise.complete("test")
         }
-        
-        future.then { result in
+
+        let group = DispatchGroup()
+        group.enter()
+
+        promise.future.then(on: .global()) { result in
             XCTAssertEqual(result, "test")
+            group.leave()
+        }.catch(on: .global()) { error in
+            XCTFail("\(error)")
         }
         
-        future.catch { _ in
-            XCTFail()
-        }
-        
-        sleep(1)
-        XCTAssert(future.isCompleted)
+        group.wait()
+        XCTAssert(promise.future.isCompleted)
     }
     
     func testTimeoutFuture() throws {
-        let future = Future<String> {
-            sleep(3)
-            return "test"
+        let promise = Promise(String.self)
+
+        DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+            promise.complete("test")
         }
         
-        XCTAssertFalse(future.isCompleted)
-        XCTAssertThrowsError(try future.await(for: .seconds(1)))
+        XCTAssertFalse(promise.future.isCompleted)
+        XCTAssertThrowsError(try promise.future.sync(timeout: .seconds(1)))
     }
     
     func testErrorFuture() throws {
-        let future = Future<String> {
-            usleep(500)
-            throw CustomError()
+        let promise = Promise(String.self)
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+            promise.fail(CustomError())
         }
-        
+
         var executed = 0
-        
-        future.then { _ in
+        var caught = false
+
+        let group = DispatchGroup()
+        group.enter()
+        promise.future.then(on: .global()) { _ in
             XCTFail()
-        }
-        
-        future.catch { error in
             executed += 1
+        }.catch(on: .global()) { error in
+            executed += 1
+            caught = true
+            group.leave()
             XCTAssert(error is CustomError)
         }
         
-        var caught = false
-        
-        future.catch(CustomError.self) { _ in
-            executed += 1
-            caught = true
-        }
-        
-        sleep(4)
+        group.wait()
         XCTAssert(caught)
-        XCTAssertTrue(future.isCompleted)
-        XCTAssertEqual(executed, 2)
+        XCTAssertTrue(promise.future.isCompleted)
+        XCTAssertEqual(executed, 1)
     }
-    
-    func testUnknownError() throws {
-        let future = Future<String> {
-            sleep(1)
-            throw UnknownError()
+
+    func testArrayFuture() throws {
+        let promiseA = Promise(String.self)
+        let promiseB = Promise(String.self)
+
+        let futures = [promiseA.future, promiseB.future]
+
+        let group = DispatchGroup()
+        group.enter()
+        futures.flatten(on: .global()).then(on: .global()) { array in
+            XCTAssertEqual(array, ["a", "b"])
+            group.leave()
+        }.catch(on: .global()) { error in
+            XCTFail("\(error)")
         }
-        
-        future.then { _ in
-            XCTFail()
-        }
-        
-        future.catch(CustomError.self) { _ in
-            XCTFail()
-        }
-        
-        future.catch { error in
-            XCTAssert(error is UnknownError)
-        }
-        
-        sleep(2)
-    }
-    
-    func testUnwrapFutureResult() throws {
-        let future = Future<String> {
-            throw CustomError()
-        }
-        
-        var completed = false
-        
-        func check(_ result: FutureResult<String>) {
-            XCTAssertThrowsError(try result.assertSuccess())
-        }
-        
-        future.onComplete { result in
-            completed = true
-            
-            check(result)
-        }
-        
-        // To prevent checking before executing the async future
-        sleep(1)
-        
-        XCTAssert(completed)
-    }
-    
-    func testFutureMapping() throws {
-        let future = Future { "0" }
-        
-        let result = future.map { string in
-            return Int(string)
-        }.map { int in
-            return int == 0
-        }
-        
-        XCTAssert(try result.await(for: .seconds(1)))
-        XCTAssertEqual(try future.await(for: .seconds(1)), "0")
-    }
-    
-    func testNestedFutureReducing() throws {
-        let future = Future { "0" }.replace { string in
-            return Future {
-                return Int(string)
-            }
-        }.map { $0 }
-        
-        XCTAssertEqual(try future.await(for: .seconds(1)), 0)
-    }
-    
-    func testClosureCompletion() throws {
-        let promise = Promise<String>()
-        let future = promise.future
-        
-        future.then { _ in
-            XCTFail()
-        }
-        
-        promise.complete {
-            throw UnknownError()
-        }
-        
-        sleep(1)
-    }
-    
-    func testManualFuture() throws {
-        let promise = Promise<String>()
-        let future = promise.future
-        
-        XCTAssertFalse(future.isCompleted)
-        
-        promise.complete("Hello world")
-        
-        XCTAssertTrue(future.isCompleted)
-        
-        future.onComplete { result in
-            switch result {
-            case .expectation(let expectation):
-                XCTAssertEqual(expectation, "Hello world")
-            default:
-                XCTFail()
-            }
-        }
-        
-        let promise2 = Promise<String>()
-        let future2 = promise2.future
-        
-        promise2.complete(CustomError())
-        
-        future2.onComplete { result in
-            switch result {
-            case .error(let error):
-                XCTAssert(error is CustomError)
-            default:
-                XCTFail()
-            }
-        }
+
+        promiseA.complete("a")
+        promiseB.complete("b")
+
+        group.wait()
     }
 
     static let allTests = [
@@ -187,13 +92,8 @@ final class FutureTests : XCTestCase {
         ("testFutureThen", testFutureThen),
         ("testTimeoutFuture", testTimeoutFuture),
         ("testErrorFuture", testErrorFuture),
-        ("testUnknownError", testUnknownError),
-        ("testUnwrapFutureResult", testUnwrapFutureResult),
-        ("testFutureMapping", testFutureMapping),
-        ("testNestedFutureReducing", testNestedFutureReducing),
-        ("testManualFuture", testManualFuture)
+        ("testArrayFuture", testArrayFuture),
     ]
 }
 
-struct UnknownError : Error {}
 struct CustomError : Error {}
