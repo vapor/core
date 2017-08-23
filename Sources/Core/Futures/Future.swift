@@ -14,9 +14,6 @@ public final class Future<T>: FutureType {
     /// here when it is resolved.
     private var result: Result?
 
-    /// The future's internal lock
-    private let queue: DispatchQueue
-
     /// Contains information about callbacks
     /// waiting for this future to complete
     private struct Awaiter {
@@ -32,55 +29,54 @@ public final class Future<T>: FutureType {
     internal init() {
         awaiters = []
         result = nil
-        self.queue = DispatchQueue(label: "codes.vapor.core.future.lock")
+    }
+
+    public convenience init(_ result: T) {
+        self.init()
+        self.result = .expectation(result)
+    }
+
+    public convenience init(error: Error) {
+        self.init()
+        self.result = .error(error)
     }
     
     /// `true` if the future is already completed.
-    public var isCompleted: Future<Bool> {
-        let promise = Promise(Bool.self)
-
-        queue.async {
-            promise.complete(self.result != nil)
-        }
-        
-        return promise.future
+    public var isCompleted: Bool {
+        return result != nil
     }
 
     // Completes the result, notifying awaiters.
     internal func complete(with result: Result) {
-        queue.async {
-            guard self.result == nil else {
-                return
-            }
-            self.result = result
+        guard self.result == nil else {
+            return
+        }
+        self.result = result
 
-            self.awaiters.forEach { awaiter in
-                if let queue = awaiter.queue {
-                    queue.async {
-                        awaiter.callback(result)
-                    }
-                } else {
+        self.awaiters.forEach { awaiter in
+            if let queue = awaiter.queue {
+                queue.async {
                     awaiter.callback(result)
                 }
+            } else {
+                awaiter.callback(result)
             }
         }
     }
 
     /// Locked method for adding an awaiter
     public func completeOrAwait(on queue: DispatchQueue?, callback: @escaping ResultCallback) {
-        self.queue.async {
-            if let result = self.result {
-                if let queue = queue {
-                    queue.async {
-                        callback(result)
-                    }
-                } else {
+        if let result = self.result {
+            if let queue = queue {
+                queue.async {
                     callback(result)
                 }
             } else {
-                let awaiter = Awaiter(callback: callback, queue: queue)
-                self.awaiters.append(awaiter)
+                callback(result)
             }
+        } else {
+            let awaiter = Awaiter(callback: callback, queue: queue)
+            self.awaiters.append(awaiter)
         }
     }
 }
