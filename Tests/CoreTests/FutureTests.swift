@@ -1,5 +1,6 @@
+import Core
+import Dispatch
 import XCTest
-@testable import Core
 
 final class FutureTests : XCTestCase {
     func testSimpleFuture() throws {
