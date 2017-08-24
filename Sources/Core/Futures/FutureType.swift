@@ -24,7 +24,7 @@ extension FutureType {
     public typealias ErrorCallback = ((Error) -> ())
 
     /// Callback for accepting the expectation.
-    public typealias ExpectationMapCallback<T> = ((Expectation) -> (T))
+    public typealias ExpectationMapCallback<T> = ((Expectation) throws -> (T))
 
     /// Adds a handler to be asynchronously executed on
     /// completion of this future.
@@ -62,8 +62,12 @@ extension FutureType {
         let promise = Promise(T.self)
 
         then(on: queue) { expectation in
-            let mapped = callback(expectation)
-            promise.complete(mapped)
+            do {
+                let mapped = try callback(expectation)
+                promise.complete(mapped)
+            } catch {
+                promise.fail(error)
+            }
         }.catch { error in
             promise.fail(error)
         }

@@ -4,7 +4,7 @@ import libc
 
 public final class File: FileReader, FileCache {
     /// Internal dispatch queue
-    let queue: DispatchQueue
+    private let queue: DispatchQueue
 
     /// Cached data.
     /// Only access on self.queue!
@@ -19,8 +19,8 @@ public final class File: FileReader, FileCache {
 
     /// Create a new CFile
     /// FIXME: add cache maximum
-    public init(on queue: DispatchQueue) {
-        self.queue = queue
+    public init() {
+        self.queue = DispatchQueue(label: "codes.vapor.core.file.lock")
         self.cache = [:]
         self.sources = [:]
         self.buffer = .init(repeating: 0, count: 1_048_576)
