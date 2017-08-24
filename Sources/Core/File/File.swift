@@ -3,53 +3,53 @@ import Foundation
 import libc
 
 public final class File: FileReader, FileCache {
-    /// Internal dispatch queue
-    private let queue: DispatchQueue
-
     /// Cached data.
-    /// Only access on self.queue!
     private var cache: [Int: Data]
-
-    /// Holds onto read source handles
-    /// Only access on self.queue!
-    private var sources: [Int32: DispatchSourceRead]
-
-    /// Holds libc read/write data
-    private var buffer: Bytes
 
     /// Create a new CFile
     /// FIXME: add cache maximum
     public init() {
-        self.queue = DispatchQueue(label: "codes.vapor.core.file.lock")
         self.cache = [:]
-        self.sources = [:]
-        self.buffer = .init(repeating: 0, count: 1_048_576)
     }
 
     /// See FileReader.read
     public func read(at path: String) -> Future<Data> {
         let promise = Promise(Data.self)
 
-        let fd = libc.open(path.withCString { $0 }, O_RDONLY | O_NONBLOCK)
-        if fd > 0 {
-            let readSource = DispatchSource.makeReadSource(
-                fileDescriptor: fd,
-                queue: queue
-            )
-
-            readSource.setEventHandler {
-                let bytesRead = libc.read(fd, &self.buffer, self.buffer.count)
-                let data = Data(bytes: self.buffer[0..<bytesRead])
-                promise.complete(data)
-                close(fd)
-                self.queue.async {
-                    self.sources[fd] = nil
-                }
+        let file = DispatchIO(
+            type: .stream,
+            path: "/Users/tanner/Desktop/hello.txt",
+            oflag: O_RDONLY,
+            mode: 0,
+            queue: .global()
+        ) { error in
+            if error == 0 {
+                // success
+            } else {
+                let error = FileError(.readError(error, path: path))
+                promise.fail(error)
             }
-            readSource.resume()
+        }
 
-            queue.async {
-                self.sources[fd] = readSource
+        if let file = file {
+            var buffer = DispatchData.empty
+            file.read(offset: 0, length: size_t.max - 1, queue: .global()) { done, data, error in
+                if done {
+                    if error == 0 {
+                        let copied = Data(buffer)
+                        promise.complete(copied)
+                    } else {
+                        let error = FileError(.readError(error, path: path))
+                        promise.fail(error)
+                    }
+                } else {
+                    if let data = data {
+                        buffer.append(data)
+                    } else {
+                        let error = FileError(.readError(error, path: path))
+                        promise.fail(error)
+                    }
+                }
             }
         } else {
             promise.fail(FileError(.invalidDescriptor))
@@ -60,19 +60,18 @@ public final class File: FileReader, FileCache {
 
     /// See FileCache.getFile
     public func getFile<H: Hashable>(hash: H) -> Future<Data?> {
-        let promise = Promise(Data?.self)
-
-        queue.async {
-            promise.complete(self.cache[hash.hashValue])
-        }
-
-        return promise.future
+        return Future(cache[hash.hashValue])
     }
 
     /// See FileCache.setFile
     public func setFile<H: Hashable>(file: Data?, hash: H) {
-        queue.async {
-            self.cache[hash.hashValue] = file
-        }
+        cache[hash.hashValue] = file
     }
+}
+
+
+extension DispatchData {
+    static let empty = DispatchData(
+        bytes: UnsafeRawBufferPointer(start: nil, count: 0)
+    )
 }

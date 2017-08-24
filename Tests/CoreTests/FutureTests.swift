@@ -134,6 +134,11 @@ final class FutureTests : XCTestCase {
         }
     }
 
+    func testFile() throws {
+        let data = try File().read(at: "/Users/tanner/Desktop/hello.txt").sync()
+        XCTAssertEqual(String(data: data, encoding: .utf8), "hi\n")
+    }
+
     static let allTests = [
         ("testSimpleFuture", testSimpleFuture),
         ("testFutureThen", testFutureThen),

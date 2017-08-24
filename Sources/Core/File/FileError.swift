@@ -4,6 +4,7 @@ public struct FileError: Debuggable, Traceable, Error {
     /// Kinds of File errors
     enum Kind {
         case invalidDescriptor
+        case readError(Int32, path: String)
     }
 
     /// This error's kind
@@ -14,6 +15,8 @@ public struct FileError: Debuggable, Traceable, Error {
         switch kind {
         case .invalidDescriptor:
             return "Invalid file descriptor"
+        case .readError(_, let path):
+            return "An error occurred while reading \(path)"
         }
     }
 
@@ -22,6 +25,8 @@ public struct FileError: Debuggable, Traceable, Error {
         switch kind {
         case .invalidDescriptor:
             return "invalidDescriptor"
+        case .readError(let e, _):
+            return "readError (\(e))"
         }
     }
 
