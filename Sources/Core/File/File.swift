@@ -41,6 +41,7 @@ public final class File: FileReader, FileCache {
                 let bytesRead = libc.read(fd, &self.buffer, self.buffer.count)
                 let data = Data(bytes: self.buffer[0..<bytesRead])
                 promise.complete(data)
+                close(fd)
                 self.queue.async {
                     self.sources[fd] = nil
                 }
