@@ -5,7 +5,7 @@ import Dispatch
 /// Concretely implemented by `Future<T>`
 public protocol FutureType {
     associatedtype Expectation
-    func completeOrAwait(on queue: DispatchQueue?, callback: @escaping ResultCallback)
+    func addListener(callback: @escaping ResultCallback)
 }
 
 // MARK: Convenience
@@ -23,15 +23,18 @@ extension FutureType {
     /// Callback for accepting an error.
     public typealias ErrorCallback = ((Error) -> ())
 
+    /// Callback for accepting an event.
+    public typealias EventCallback = (() -> ())
+
     /// Callback for accepting the expectation.
-    public typealias ExpectationMapCallback<T> = ((Expectation) -> (T))
+    public typealias ExpectationMapCallback<T> = ((Expectation) throws -> (T))
 
     /// Adds a handler to be asynchronously executed on
     /// completion of this future.
     ///
     /// Will *not* be executed if an error occurrs
-    public func then(on queue: DispatchQueue? = nil, callback: @escaping ExpectationCallback) -> Self {
-        completeOrAwait(on: queue) { result in
+    public func then(callback: @escaping ExpectationCallback) -> Self {
+        addListener { result in
             guard let ex = result.expectation else {
                 return
             }
@@ -47,23 +50,40 @@ extension FutureType {
     ///
     /// Will *only* be executed if an error occurred.
     //// Successful results will not call this handler.
-    public func `catch`(on queue: DispatchQueue? = nil, callback: @escaping ErrorCallback) {
-        completeOrAwait(on: queue) { result in
+    @discardableResult
+    public func `catch`(callback: @escaping ErrorCallback) -> Self {
+        addListener { result in
             guard let er = result.error else {
                 return
             }
 
             callback(er)
         }
+
+        return self
+    }
+
+    /// Will always be excuted w/ the result.
+    @discardableResult
+    public func always(callback: @escaping EventCallback) -> Self {
+        addListener { _ in
+            callback()
+        }
+
+        return self
     }
 
     /// Maps a future to a future of a different type.
-    public func map<T>(on queue: DispatchQueue? = nil, callback: @escaping ExpectationMapCallback<T>) -> Future<T> {
+    public func map<T>(callback: @escaping ExpectationMapCallback<T>) -> Future<T> {
         let promise = Promise(T.self)
 
-        then(on: queue) { expectation in
-            let mapped = callback(expectation)
-            promise.complete(mapped)
+        then { expectation in
+            do {
+                let mapped = try callback(expectation)
+                promise.complete(mapped)
+            } catch {
+                promise.fail(error)
+            }
         }.catch { error in
             promise.fail(error)
         }
@@ -79,13 +99,16 @@ extension FutureType {
         let semaphore = DispatchSemaphore(value: 0)
         var awaitedResult: FutureResult<Expectation>?
 
-        self.completeOrAwait(on: .global()) { result in
+        addListener { result in
             awaitedResult = result
             semaphore.signal()
         }
 
         guard semaphore.wait(timeout: time) == .success else {
-            throw PromiseError(identifier: "timeout", reason: "Timeout reached waiting for future \(Expectation.self)")
+            throw PromiseError(
+                identifier: "timeout",
+                reason: "Timeout reached waiting for future \(Expectation.self)"
+            )
         }
 
         return try awaitedResult!.unwrap()
@@ -112,18 +135,15 @@ extension Array where Element: FutureType {
 
         var iterator = makeIterator()
         func handle(_ future: Element) {
-            future.completeOrAwait(on: queue) { element in
-                do {
-                    let res = try element.unwrap()
-                    elements.append(res)
-                    if let next = iterator.next() {
-                        handle(next)
-                    } else {
-                        promise.complete(elements)
-                    }
-                } catch {
-                    promise.fail(error)
+            future.then { res in
+                elements.append(res)
+                if let next = iterator.next() {
+                    handle(next)
+                } else {
+                    promise.complete(elements)
                 }
+            }.catch { error in
+                promise.fail(error)
             }
         }
 
