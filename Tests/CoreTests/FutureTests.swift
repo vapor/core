@@ -1,6 +1,7 @@
 import Core
 import Dispatch
 import XCTest
+import libc
 
 final class FutureTests : XCTestCase {
     func testSimpleFuture() throws {
@@ -108,6 +109,31 @@ final class FutureTests : XCTestCase {
         group.wait()
     }
 
+    func testPerformance() {
+        self.measure {
+            let promises = [Promise<String>](
+                repeating: Promise(String.self),
+                count: 4096
+            )
+
+            promises.forEach { $0.complete("hello!") }
+
+            let group = DispatchGroup()
+            promises.forEach { promise in
+                group.enter()
+                promise.future.then { string in
+                    XCTAssertEqual(string, "hello!")
+                }.catch { error in
+                    XCTFail("\(error)")
+                }.always {
+                    group.leave()
+                }
+            }
+
+            group.wait()
+        }
+    }
+
     static let allTests = [
         ("testSimpleFuture", testSimpleFuture),
         ("testFutureThen", testFutureThen),
@@ -115,6 +141,7 @@ final class FutureTests : XCTestCase {
         ("testErrorFuture", testErrorFuture),
         ("testArrayFuture", testArrayFuture),
         ("testFutureMap", testFutureMap),
+        ("testPerformance", testPerformance),
     ]
 }
 

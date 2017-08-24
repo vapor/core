@@ -18,7 +18,6 @@ public final class Future<T>: FutureType {
     /// waiting for this future to complete
     private struct Awaiter {
         let callback: ResultCallback
-        let queue: DispatchQueue?
     }
 
     /// A list of all handlers waiting to 
@@ -55,29 +54,17 @@ public final class Future<T>: FutureType {
         }
         self.result = result
 
-        self.awaiters.forEach { awaiter in
-            if let queue = awaiter.queue {
-                queue.async {
-                    awaiter.callback(result)
-                }
-            } else {
-                awaiter.callback(result)
-            }
+        awaiters.forEach { awaiter in
+            awaiter.callback(result)
         }
     }
 
-    /// Locked method for adding an awaiter
-    public func completeOrAwait(on queue: DispatchQueue?, callback: @escaping ResultCallback) {
+    /// Adds a listener (or completes immediately if done)
+    public func addListener(callback: @escaping ResultCallback) {
         if let result = self.result {
-            if let queue = queue {
-                queue.async {
-                    callback(result)
-                }
-            } else {
-                callback(result)
-            }
+            callback(result)
         } else {
-            let awaiter = Awaiter(callback: callback, queue: queue)
+            let awaiter = Awaiter(callback: callback)
             self.awaiters.append(awaiter)
         }
     }
