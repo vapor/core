@@ -33,17 +33,17 @@ class ArrayTests: XCTestCase {
     }
 
     func testTrim() {
-        let result = Array("==hello==".characters).trimmed(["="])
+        let result = Array("==hello==").trimmed(["="])
         XCTAssertEqual(String(result), "hello")
     }
 
     func testTrimEmpty() {
-        let result = Array("".characters).trimmed([])
+        let result = Array("").trimmed([])
         XCTAssertEqual(String(result), "")
     }
 
     func testTrimAll() {
-        let result = Array("~~".characters).trimmed(["~"])
+        let result = Array("~~").trimmed(["~"])
         XCTAssertEqual(String(result), "")
     }
 }
