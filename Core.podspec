@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = 'Core'
-  spec.version      = '2.0.1'
+  spec.version      = '2.1.2'
   spec.license      = 'MIT'
   spec.homepage     = 'https://github.com/vapor/core'
   spec.authors      = { 'Vapor' => 'contact@vapor.codes' }
@@ -16,8 +16,8 @@ Pod::Spec.new do |spec|
 
   spec.subspec "Default" do |ss|
     ss.source_files = 'Sources/Core/**/*.{swift}'
-    ss.dependency 'Bits', '~> 1.0'
-    ss.dependency 'Debugging', '~> 1.0'
+    ss.dependency 'Bits', '~> 1.1.0'
+    ss.dependency 'Debugging', '~> 1.1.0'
     ss.dependency 'Core/libc'
   end
 
