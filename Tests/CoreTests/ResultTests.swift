@@ -17,6 +17,8 @@ class ResultTests: XCTestCase {
         XCTAssertEqual(result.value, 1)
         XCTAssert(result.error == nil)
         XCTAssertEqual(result.succeeded, true)
+        XCTAssertEqual(result.isSuccess, true)
+        XCTAssertEqual(result.isFailure, false)
     }
 
     func testValueNil() {
@@ -24,5 +26,7 @@ class ResultTests: XCTestCase {
         XCTAssertEqual(result.value, nil)
         XCTAssert(result.error != nil)
         XCTAssertEqual(result.succeeded, false)
+        XCTAssertEqual(result.isSuccess, false)
+        XCTAssertEqual(result.isFailure, true)
     }
 }
