@@ -2,7 +2,7 @@
     <img src="https://cloud.githubusercontent.com/assets/1342803/24859350/7065f420-1df0-11e7-9796-577b04d6b35b.png" width="320" alt="Core">
     <br>
     <br>
-    <a href="https://docs.vapor.codes/2.0/core/package/">
+    <a href="https://docs.vapor.codes/3.0/">
         <img src="http://img.shields.io/badge/read_the-docs-92A8D1.svg" alt="Documentation">
     </a>
     <a href="http://vapor.team">
@@ -15,6 +15,6 @@
         <img src="https://circleci.com/gh/vapor/core.svg?style=shield" alt="Continuous Integration">
     </a>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/swift-3.1-brightgreen.svg" alt="Swift 3.1">
+        <img src="http://img.shields.io/badge/swift-4.0-brightgreen.svg" alt="Swift 4.0">
     </a>
 </p>
