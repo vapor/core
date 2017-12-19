@@ -4,15 +4,20 @@ import PackageDescription
 let package = Package(
     name: "Core",
     products: [
-        .library(name: "libc", targets: ["libc"]),
-        .library(name: "Core", targets: ["Core"]),
+        .library(name: "Bits", targets: ["Bits"]),
+        .library(name: "CodableKit", targets: ["CodableKit"]),
+        .library(name: "COperatingSystem", targets: ["COperatingSystem"]),
+        .library(name: "Debugging", targets: ["Debugging"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/debugging.git", .branch("beta")),
+        // Swift Promises, Futures, and Streams.
+        .package(url: "https://github.com/vapor/async.git", .branch("beta")),
     ],
     targets: [
-        .target(name: "libc"),
-        .target(name: "Core", dependencies: ["libc", "Debugging"]),
-        .testTarget(name: "CoreTests", dependencies: ["Core"]),
+        .target(name: "Bits"),
+        .target(name: "CodableKit", dependencies: ["Async"]),
+        .target(name: "COperatingSystem"),
+        .target(name: "Debugging"),
+        .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
     ]
 )

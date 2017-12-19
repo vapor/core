@@ -1,8 +1,8 @@
 import Debugging
 
-/// Errors that can be thrown while using promises.
-public struct PromiseError: Swift.Error, Debuggable, Traceable {
-    public static let readableName = "Promise Error"
+/// Errors that can be thrown while working with TCP sockets.
+public struct CodableError: Traceable, Debuggable, Helpable, Swift.Error, Encodable {
+    public static let readableName = "Codable Error"
     public let identifier: String
     public var reason: String
     public var file: String
@@ -10,11 +10,15 @@ public struct PromiseError: Swift.Error, Debuggable, Traceable {
     public var line: UInt
     public var column: UInt
     public var stackTrace: [String]
+    public var possibleCauses: [String]
+    public var suggestedFixes: [String]
 
     /// Create a new TCP error.
     public init(
         identifier: String,
         reason: String,
+        possibleCauses: [String] = [],
+        suggestedFixes: [String] = [],
         file: String = #file,
         function: String = #function,
         line: UInt = #line,
@@ -26,6 +30,11 @@ public struct PromiseError: Swift.Error, Debuggable, Traceable {
         self.function = function
         self.line = line
         self.column = column
-        self.stackTrace = PromiseError.makeStackTrace()
+        self.stackTrace = CodableError.makeStackTrace()
+        self.possibleCauses = possibleCauses
+        self.suggestedFixes = suggestedFixes
     }
 }
+
+
+
