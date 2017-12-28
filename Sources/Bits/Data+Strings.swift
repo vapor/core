@@ -22,6 +22,36 @@ extension Data {
     }
 }
 
+extension Array where Element == UInt8 {
+    public var djb2: Int {
+        var hash = 5381
+        
+        for element in self {
+            hash = ((hash << 5) &+ hash) &+ numericCast(element)
+        }
+        
+        return hash
+    }
+    
+    /// Converts a data blob's uppercased ASCII characters to lowercased efficiently
+    public func lowercasedASCIIString() -> [UInt8] {
+        var lowercased = [UInt8](repeating: 0, count: self.count)
+        var writeIndex = 0
+        
+        for i in self.startIndex..<self.endIndex {
+            if self[i] >= .A && self[i] <= .Z {
+                lowercased[writeIndex] = self[i] &+ asciiCasingOffset
+            } else {
+                lowercased[writeIndex] = self[i]
+            }
+            
+            writeIndex = writeIndex &+ 1
+        }
+        
+        return lowercased
+    }
+}
+
 extension Data {
     /// Reads from a `Data` buffer using a `BufferPointer` rather than a normal pointer
     public func withByteBuffer<T>(_ closure: (ByteBuffer) throws -> T) rethrows -> T {
