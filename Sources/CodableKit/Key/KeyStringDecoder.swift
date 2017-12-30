@@ -58,6 +58,56 @@ private func isTruthy(_ any: Any?) -> Bool {
     }
 }
 
+internal func withEnumHeuristic<T>(atPath codingPath: [CodingKey], work: () throws -> T) throws -> T {
+    do {
+        return try work()
+    } catch Swift.DecodingError.dataCorrupted(let context) where context.codingPath.count == codingPath.count {
+        // This heuristic is bad. It relies too much on the specific content of
+        // an error message from inside the Swift stdlib. Find a better way to
+        // detect this particular error case if at all possible.
+
+        if //T.self is RawRepresentable &&      // RawRepresentable is an existential, this doesn't work
+           !(T.self is AnyKeyStringDecodable) &&
+           context.debugDescription.hasPrefix("Cannot initialize \(T.self) from invalid") &&
+           (context.debugDescription.hasSuffix("value 1") || context.debugDescription.hasSuffix("value 0"))
+        {
+            // Is this too much information? Should we just give a docs link instead?
+            fatalError("""
+                
+                
+                It looks like you tried to derive a keypath for a RawRepresentable enum which
+                has a compiler-generated Codable conformance. This most often happens because
+                you tried to use an enum with Fluent's automatic schema generation.
+                
+                The type is:
+                \(T.self)
+                
+                If this type is not an enum, please let us know what you were actually doing
+                so we can improve the quirky hueristic that generates this error message!
+                
+                Deriving keypaths for enums automagically is not yet supported, pending the
+                completion, acceptance, implementation, and release of what at the time of
+                this writing was a draft swift-evolution proposal. This is not expected to
+                happen any time soon.
+                
+                https://github.com/jtbandes/swift-evolution/blob/case-enumerable/proposals/0000-derived-collection-of-enum-cases.md
+                
+                The recommended solution is to conform your enum to the KeyStringDecodable
+                protocol, implement keyStringTrue to return one enum case, and implement
+                keyStringFalse to return a different enum case. The actual values of the
+                cases don't matter, as long as Equatable will see them as different.
+                
+                There is no trivial solution for enums with only one case at this time. Sorry!
+                
+                
+                """
+            )
+        } else {
+            throw Swift.DecodingError.dataCorrupted(context)
+        }
+    }
+}
+
 // MARK: Protocols
 
 public protocol AnyKeyStringDecodable {
@@ -278,7 +328,7 @@ fileprivate struct KeyStringKeyedDecoder<K>: KeyedDecodingContainerProtocol wher
             }
         } else {
             let decoder = KeyStringDecoder(codingPath: codingPath + [key], result: result)
-            return try T(from: decoder)
+            return try withEnumHeuristic(atPath: decoder.codingPath) { try T(from: decoder) }
         }
     }
 }
