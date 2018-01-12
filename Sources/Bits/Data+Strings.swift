@@ -56,19 +56,7 @@ extension Array where Element == UInt8 {
         guard self.count == data.count else { return false }
         
         for i in 0..<self.count {
-            if self[i] != data[i] {
-                if self[i] >= .A && self[i] <= .Z {
-                    guard self[i] &+ asciiCasingOffset == data[i] else {
-                        return false
-                    }
-                } else if data[i] >= .A && data[i] <= .Z {
-                    guard data[i] &+ asciiCasingOffset == self[i] else {
-                        return false
-                    }
-                } else {
-                    return false
-                }
-            }
+            if self[i] & 0xdf != data[i] & 0xdf { return false }
         }
         
         return true
