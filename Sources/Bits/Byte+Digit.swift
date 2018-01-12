@@ -37,3 +37,37 @@ extension Byte {
     public static let nine: Byte = 0x39
 }
 
+extension Int {
+    public func bytes(reserving: Int = 0) -> [UInt8] {
+        var data = [UInt8]()
+        data.reserveCapacity(reserving)
+        
+        var i: Int
+        
+        if self < 0 {
+            data.append(.hyphen)
+            // make positive
+            i = -self
+        } else {
+            i = self
+        }
+        
+        var offset = 0
+        var testI = i
+        
+        repeat {
+            offset = offset &+ 1
+            testI = testI / 10
+            data.append(0)
+        } while testI > 0
+        
+        while offset > 0 {
+            // subtract first to be before the `data.count`
+            offset = offset &- 1
+            data[offset] = 0x30 &+ numericCast(i % 10)
+            i = i / 10
+        }
+        
+        return data
+    }
+}
