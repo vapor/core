@@ -50,6 +50,29 @@ extension Array where Element == UInt8 {
         
         return lowercased
     }
+    
+    /// Checks if the current bytes are equal to the contents of the provided ByteBuffer
+    public func caseInsensitiveEquals(to data: ByteBuffer) -> Bool {
+        guard self.count == data.count else { return false }
+        
+        for i in 0..<self.count {
+            if self[i] != data[i] {
+                if self[i] >= .A && self[i] <= .Z {
+                    guard self[i] &+ asciiCasingOffset == data[i] else {
+                        return false
+                    }
+                } else if data[i] >= .A && data[i] <= .Z {
+                    guard data[i] &+ asciiCasingOffset == self[i] else {
+                        return false
+                    }
+                } else {
+                    return false
+                }
+            }
+        }
+        
+        return true
+    }
 }
 
 extension Data {
@@ -71,3 +94,4 @@ extension Data {
         }
     }
 }
+
