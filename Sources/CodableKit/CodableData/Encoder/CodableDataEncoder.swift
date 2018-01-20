@@ -4,8 +4,8 @@ public final class CodableDataEncoder {
     public init() {}
 
     /// Encodes the supplied `Encodable` to `CodableData`
-    public func encode(_ encodable: Encodable) throws -> CodableData {
-        let data = PartialCodableData(data: .null)
+    public func encode(_ encodable: Encodable) throws -> EncodableData {
+        let data = PartialEncodableData(data: .null)
         let encoder = _CodableDataEncoder(partialData: data, at: [])
         try encodable.encode(to: encoder)
         return data.data
@@ -21,10 +21,10 @@ internal final class _CodableDataEncoder: Encoder {
     var userInfo: [CodingUserInfoKey: Any]
 
     /// Data being encoded.
-    let partialData: PartialCodableData
+    let partialData: PartialEncodableData
 
     /// Creates a new internal `_CodableDataEncoder`.
-    init(partialData: PartialCodableData, at path: [CodingKey]) {
+    init(partialData: PartialEncodableData, at path: [CodingKey]) {
         self.codingPath = path
         self.userInfo = [:]
         self.partialData = partialData

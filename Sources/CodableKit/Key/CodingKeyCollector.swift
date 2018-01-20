@@ -182,9 +182,9 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
     }
 
     func decode<T>(_ type: T.Type, forKey key: K) throws -> T where T: Decodable {
+        result.add(type: type, atPath: codingPath + [key])
         // restore query field map, for override
         if let custom = T.self as? AnyKeyStringDecodable.Type {
-            result.add(type: type, atPath: codingPath + [key])
             return custom._keyStringFalse as! T
         } else {
             let decoder = CodingKeyCollector(codingPath: codingPath + [key], result: result)
