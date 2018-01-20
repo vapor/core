@@ -14,8 +14,11 @@ public final class PartialEncodableData {
     }
 
     /// Sets the `PostgreSQLData` at supplied coding path.
-    func set(_ data: Encodable, at path: [CodingKey]) {
-        set(&self.data, to: .encodable(data), at: path)
+    func set<E>(_ data: E, at path: [CodingKey]) where E: Encodable {
+        set(&self.data, to: .encode({ encoder in
+            var encoder = encoder
+            try encoder.encode(data)
+        }), at: path)
     }
 
     /// Sets the mutable `PostgreSQLData` to supplied data at coding path.
