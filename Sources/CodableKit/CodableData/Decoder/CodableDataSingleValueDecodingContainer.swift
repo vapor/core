@@ -14,7 +14,7 @@ final class CodableDataSingleValueDecodingContainer: SingleValueDecodingContaine
 
     /// See `SingleValueDecodingContainer.decodeNil`
     func decodeNil() -> Bool {
-        return partialData.get(at: codingPath) == nil
+        return partialData.decodeNil(at: codingPath)
     }
 
     /// See `SingleValueDecodingContainer.decode`
