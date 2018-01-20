@@ -7,7 +7,7 @@ public final class CodableDataDecoder {
     public func decode<D>(_ type: D.Type = D.self, from data: CodableData) throws -> D
         where D: Decodable
     {
-        let decoder = _CodableDataDecoder(partialData: .init(data: .null), at: [])
+        let decoder = _CodableDataDecoder(partialData: .init(data: data), at: [])
         return try D(from: decoder)
     }
 }
