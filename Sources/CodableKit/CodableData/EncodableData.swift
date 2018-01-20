@@ -1,7 +1,9 @@
 // Data from the `CodableDataEncoder`
 public enum EncodableData {
     case null
-    case encode((SingleValueEncodingContainer) throws -> ())
+    case single(EncodableDataCallback)
     case dictionary([String: EncodableData])
     case array([EncodableData])
 }
+
+public typealias EncodableDataCallback = (inout SingleValueEncodingContainer) throws -> (Any.Type, [CodingKey])
