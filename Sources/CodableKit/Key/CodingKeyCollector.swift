@@ -68,7 +68,7 @@ fileprivate final class CodingKeyCollector: Decoder {
     }
 
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        fatalError("key string mapping arrays is not yet supported")
+        return CodingKeyCollectorUnkeyedDecoder(codingPath: codingPath, result: result)
     }
 
     func singleValueContainer() throws -> SingleValueDecodingContainer {
@@ -191,4 +191,63 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
             return try T(from: decoder)
         }
     }
+}
+
+fileprivate struct CodingKeyCollectorUnkeyedDecoder: UnkeyedDecodingContainer {
+    var codingPath: [CodingKey]
+    var count: Int?
+    var isAtEnd: Bool
+    var currentIndex: Int
+    var result: CodingKeyCollectorResult
+
+    init(codingPath: [CodingKey], result: CodingKeyCollectorResult) {
+        self.codingPath = codingPath
+        self.result = result
+        self.count = nil
+        self.isAtEnd = true
+        self.currentIndex = 0
+    }
+
+    func decodeNil() -> Bool {
+        return false
+    }
+
+    func decode(_ type: Bool.Type) throws -> Bool {
+        result.add(type: [Bool].self, atPath: codingPath)
+        return false
+    }
+
+    func decode(_ type: Int.Type) throws -> Int {
+        result.add(type: [Int].self, atPath: codingPath)
+        return 0
+    }
+
+    func decode(_ type: Double.Type) throws -> Double {
+        result.add(type: [Double].self, atPath: codingPath)
+        return 0
+    }
+
+    func decode(_ type: String.Type) throws -> String {
+        result.add(type: [String].self, atPath: codingPath)
+        return "0"
+    }
+
+    func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
+        let decoder = CodingKeyCollector(codingPath: codingPath, result: result)
+        return try T(from: decoder)
+    }
+
+    mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
+        let container = CodingKeyCollectorKeyedDecoder<NestedKey>(codingPath: codingPath, result: result)
+        return .init(container)
+    }
+
+    mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
+        return CodingKeyCollectorUnkeyedDecoder(codingPath: codingPath, result: result)
+    }
+
+    mutating func superDecoder() throws -> Decoder {
+        return CodingKeyCollector(codingPath: codingPath, result: result)
+    }
+
 }
