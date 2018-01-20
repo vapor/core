@@ -1,9 +1,9 @@
-/// Reference wrapper around `PartialEncodableData`
+/// Reference wrapper around `PartialCodableData`
 public final class PartialCodableData {
     /// The partial data.
     var data: CodableData
 
-    /// Creates a new `PartialPostgreSQLData`.
+    /// Creates a new `PartialCodableData`.
     init(data: CodableData) {
         self.data = data
     }
@@ -36,7 +36,7 @@ public final class PartialCodableData {
         set(&self.data, to: value, at: path)
     }
 
-    /// Sets the mutable `PostgreSQLData` to supplied data at coding path.
+    /// Sets the mutable `CodableData` to supplied data at coding path.
     private func set(_ context: inout CodableData, to value: CodableData, at path: [CodingKey]) {
         guard path.count >= 1 else {
             context = value
