@@ -25,7 +25,7 @@ extension Decodable {
                     break b
                 }
 
-                if isTruthy(decoded[keyPath: keyPath]) {
+                if isTruthy(decoded[keyPath: keyPath] as Any) {
                     return codingPath
                 }
             }
@@ -42,8 +42,8 @@ extension Decodable {
 
 // MARK: Utils
 
-private func isTruthy(_ any: Any?) -> Bool {
-    switch any! {
+private func isTruthy(_ any: Any) -> Bool {
+    switch any {
     case let bool as Bool: return bool
     case let int as Int: return int == 1
     case let string as String: return string == "1"
@@ -52,9 +52,35 @@ private func isTruthy(_ any: Any?) -> Bool {
     case let opt as Optional<Any>:
         switch opt {
         case .none: return false
-        case .some(let w): return isTruthy(w)
+        case .some(let w):
+            return isTruthy(w)
         }
     default: fatalError("Unsupported type. Conform `\(type(of: any))` to `KeyStringDecodable` to fix this error.")
+    }
+}
+
+extension Array: AnyKeyStringDecodable {
+    public static var _keyStringTrue: Any {
+        return [(Element.self as! AnyKeyStringDecodable.Type)._keyStringTrue]
+    }
+
+    public static var _keyStringFalse: Any {
+        return [(Element.self as! AnyKeyStringDecodable.Type)._keyStringFalse]
+    }
+
+    public static func _keyStringIsTrue(_ any: Any) -> Bool {
+        let item = (any as! [Element])[0]
+        return (Element.self as! AnyKeyStringDecodable.Type)._keyStringIsTrue(item)
+    }
+}
+
+extension String: KeyStringDecodable {
+    public static var keyStringTrue: String {
+        return "t"
+    }
+
+    public static var keyStringFalse: String {
+        return "f"
     }
 }
 
@@ -134,7 +160,7 @@ fileprivate final class KeyStringDecoder: Decoder {
     }
 
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        fatalError("key string mapping arrays is not yet supported")
+        return KeyStringUnkeyedDecoder(codingPath: codingPath, result: result)
     }
 
     func singleValueContainer() throws -> SingleValueDecodingContainer {
@@ -280,5 +306,71 @@ fileprivate struct KeyStringKeyedDecoder<K>: KeyedDecodingContainerProtocol wher
             let decoder = KeyStringDecoder(codingPath: codingPath + [key], result: result)
             return try T(from: decoder)
         }
+    }
+}
+
+fileprivate struct KeyStringUnkeyedDecoder: UnkeyedDecodingContainer {
+    var count: Int?
+    var isAtEnd: Bool
+    var currentIndex: Int
+    var codingPath: [CodingKey]
+    var result: KeyStringDecoderResult
+
+    init(codingPath: [CodingKey], result: KeyStringDecoderResult) {
+        self.codingPath = codingPath
+        self.result = result
+        self.currentIndex = 0
+        if result.cycle {
+            self.count = 1
+            self.isAtEnd = false
+            result.codingPath = codingPath
+        } else {
+            self.count = 0
+            self.isAtEnd = true
+        }
+    }
+
+    mutating func decodeNil() throws -> Bool {
+        isAtEnd = true
+        return true
+    }
+
+    mutating func decode(_ type: Bool.Type) throws -> Bool {
+        isAtEnd = true
+        return true
+    }
+
+    mutating func decode(_ type: Int.Type) throws -> Int {
+        isAtEnd = true
+        return 1
+    }
+
+    mutating func decode(_ type: Double.Type) throws -> Double {
+        isAtEnd = true
+        return 1.0
+    }
+
+    mutating func decode(_ type: String.Type) throws -> String {
+        isAtEnd = true
+        return "1"
+    }
+
+    mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
+        isAtEnd = true
+        let decoder = KeyStringDecoder(codingPath: codingPath, result: result)
+        return try T(from: decoder)
+    }
+
+    mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
+        let container = KeyStringKeyedDecoder<NestedKey>(codingPath: codingPath, result: result)
+        return .init(container)
+    }
+
+    mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
+        return KeyStringUnkeyedDecoder(codingPath: codingPath, result: result)
+    }
+
+    mutating func superDecoder() throws -> Decoder {
+        return KeyStringDecoder(codingPath: codingPath, result: result)
     }
 }
