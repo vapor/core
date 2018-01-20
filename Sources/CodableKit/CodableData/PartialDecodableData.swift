@@ -46,7 +46,7 @@ final class PartialDecodableData {
     /// Gets a `String` from the supplied path or throws a decoding error.
     func decode<D>(_ type: D.Type = D.self, at path: [CodingKey]) throws -> D where D: Decodable {
         if let value = get(at: path), case .single(let decoder) = value {
-            return try decoder(D.self, path).decode(D.self)
+            return try decoder().decode(D.self)
         } else {
             let decoder = _CodableDataDecoder(partialData: self, at: path)
             return try D(from: decoder)
