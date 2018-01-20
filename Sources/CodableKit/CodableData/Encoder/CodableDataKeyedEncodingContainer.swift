@@ -91,7 +91,7 @@ internal final class CodableDataKeyedEncodingContainer<K>: KeyedEncodingContaine
 
     /// See `KeyedEncodingContainerProtocol.encode`
     func encode<T>(_ value: T, forKey key: K) throws where T : Encodable {
-        try partialData.set(.encodable(value), at: codingPath + [key])
+        partialData.set(.encodable(value), at: codingPath + [key])
     }
 
     /// See `KeyedEncodingContainerProtocol.nestedContainer`
