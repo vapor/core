@@ -4,92 +4,93 @@ internal final class CodableDataSingleValueEncodingContainer: SingleValueEncodin
     var codingPath: [CodingKey]
 
     /// Data being encoded.
-    let partialData: PartialEncodableData
+    let partialData: PartialCodableData
 
     /// Creates a new `CodableDataKeyedEncodingContainer`
-    init(partialData: PartialEncodableData, at path: [CodingKey]) {
+    init(partialData: PartialCodableData, at path: [CodingKey]) {
         self.codingPath = path
         self.partialData = partialData
     }
 
     /// See `SingleValueEncodingContainer.encodeNil`
     func encodeNil() throws {
-        partialData.setNil(at: codingPath)
+        partialData.set(.null, at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Bool) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.bool(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Int) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.int(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Int8) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.int8(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Int16) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.int16(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Int32) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.int32(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Int64) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.int64(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: UInt) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.uint(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: UInt8) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.uint8(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: UInt16) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.uint16(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: UInt32) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.uint32(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: UInt64) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.uint64(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Float) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.float(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: Double) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.double(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode(_ value: String) throws {
-        partialData.set(value, at: codingPath)
+        partialData.set(.string(value), at: codingPath)
     }
 
     /// See `SingleValueEncodingContainer.encode`
     func encode<T>(_ value: T) throws where T : Encodable {
-        partialData.set(value, at: codingPath)
+        let encoder = _CodableDataEncoder(partialData: partialData, at: codingPath)
+        try value.encode(to: encoder)
     }
 
     /// See `SingleValueEncodingContainer.nestedContainer`

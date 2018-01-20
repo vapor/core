@@ -4,7 +4,7 @@ public final class CodableDataDecoder {
     public init() {}
 
     /// Decodes the supplied `Decodable` to `CodableData`
-    public func decode<D>(_ type: D.Type = D.self, from data: DecodableData) throws -> D
+    public func decode<D>(_ type: D.Type = D.self, from data: CodableData) throws -> D
         where D: Decodable
     {
         let decoder = _CodableDataDecoder(partialData: .init(data: data), at: [])
@@ -21,10 +21,10 @@ internal final class _CodableDataDecoder: Decoder {
     var userInfo: [CodingUserInfoKey: Any]
 
     /// Data being encoded.
-    let partialData: PartialDecodableData
+    let partialData: PartialCodableData
 
     /// Creates a new internal `_CodableDataDecoder`.
-    init(partialData: PartialDecodableData, at path: [CodingKey]) {
+    init(partialData: PartialCodableData, at path: [CodingKey]) {
         self.codingPath = path
         self.userInfo = [:]
         self.partialData = partialData
