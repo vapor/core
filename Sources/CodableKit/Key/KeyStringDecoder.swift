@@ -24,7 +24,7 @@ extension Decodable {
                 do {
                     decoded = try Self(from: decoder)
                 } catch {
-                    fatalError("Unable to decode \(Self.self). Please ensure all nested types conform to `KeyStringDecodable`: \(error)")
+                    unsupported(Self.self)
                 }
                 guard let codingPath = result.codingPath else {
                     // no more values are being set at this depth
@@ -271,18 +271,7 @@ fileprivate struct KeyStringSingleValueDecoder: SingleValueDecodingContainer {
         do {
             return try T(from: decoder)
         } catch {
-
-            fatalError("""
-                Unable to decode \(T.self): \(error)
-
-                Conform `\(T.self) to KeyStringDecodable`:
-
-                extension \(T.self): KeyStringDecodable {
-                public static var keyStringTrue: \(T.self) { <#truth_value> }
-                public static var keyStringFalse: \(T.self) { <#false_value> }
-                }
-
-                """)
+            unsupported(T.self)
         }
     }
 }
@@ -372,7 +361,11 @@ fileprivate struct KeyStringKeyedDecoder<K>: KeyedDecodingContainerProtocol wher
             }
         } else {
             let decoder = KeyStringDecoder(codingPath: codingPath + [key], result: result)
-            return try T(from: decoder)
+            do {
+                return try T(from: decoder)
+            } catch {
+                unsupported(T.self)
+            }
         }
     }
 }
@@ -426,7 +419,11 @@ fileprivate struct KeyStringUnkeyedDecoder: UnkeyedDecodingContainer {
     mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
         isAtEnd = true
         let decoder = KeyStringDecoder(codingPath: codingPath, result: result)
-        return try T(from: decoder)
+        do {
+            return try T(from: decoder)
+        } catch {
+            unsupported(T.self)
+        }
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
