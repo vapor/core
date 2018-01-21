@@ -458,5 +458,8 @@ private func unsupported<T>(_ type: T.Type) -> Never {
             return <#false_value#>
         }
     }
+               
+               
+    See https://docs.vapor.codes/3.0/fluent/models/ for more information.
     """)
 }

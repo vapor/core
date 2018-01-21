@@ -188,7 +188,8 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
             return custom._keyStringFalse as! T
         } else {
             let decoder = CodingKeyCollector(codingPath: codingPath + [key], result: result)
-            return try T(from: decoder)
+            
+            return try withEnumHeuristic(atPath: decoder.codingPath) { try T(from: decoder) }
         }
     }
 }
