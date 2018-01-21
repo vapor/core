@@ -2,9 +2,10 @@ import Foundation
 
 /// Maps KeyPath to [CodingKey] on Decodable types.
 extension Decodable {
-    /// Accepts `AnyKeyPath`.
-    /// See Decodable.codingPath(forKey:)
-    public static func unsafeCodingPath(forKey keyPath: AnyKeyPath) -> [CodingKey] {
+    /// Returns the Decodable coding path `[CodingKey]` for the supplied key path.
+    /// Note: Attempting to resolve a keyPath for non-decoded key paths (i.e., count, etc)
+    /// will result in a fatalError.
+    public static func codingPath<T>(forKey keyPath: KeyPath<Self, T>) -> [CodingKey] {
         var depth = 0
         a: while true {
             defer { depth += 1 }
@@ -19,7 +20,12 @@ extension Decodable {
                 let result = KeyStringDecoderResult(progress: progress, depth: depth)
                 let decoder = KeyStringDecoder(codingPath: [], result: result)
 
-                let decoded = try! Self(from: decoder)
+                let decoded: Self
+                do {
+                    decoded = try Self(from: decoder)
+                } catch {
+                    unsupported(Self.self)
+                }
                 guard let codingPath = result.codingPath else {
                     // no more values are being set at this depth
                     break b
@@ -31,64 +37,95 @@ extension Decodable {
             }
         }
     }
-
-    /// Returns the Decodable coding path `[CodingKey]` for the supplied key path.
-    /// Note: Attempting to resolve a keyPath for non-decoded key paths (i.e., count, etc)
-    /// will result in a fatalError.
-    public static func codingPath<T>(forKey keyPath: KeyPath<Self, T>) -> [CodingKey] {
-        return unsafeCodingPath(forKey: keyPath)
-    }
 }
 
 // MARK: Utils
 
-private func isTruthy(_ any: Any?) -> Bool {
-    switch any! {
-    case let bool as Bool: return bool
-    case let int as Int: return int == 1
-    case let string as String: return string == "1"
-    case let double as Double: return double == 1
-    case let custom as AnyKeyStringDecodable: return type(of: custom)._keyStringIsTrue(custom)
-    case let opt as Optional<Any>:
-        switch opt {
-        case .none: return false
-        case .some(let w): return isTruthy(w)
+private func isTruthy<T>(_ any: T) -> Bool {
+    guard let custom = T.self as? AnyKeyStringDecodable.Type else {
+        unsupported(T.self)
+    }
+    return custom._keyStringIsTrue(any)
+}
+
+extension Optional: AnyKeyStringDecodable {
+    public static var _keyStringTrue: Any {
+        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Wrapped.self)
         }
-    default: fatalError("Unsupported type. Conform `\(type(of: any))` to `KeyStringDecodable` to fix this error.")
+        return type._keyStringTrue
+    }
+
+    public static var _keyStringFalse: Any {
+        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Wrapped.self)
+        }
+        return type._keyStringFalse
+    }
+
+    public static func _keyStringIsTrue(_ any: Any) -> Bool {
+        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Wrapped.self)
+        }
+
+        if let wrapped = any as? Wrapped {
+            return type._keyStringIsTrue(wrapped)
+        } else {
+            return false
+        }
     }
 }
 
-internal func withEnumHeuristic<T>(atPath codingPath: [CodingKey], work: () throws -> T) throws -> T {
-    do {
-        return try work()
-    } catch Swift.DecodingError.dataCorrupted(let context) where
-        context.codingPath.count == codingPath.count &&
-        //T.self is RawRepresentable &&      // RawRepresentable is an existential, this doesn't work
-        !(T.self is AnyKeyStringDecodable) &&
-       context.debugDescription.hasPrefix("Cannot initialize \(T.self) from invalid") &&
-       (context.debugDescription.hasSuffix("value 1") || context.debugDescription.hasSuffix("value 0"))
-    {
-        // This heuristic is bad. It relies too much on the specific content of
-        // an error message from inside the Swift stdlib. Find a better way to
-        // detect this particular error case if at all possible.
+extension Array: AnyKeyStringDecodable {
+    public static var _keyStringTrue: Any {
+        guard let type = Element.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Element.self)
+        }
+        return [type._keyStringTrue]
+    }
 
-        fatalError("""
-            
-            
-            It looks like you tried to get a keypath for \(T.self), which seems to be an
-            enum. Conform \(T.self) to the KeyStringDecodable protocol to make this work.
-            Here is some sample code to get you started:
-            
-            extension \(T.self): KeyStringDecodable {
-                public static var keyStringTrue: \(T.self) { return <#one enum case#> }
-                public static var keyStringFalse: \(T.self) { return <#another enum case#> }
-            }
-            
-            See https://docs.vapor.codes/3.0/fluent/models/ for more information.
-            
-            
-            """
-        )
+    public static var _keyStringFalse: Any {
+        guard let type = Element.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Element.self)
+        }
+        return [type._keyStringFalse]
+    }
+
+    public static func _keyStringIsTrue(_ any: Any) -> Bool {
+        guard let type = Element.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Element.self)
+        }
+        return type._keyStringIsTrue(any)
+    }
+}
+
+extension Int: KeyStringDecodable {
+    public static var keyStringTrue: Int {
+        return 1
+    }
+
+    public static var keyStringFalse: Int {
+        return 0
+    }
+}
+
+extension Data: KeyStringDecodable {
+    public static var keyStringTrue: Data {
+        return Data([0x01])
+    }
+
+    public static var keyStringFalse: Data {
+        return Data([0x00])
+    }
+}
+
+extension String: KeyStringDecodable {
+    public static var keyStringTrue: String {
+        return "1"
+    }
+
+    public static var keyStringFalse: String {
+        return "0"
     }
 }
 
@@ -116,9 +153,17 @@ extension KeyStringDecodable {
 private let _false = UUID()
 private let _true = UUID()
 
+/// See `KeyStringDecodable`
 extension UUID: KeyStringDecodable {
-    public static var keyStringTrue: UUID { return _true }
-    public static var keyStringFalse: UUID { return _false }
+    /// See `KeyStringDecodable.keyStringTrue`
+    public static var keyStringTrue: UUID {
+        return _true
+    }
+
+    /// See `KeyStringDecodable.keyStringFalse`
+    public static var keyStringFalse: UUID {
+        return _false
+    }
 }
 
 private let _falsedate = Date(timeIntervalSince1970: 0)
@@ -168,7 +213,7 @@ fileprivate final class KeyStringDecoder: Decoder {
     }
 
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        fatalError("key string mapping arrays is not yet supported")
+        return KeyStringUnkeyedDecoder(codingPath: codingPath, result: result)
     }
 
     func singleValueContainer() throws -> SingleValueDecodingContainer {
@@ -223,7 +268,11 @@ fileprivate struct KeyStringSingleValueDecoder: SingleValueDecodingContainer {
 
     func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
         let decoder = KeyStringDecoder(codingPath: codingPath, result: result)
-        return try T(from: decoder)
+        do {
+            return try T(from: decoder)
+        } catch {
+            unsupported(T.self)
+        }
     }
 }
 
@@ -312,7 +361,105 @@ fileprivate struct KeyStringKeyedDecoder<K>: KeyedDecodingContainerProtocol wher
             }
         } else {
             let decoder = KeyStringDecoder(codingPath: codingPath + [key], result: result)
-            return try withEnumHeuristic(atPath: decoder.codingPath) { try T(from: decoder) }
+            do {
+                return try T(from: decoder)
+            } catch {
+                unsupported(T.self)
+            }
         }
     }
+}
+
+fileprivate struct KeyStringUnkeyedDecoder: UnkeyedDecodingContainer {
+    var count: Int?
+    var isAtEnd: Bool
+    var currentIndex: Int
+    var codingPath: [CodingKey]
+    var result: KeyStringDecoderResult
+
+    init(codingPath: [CodingKey], result: KeyStringDecoderResult) {
+        self.codingPath = codingPath
+        self.result = result
+        self.currentIndex = 0
+        if result.cycle {
+            self.count = 1
+            self.isAtEnd = false
+            result.codingPath = codingPath
+        } else {
+            self.count = 0
+            self.isAtEnd = true
+        }
+    }
+
+    mutating func decodeNil() throws -> Bool {
+        isAtEnd = true
+        return true
+    }
+
+    mutating func decode(_ type: Bool.Type) throws -> Bool {
+        isAtEnd = true
+        return true
+    }
+
+    mutating func decode(_ type: Int.Type) throws -> Int {
+        isAtEnd = true
+        return 1
+    }
+
+    mutating func decode(_ type: Double.Type) throws -> Double {
+        isAtEnd = true
+        return 1.0
+    }
+
+    mutating func decode(_ type: String.Type) throws -> String {
+        isAtEnd = true
+        return "1"
+    }
+
+    mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
+        isAtEnd = true
+        let decoder = KeyStringDecoder(codingPath: codingPath, result: result)
+        do {
+            return try T(from: decoder)
+        } catch {
+            unsupported(T.self)
+        }
+    }
+
+    mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
+        let container = KeyStringKeyedDecoder<NestedKey>(codingPath: codingPath, result: result)
+        return .init(container)
+    }
+
+    mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
+        return KeyStringUnkeyedDecoder(codingPath: codingPath, result: result)
+    }
+
+    mutating func superDecoder() throws -> Decoder {
+        return KeyStringDecoder(codingPath: codingPath, result: result)
+    }
+}
+
+private func unsupported<T>(_ type: T.Type) -> Never {
+    fatalError("""
+    Unknown type encountered while generating `[CodingKey]` path for a `KeyPath`.
+
+    Please conform `\(T.self) to `KeyStringDecodable` to fix this error:
+
+    /// See `KeyStringDecodable`
+    extension \(T.self): KeyStringDecodable {
+        /// See `KeyStringDecodable.keyStringTrue`
+        public static var keyStringTrue: \(T.self) {
+            return <#truth_value#>
+        }
+
+        /// See `KeyStringDecodable.keyStringFalse`
+        public static var keyStringFalse: \(T.self) {
+            return <#false_value#>
+        }
+    }
+               
+               
+    See https://docs.vapor.codes/3.0/fluent/models/ for more information.
+    """)
 }
