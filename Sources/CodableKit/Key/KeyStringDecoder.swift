@@ -129,6 +129,16 @@ extension String: KeyStringDecodable {
     }
 }
 
+extension Bool: KeyStringDecodable {
+    public static var keyStringTrue: Bool {
+        return true
+    }
+
+    public static var keyStringFalse: Bool {
+        return false
+    }
+}
+
 // MARK: Protocols
 
 public protocol AnyKeyStringDecodable {
