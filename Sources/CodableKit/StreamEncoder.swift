@@ -1,4 +1,4 @@
-import Async
+import Asyncgit	
 
 /// Capable of encoding streams.
 public protocol StreamEncoder: class {

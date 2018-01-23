@@ -8,6 +8,7 @@ let package = Package(
         .library(name: "CodableKit", targets: ["CodableKit"]),
         .library(name: "COperatingSystem", targets: ["COperatingSystem"]),
         .library(name: "Debugging", targets: ["Debugging"]),
+        .library(name: "Files", targets: ["Files"]),
     ],
     dependencies: [
         // Swift Promises, Futures, and Streams.
@@ -19,5 +20,7 @@ let package = Package(
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
         .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
+        .target(name: "Files"),
+        .testTarget(name: "FilesTests", dependencies: ["Files"]),
     ]
 )
