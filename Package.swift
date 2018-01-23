@@ -20,7 +20,7 @@ let package = Package(
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
         .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
-        .target(name: "Files"),
+        .target(name: "Files", dependencies: ["Async", "Debugging"]),
         .testTarget(name: "FilesTests", dependencies: ["Files"]),
     ]
 )
