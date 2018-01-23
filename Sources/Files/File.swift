@@ -22,7 +22,7 @@ public final class File: Socket {
         public static let async = File.Flags(rawValue: O_ASYNC)
         
         /// Open the file in nonblocking mode
-        public static let nonblocking = File.Flags(rawValue: O_NONBLOCK)
+        public static let nonBlocking = File.Flags(rawValue: O_NONBLOCK)
         
         /// The file mustbe created. Throw an error if it already exists
         public static let mustCreate = File.Flags(rawValue: O_DIRECTORY)
@@ -38,24 +38,21 @@ public final class File: Socket {
         
         /// Does not update the last access time
         public static let avoidTouchingAccessTime = File.Flags(rawValue: O_NOFOLLOW)
-    }
-    
-    public struct Mode {
-        var rawValue: mode_t
         
-        init(rawValue: mode_t) {
-            self.rawValue = rawValue
-        }
+        /// Opens the file for reading only
+        public static let read = File.Flags(rawValue: numericCast(O_RDONLY))
         
-        public static let read = File.Mode(rawValue: numericCast(O_RDONLY))
-        public static let write = File.Mode(rawValue: numericCast(O_WRONLY))
-        public static let readWrite = File.Mode(rawValue: numericCast(O_RDWR))
+        /// Opens the file for writing only
+        public static let write = File.Flags(rawValue: numericCast(O_WRONLY))
+        
+        /// Opens the file for reading and writing
+        public static let readWrite = File.Flags(rawValue: numericCast(O_RDWR))
     }
     
     public private(set) var descriptor: Int32
     
-    public init(atPath path: String, flags: Flags = [.async], mode: Mode = .read, size: Int32) throws {
-        self.descriptor = Darwin.open(path, flags.rawValue, mode.rawValue)
+    public init(atPath path: String, flags: Flags) throws {
+        self.descriptor = COperatingSystem.open(path, flags.rawValue)
         
         guard descriptor >= 0 else {
             let reason = String(cString: strerror(errno))
@@ -95,7 +92,7 @@ public final class File: Socket {
             return .wrote(count: 0)
         }
         
-        let sent = send(descriptor, pointer, buffer.count, 0)
+        let sent = COperatingSystem.write(descriptor, pointer, buffer.count)
         
         guard sent != -1 else {
             switch errno {
