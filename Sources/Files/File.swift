@@ -49,7 +49,32 @@ public final class File: Socket {
         public static let readWrite = File.Flags(rawValue: numericCast(O_RDWR))
     }
     
+    public struct Details {
+        let stat: stat
+        
+        public var size: Int {
+            return numericCast(stat.st_size)
+        }
+        
+        public var lastModification: Date {
+            let epochSeconds = Double(stat.st_mtimespec.tv_nsec) * 1_000_000_000
+            
+            return Date(timeIntervalSince1970: epochSeconds)
+        }
+        
+        public var lastAccess: Date {
+            let epochSeconds = Double(stat.st_atimespec.tv_nsec) * 1_000_000_000
+            
+            return Date(timeIntervalSince1970: epochSeconds)
+        }
+        
+        init(_ stat: stat) {
+            self.stat = stat
+        }
+    }
+    
     public private(set) var descriptor: Int32
+    var total = 0
     
     public init(atPath path: String, flags: Flags) throws {
         self.descriptor = COperatingSystem.open(path, flags.rawValue)
@@ -77,13 +102,18 @@ public final class File: Socket {
             }
         }
         
-        guard receivedBytes > 0 else {
-            // receiving 0 indicates the entire file has been read
-            self.close()
-            return .read(count: 0)
+        total += receivedBytes
+        return .read(count: receivedBytes)
+    }
+    
+    public func readDetails() throws -> Details {
+        var status = stat()
+        
+        guard fstat(self.descriptor, &status) == 0 else {
+            throw FileError.posix(errno, identifier: "fstat")
         }
         
-        return .read(count: receivedBytes)
+        return Details(status)
     }
     
     /// See `Socket.write`
