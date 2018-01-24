@@ -32,7 +32,7 @@ extension Decodable {
                     break b
                 }
 
-                if decoded[keyPath: keyPath] == T.keyStringTrue {
+                if T.keyStringIsTrue(decoded[keyPath: keyPath]) {
                     return codingPath
                 }
             }
@@ -88,16 +88,23 @@ public protocol AnyKeyStringDecodable {
     static func _keyStringIsTrue(_ any: Any) -> Bool
 }
 
-public protocol KeyStringDecodable: Equatable, AnyKeyStringDecodable {
+public protocol KeyStringDecodable: AnyKeyStringDecodable {
     static var keyStringTrue: Self { get }
     static var keyStringFalse: Self { get }
+    static func keyStringIsTrue(_ item: Self) -> Bool
 }
 
 extension KeyStringDecodable {
     public static var _keyStringTrue: Any { return keyStringTrue }
     public static var _keyStringFalse: Any { return keyStringFalse }
     public static func _keyStringIsTrue(_ any: Any) -> Bool {
-        return keyStringTrue == any as! Self
+        return keyStringIsTrue(any as! Self)
+    }
+}
+
+extension KeyStringDecodable where Self: Equatable {
+    public static func keyStringIsTrue(_ item: Self) -> Bool {
+        return Self.keyStringTrue == item
     }
 }
 
@@ -154,13 +161,15 @@ extension Date: KeyStringDecodable {
 
 #if swift(>=4.1)
 extension Array: KeyStringDecodable where Element: KeyStringDecodable {
+    public static func keyStringIsTrue(_ item: Array<Element>) -> Bool { return Element.keyStringIsTrue(item[0]) }
     public static var keyStringTrue: Array<Element> { return [Element.keyStringTrue] }
     public static var keyStringFalse: Array<Element> { return [Element.keyStringFalse] }
 }
 
 extension Dictionary: KeyStringDecodable where Value: KeyStringDecodable, Key == String {
-    public static var keyStringTrue: Dictionary<Key, Value> { return ["true": Value.keyStringTrue] }
-    public static var keyStringFalse: Dictionary<Key, Value> { return ["false": Value.keyStringFalse] }
+    public static func keyStringIsTrue(_ item: Dictionary<String, Value>) -> Bool { return Value.keyStringIsTrue(item[""]!) }
+    public static var keyStringTrue: Dictionary<Key, Value> { return ["": Value.keyStringTrue] }
+    public static var keyStringFalse: Dictionary<Key, Value> { return ["": Value.keyStringFalse] }
 }
 #else
 extension Array: AnyKeyStringDecodable {
