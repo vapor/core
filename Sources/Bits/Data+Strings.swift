@@ -63,6 +63,19 @@ extension Array where Element == UInt8 {
     }
 }
 
+extension UnsafeBufferPointer where Element == UInt8 {
+    /// Checks if the current bytes are equal to the contents of the provided ByteBuffer
+    public func caseInsensitiveEquals(to data: ByteBuffer) -> Bool {
+        guard self.count == data.count else { return false }
+        
+        for i in 0..<self.count {
+            if self[i] & 0xdf != data[i] & 0xdf { return false }
+        }
+        
+        return true
+    }
+}
+
 extension Data {
     /// Reads from a `Data` buffer using a `BufferPointer` rather than a normal pointer
     public func withByteBuffer<T>(_ closure: (ByteBuffer) throws -> T) rethrows -> T {
