@@ -171,6 +171,16 @@ extension Dictionary: KeyStringDecodable where Value: KeyStringDecodable, Key ==
     public static var keyStringTrue: Dictionary<Key, Value> { return ["": Value.keyStringTrue] }
     public static var keyStringFalse: Dictionary<Key, Value> { return ["": Value.keyStringFalse] }
 }
+extension Optional: KeyStringDecodable where Wrapped: KeyStringDecodable {
+    public static func keyStringIsTrue(_ item: Optional<Wrapped>) -> Bool {
+        guard let item = item else {
+            return false
+        }
+        return Wrapped.keyStringIsTrue(item)
+    }
+    public static var keyStringTrue: Optional<Wrapped> { return Wrapped.keyStringTrue }
+    public static var keyStringFalse: Optional<Wrapped> { return Wrapped.keyStringFalse }
+}
 #else
 extension Array: AnyKeyStringDecodable {
     public static var _keyStringTrue: Any {
@@ -192,6 +202,33 @@ extension Array: AnyKeyStringDecodable {
             unsupported(Element.self)
         }
         return type._keyStringIsTrue(any)
+    }
+}
+
+extension Optional: AnyKeyStringDecodable {
+    public static var _keyStringTrue: Any {
+        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Wrapped.self)
+        }
+        return type._keyStringTrue
+    }
+
+    public static var _keyStringFalse: Any {
+        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Wrapped.self)
+        }
+        return type._keyStringFalse
+    }
+
+    public static func _keyStringIsTrue(_ any: Any) -> Bool {
+        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
+            unsupported(Wrapped.self)
+        }
+        if let wrapped = any as? Wrapped {
+            return type._keyStringIsTrue(wrapped)
+        } else {
+            return false
+        }
     }
 }
 
