@@ -106,7 +106,7 @@ fileprivate struct CodingKeyCollectorSingleValueDecoder: SingleValueDecodingCont
 
     func decode(_ type: String.Type) throws -> String {
         result.add(type: type, atPath: codingPath)
-        return "0"
+        return "00000000-0000-0000-0000-000000000000"
     }
 
     func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
