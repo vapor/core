@@ -18,7 +18,7 @@ final class CodableDataKeyedDecodingContainer<K>: KeyedDecodingContainerProtocol
         switch partialData.get(at: path) {
         case .some(let data):
             switch data {
-            case .dictionary(let value): allKeys = value.keys.flatMap { Key(stringValue: $0) }
+            case .dictionary(let value): allKeys = value.keys.compactMap { Key(stringValue: $0) }
             default: allKeys = []
             }
         default: allKeys = []

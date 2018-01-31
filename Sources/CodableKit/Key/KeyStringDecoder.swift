@@ -1,6 +1,5 @@
 import Foundation
 
-#if swift(>=4.1)
 /// Maps KeyPath to [CodingKey] on Decodable types.
 extension Decodable {
     /// Returns the Decodable coding path `[CodingKey]` for the supplied key path.
@@ -39,46 +38,6 @@ extension Decodable {
         }
     }
 }
-#else
-/// Maps KeyPath to [CodingKey] on Decodable types.
-extension Decodable {
-    /// Returns the Decodable coding path `[CodingKey]` for the supplied key path.
-    /// Note: Attempting to resolve a keyPath for non-decoded key paths (i.e., count, etc)
-    /// will result in a fatalError.
-    public static func codingPath<T>(forKey keyPath: KeyPath<Self, T>) -> [CodingKey] {
-        var depth = 0
-        a: while true {
-            defer { depth += 1 }
-            var progress = 0
-
-            if depth > 42 {
-                fatalError("Exceeded maximum `codingPath(forKey:)` depth.")
-            }
-
-            b: while true {
-                defer { progress += 1 }
-                let result = KeyStringDecoderResult(progress: progress, depth: depth)
-                let decoder = KeyStringDecoder(codingPath: [], result: result)
-
-                let decoded: Self
-                do {
-                    decoded = try Self(from: decoder)
-                } catch {
-                    unsupported(Self.self)
-                }
-                guard let codingPath = result.codingPath else {
-                    // no more values are being set at this depth
-                    break b
-                }
-
-                if isTruthy(decoded[keyPath: keyPath]) {
-                    return codingPath
-                }
-            }
-        }
-    }
-}
-#endif
 
 // MARK: Protocols
 
@@ -159,7 +118,6 @@ extension Date: KeyStringDecodable {
     public static var keyStringFalse: Date { return Date(timeIntervalSince1970: 0) }
 }
 
-#if swift(>=4.1)
 extension Array: KeyStringDecodable where Element: KeyStringDecodable {
     public static func keyStringIsTrue(_ item: Array<Element>) -> Bool { return Element.keyStringIsTrue(item[0]) }
     public static var keyStringTrue: Array<Element> { return [Element.keyStringTrue] }
@@ -181,85 +139,6 @@ extension Optional: KeyStringDecodable where Wrapped: KeyStringDecodable {
     public static var keyStringTrue: Optional<Wrapped> { return Wrapped.keyStringTrue }
     public static var keyStringFalse: Optional<Wrapped> { return Wrapped.keyStringFalse }
 }
-#else
-extension Array: AnyKeyStringDecodable {
-    public static var _keyStringTrue: Any {
-        guard let type = Element.self as? AnyKeyStringDecodable.Type else {
-            unsupported(Element.self)
-        }
-        return [type._keyStringTrue]
-    }
-
-    public static var _keyStringFalse: Any {
-        guard let type = Element.self as? AnyKeyStringDecodable.Type else {
-            unsupported(Element.self)
-        }
-        return [type._keyStringFalse]
-    }
-
-    public static func _keyStringIsTrue(_ any: Any) -> Bool {
-        guard let type = Element.self as? AnyKeyStringDecodable.Type else {
-            unsupported(Element.self)
-        }
-        return type._keyStringIsTrue(any)
-    }
-}
-
-extension Optional: AnyKeyStringDecodable {
-    public static var _keyStringTrue: Any {
-        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
-            unsupported(Wrapped.self)
-        }
-        return type._keyStringTrue
-    }
-
-    public static var _keyStringFalse: Any {
-        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
-            unsupported(Wrapped.self)
-        }
-        return type._keyStringFalse
-    }
-
-    public static func _keyStringIsTrue(_ any: Any) -> Bool {
-        guard let type = Wrapped.self as? AnyKeyStringDecodable.Type else {
-            unsupported(Wrapped.self)
-        }
-        if let wrapped = any as? Wrapped {
-            return type._keyStringIsTrue(wrapped)
-        } else {
-            return false
-        }
-    }
-}
-
-private func isTruthy<T>(_ any: T) -> Bool {
-    guard let custom = T.self as? AnyKeyStringDecodable.Type else {
-        unsupported(T.self)
-    }
-    return custom._keyStringIsTrue(any)
-}
-
-private func unsupported<T>(_ type: T.Type) -> Never {
-    fatalError("""
-    Unknown type encountered while generating `[CodingKey]` path for a `KeyPath`.
-
-    Please conform `\(T.self) to `KeyStringDecodable` to fix this error:
-
-        /// See `KeyStringDecodable`
-        extension \(T.self): KeyStringDecodable {
-            /// See `KeyStringDecodable.keyStringTrue`
-            public static var keyStringTrue: \(T.self) {
-                return <#truth_value#>
-            }
-
-            /// See `KeyStringDecodable.keyStringFalse`
-            public static var keyStringFalse: \(T.self) {
-                return <#false_value#>
-            }
-        }
-    """)
-}
-#endif
 
 // MARK: Result
 
