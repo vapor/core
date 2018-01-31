@@ -41,6 +41,57 @@ class KeyStringDecoderTests: XCTestCase {
         // XCTAssertEqual(Foo.codingPath(forKey: \.bar.dict).map { $0.stringValue }, ["bar", "dict"])
     }
 
+    func testProperties() {
+        struct User: Decodable {
+            var int: Int
+            var oint: Int?
+            var int8: Int8
+            var oint8: Int8?
+            var int16: Int16
+            var oint16: Int16?
+            var int32: Int32
+            var oint32: Int32?
+            var int64: Int64
+            var oint64: Int64?
+            var uint: UInt
+            var uoint: UInt?
+            var uint8: UInt8
+            var uoint8: UInt8?
+            var uint16: UInt16
+            var uoint16: UInt16?
+            var uint32: UInt32
+            var uoint32: UInt32?
+            var uint64: UInt64
+            var uoint64: UInt64?
+
+            var uuid: UUID
+            var ouuid: UUID?
+
+            var date: Date
+            var odate: Date?
+
+            var float: Float
+            var ofloat: Float?
+            var double: Double
+            var odouble: Double?
+
+            var string: String
+            var ostring: String?
+
+            var bool: Bool
+            var obool: Bool?
+
+            var array: [String]
+            var oarray: [String]?
+
+            var dict: [String: String]
+            var odict: [String: String]?
+        }
+
+        let properties = User.properties()
+        XCTAssertEqual(properties.description, "[int: Int, oint: Int?, int8: Int8, oint8: Int8?, int16: Int16, oint16: Int16?, int32: Int32, oint32: Int32?, int64: Int64, oint64: Int64?, uint: UInt, uoint: UInt?, uint8: UInt8, uoint8: UInt8?, uint16: UInt16, uoint16: UInt16?, uint32: UInt32, uoint32: UInt32?, uint64: UInt64, uoint64: UInt64?, uuid: UUID, ouuid: UUID?, date: Date, odate: Date?, float: Float, ofloat: Float?, double: Double, odouble: Double?, string: String, ostring: String?, bool: Bool, obool: Bool?]")
+    }
+
     static let allTests = [
         ("testSimpleStruct", testSimpleStruct),
         ("testNestedStruct", testNestedStruct),
