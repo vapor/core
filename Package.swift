@@ -17,6 +17,7 @@ let package = Package(
     targets: [
         .target(name: "Bits"),
         .target(name: "CodableKit", dependencies: ["Async", "Debugging"]),
+        .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
         .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
