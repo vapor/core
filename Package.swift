@@ -11,7 +11,7 @@ let package = Package(
     ],
     dependencies: [
         // Swift Promises, Futures, and Streams.
-        .package(url: "https://github.com/vapor/async.git", .branch("beta")),
+        .package(url: "https://github.com/vapor/async.git", .exact("1.0.0-beta.1")),
     ],
     targets: [
         .target(name: "Bits"),
