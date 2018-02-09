@@ -3,7 +3,7 @@ import Async
 import COperatingSystem
 import Bits
 
-public final class File: Socket {
+public final class File {
     public struct Flags: OptionSet {
         public typealias RawValue = Int32
         
@@ -74,8 +74,10 @@ public final class File: Socket {
     }
     
     public private(set) var descriptor: Int32
-    var total = 0
+    var offset: off_t = 0
+    public let details: Details
     
+    /// Opens a new file to the `path` using the provided flags
     public init(atPath path: String, flags: Flags) throws {
         self.descriptor = COperatingSystem.open(path, flags.rawValue)
         
@@ -83,6 +85,26 @@ public final class File: Socket {
             let reason = String(cString: strerror(errno))
             throw FileError(identifier: "file", reason: reason)
         }
+        
+        var status = stat()
+        
+        guard fstat(self.descriptor, &status) == 0 else {
+            throw FileError.posix(errno, identifier: "fstat")
+        }
+        
+        self.details = Details(status)
+    }
+    
+    /// Sets the offset of the file to `offset` using `lseek`
+    public func setOffset(to offset: off_t) {
+        lseek(self.descriptor, offset, SEEK_SET)
+        self.offset = offset
+    }
+    
+    /// TODO: Expose this API if there's demand
+    internal func advanceOffset(by offset: off_t) {
+        lseek(self.descriptor, offset, SEEK_CUR)
+        self.offset += offset
     }
     
     /// See `Socket.read`
@@ -90,6 +112,7 @@ public final class File: Socket {
         let receivedBytes = COperatingSystem.read(descriptor, buffer.baseAddress!, buffer.count)
         
         guard receivedBytes != -1 else {
+            print(errno)
             switch errno {
             case EINTR:
                 // try again
@@ -102,18 +125,9 @@ public final class File: Socket {
             }
         }
         
-        total += receivedBytes
+        offset += numericCast(receivedBytes)
+        print(receivedBytes, offset, self.details.size)
         return .read(count: receivedBytes)
-    }
-    
-    public func readDetails() throws -> Details {
-        var status = stat()
-        
-        guard fstat(self.descriptor, &status) == 0 else {
-            throw FileError.posix(errno, identifier: "fstat")
-        }
-        
-        return Details(status)
     }
     
     /// See `Socket.write`
