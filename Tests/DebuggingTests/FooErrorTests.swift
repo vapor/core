@@ -70,7 +70,7 @@ class FooErrorTests: XCTestCase {
 
 private let expectedPrintable: String = {
     var expectation = "⚠️ Foo Error: You do not have a `foo`.\n"
-    expectation += "- id: DebuggingTests.FooError.noFoo\n\n"
+    expectation += "- id: FooError.noFoo\n\n"
 
     expectation += "Here are some possible causes: \n"
     expectation += "- You did not set the flongwaffle.\n"

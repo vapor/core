@@ -25,6 +25,8 @@ public protocol Helpable {
     var gitHubIssues: [String] { get }
 }
 
+/// MARK: Localized
+
 extension Helpable {
     public func helpableHelp(format: HelpFormat) -> String {
         switch format {

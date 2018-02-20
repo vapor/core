@@ -1,6 +1,22 @@
+import Foundation
+
 /// `Debuggable` provides an interface that allows a type
 /// to be more easily debugged in the case of an error.
-public protocol Debuggable: CustomDebugStringConvertible, CustomStringConvertible, Identifiable {}
+public protocol Debuggable: CustomDebugStringConvertible, CustomStringConvertible, Identifiable, LocalizedError {
+    /// The reason for the error.
+    /// Typical implementations will switch over `self`
+    /// and return a friendly `String` describing the error.
+    /// - note: It is most convenient that `self` be a `Swift.Error`.
+    ///
+    /// Here is one way to do this:
+    ///
+    ///     switch self {
+    ///     case someError:
+    ///        return "A `String` describing what went wrong including the actual error: `Error.someError`."
+    ///     // other cases
+    ///     }
+    var reason: String { get }
+}
 
 // MARK: Defaults
 
@@ -21,6 +37,23 @@ extension Debuggable {
     }
 }
 
+// MARK: Localized
+
+extension Debuggable {
+    /// A localized message describing what error occurred.
+    public var errorDescription: String? { return description }
+
+    /// A localized message describing the reason for the failure.
+    public var failureReason: String? { return reason }
+
+    /// A localized message describing how one might recover from the failure.
+    public var recoverySuggestion: String? { return (self as? Helpable)?.suggestedFixes.first }
+
+    /// A localized message providing "help" text if the user requests help.
+    public var helpAnchor: String? { return (self as? Helpable)?.documentationLinks.first }
+}
+
+
 // MARK: Representations
 
 extension Debuggable {
@@ -31,7 +64,12 @@ extension Debuggable {
     public func debuggableHelp(format: HelpFormat) -> String {
         var print: [String] = []
 
-        print.append(identifiableHelp(format: format))
+        switch format {
+        case .long:
+            print.append("⚠️ \(Self.readableName): \(reason)\n- id: \(fullIdentifier)")
+        case .short:
+            print.append("⚠️ [\(fullIdentifier): \(reason)]")
+        }
 
         if let traceable = self as? Traceable {
             print.append(traceable.traceableHelp(format: format))
