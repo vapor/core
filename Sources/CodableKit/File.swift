@@ -1,7 +1,7 @@
 import Debugging
 
 /// Errors that can be thrown while working with TCP sockets.
-public struct CodableError: Traceable, Debuggable, Helpable, Swift.Error, Encodable {
+public struct CodableError: Debuggable {
     public static let readableName = "Codable Error"
     public let identifier: String
     public var reason: String

@@ -13,7 +13,8 @@ class FooErrorTests: XCTestCase {
 
     let error: FooError = .noFoo
 
-    func testPrintable() {
+    func testPrintable() throws {
+        print(error.debugDescription)
         XCTAssertEqual(
             error.debugDescription,
             expectedPrintable,
@@ -70,7 +71,7 @@ class FooErrorTests: XCTestCase {
 
 private let expectedPrintable: String = {
     var expectation = "⚠️ Foo Error: You do not have a `foo`.\n"
-    expectation += "- id: DebuggingTests.FooError.noFoo\n\n"
+    expectation += "- id: FooError.noFoo\n\n"
 
     expectation += "Here are some possible causes: \n"
     expectation += "- You did not set the flongwaffle.\n"
@@ -84,7 +85,7 @@ private let expectedPrintable: String = {
 
     expectation += "Vapor's documentation talks about this: \n"
     expectation += "- http://documentation.com/Foo\n"
-    expectation += "- http://documentation.com/foo/noFoo"
+    expectation += "- http://documentation.com/foo/noFoo\n"
     return expectation
 }()
 
