@@ -13,7 +13,7 @@ class FooErrorTests: XCTestCase {
 
     let error: FooError = .noFoo
 
-    func testPrintable() {
+    func testPrintable() throws {
         XCTAssertEqual(
             error.debugDescription,
             expectedPrintable,
