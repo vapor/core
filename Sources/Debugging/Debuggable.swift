@@ -10,8 +10,6 @@ public protocol Debuggable: CustomDebugStringConvertible, CustomStringConvertibl
     /// `readableName` `"Foo Error"`.
     static var readableName: String { get }
 
-    // MARK: Identifiers
-
     /// A unique identifier for the error's Type.
     /// - note: This defaults to `ModuleName.TypeName`,
     /// and is used to create the `identifier` property.
@@ -23,18 +21,7 @@ public protocol Debuggable: CustomDebugStringConvertible, CustomStringConvertibl
     /// or there will be infinite recursion
     var identifier: String { get }
 
-    /// The reason for the error.
-    /// Typical implementations will switch over `self`
-    /// and return a friendly `String` describing the error.
-    /// - note: It is most convenient that `self` be a `Swift.Error`.
-    ///
-    /// Here is one way to do this:
-    ///
-    ///     switch self {
-    ///     case someError:
-    ///        return "A `String` describing what went wrong including the actual error: `Error.someError`."
-    ///     // other cases
-    ///     }
+    /// The reason for the error. Usually one sentence (that should end with a period).
     var reason: String { get }
 
     /// Optional source location for this error
