@@ -14,6 +14,7 @@ class FooErrorTests: XCTestCase {
     let error: FooError = .noFoo
 
     func testPrintable() throws {
+        print(error.debugDescription)
         XCTAssertEqual(
             error.debugDescription,
             expectedPrintable,
@@ -84,7 +85,7 @@ private let expectedPrintable: String = {
 
     expectation += "Vapor's documentation talks about this: \n"
     expectation += "- http://documentation.com/Foo\n"
-    expectation += "- http://documentation.com/foo/noFoo"
+    expectation += "- http://documentation.com/foo/noFoo\n"
     return expectation
 }()
 

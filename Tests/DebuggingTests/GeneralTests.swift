@@ -18,7 +18,7 @@ class GeneralTests: XCTestCase {
     func testMinimumConformance() {
         let minimum = MinimumError.alpha
         let description = minimum.debugDescription
-        let expectation = "⚠️ MinimumError: Not enabled\n- id: MinimumError.alpha"
+        let expectation = "⚠️ MinimumError: Not enabled\n- id: MinimumError.alpha\n"
         XCTAssertEqual(description, expectation)
     }
 

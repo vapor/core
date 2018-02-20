@@ -184,14 +184,14 @@ extension Debuggable {
                 if let range = source.range {
                     help.append("- range: \(range)")
                 }
-                return help.joined(separator: "\n")
+                print.append(help.joined(separator: "\n"))
             case .short:
                 var string = "[\(source.file):\(source.line):\(source.column)"
                 if let range = source.range {
                     string += " (\(range))"
                 }
                 string += "]"
-                return string
+                print.append(string)
             }
         }
 
@@ -227,7 +227,7 @@ extension Debuggable {
 
         switch format {
         case .long:
-            return print.joined(separator: "\n\n")
+            return print.joined(separator: "\n\n") + "\n"
         case .short:
             return print.joined(separator: " ")
         }
