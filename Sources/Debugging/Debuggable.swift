@@ -88,6 +88,14 @@ extension Debuggable {
         return type.split(separator: ".").last.flatMap(String.init) ?? type
     }
 
+    public var possibleCauses: [String] {
+        return []
+    }
+
+    public var suggestedFixes: [String] {
+        return []
+    }
+
     public var documentationLinks: [String] {
         return []
     }
