@@ -77,18 +77,18 @@ extension Date: KeyStringDecodable {
     public static var keyStringFalse: Date { return Date(timeIntervalSince1970: 0) }
 }
 
-extension Array: KeyStringDecodable where Element: KeyStringDecodable {
+extension Array: KeyStringDecodable, AnyKeyStringDecodable where Element: KeyStringDecodable {
     public static func keyStringIsTrue(_ item: Array<Element>) -> Bool { return Element.keyStringIsTrue(item[0]) }
     public static var keyStringTrue: Array<Element> { return [Element.keyStringTrue] }
     public static var keyStringFalse: Array<Element> { return [Element.keyStringFalse] }
 }
 
-extension Dictionary: KeyStringDecodable where Value: KeyStringDecodable, Key == String {
+extension Dictionary: KeyStringDecodable, AnyKeyStringDecodable where Value: KeyStringDecodable, Key == String {
     public static func keyStringIsTrue(_ item: Dictionary<String, Value>) -> Bool { return Value.keyStringIsTrue(item[""]!) }
     public static var keyStringTrue: Dictionary<Key, Value> { return ["": Value.keyStringTrue] }
     public static var keyStringFalse: Dictionary<Key, Value> { return ["": Value.keyStringFalse] }
 }
-extension Optional: KeyStringDecodable where Wrapped: KeyStringDecodable {
+extension Optional: KeyStringDecodable, AnyKeyStringDecodable where Wrapped: KeyStringDecodable {
     public static func keyStringIsTrue(_ item: Optional<Wrapped>) -> Bool {
         guard let item = item else {
             return false
