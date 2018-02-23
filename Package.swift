@@ -1,14 +1,24 @@
-// swift-tools-version:3.0
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
     name: "Core",
-    targets: [
-        Target(name: "Core", dependencies: ["libc"]),
-        Target(name: "libc")
+    products: [
+        .library(name: "Bits", targets: ["Bits"]),
+        .library(name: "CodableKit", targets: ["CodableKit"]),
+        .library(name: "COperatingSystem", targets: ["COperatingSystem"]),
+        .library(name: "Debugging", targets: ["Debugging"]),
     ],
     dependencies: [
-        .Package(url: "https://github.com/vapor/bits.git", majorVersion: 1),
-        .Package(url: "https://github.com/vapor/debugging.git", majorVersion: 1),
+        // Swift Promises, Futures, and Streams.
+        .package(url: "https://github.com/vapor/async.git", from: "1.0.0-rc"),
+    ],
+    targets: [
+        .target(name: "Bits"),
+        .target(name: "CodableKit", dependencies: ["Async", "Debugging"]),
+        .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
+        .target(name: "COperatingSystem"),
+        .target(name: "Debugging"),
+        .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
     ]
 )

@@ -1,23 +1,12 @@
 #if os(Linux)
 
 import XCTest
-@testable import CoreTests
+@testable import DebuggingTests
 
 XCTMain([
-    testCase(ArrayTests.allTests),
-    testCase(BlackBoxTests.allTests),
-    testCase(CacheTests.allTests),
-    testCase(FileProtocolTests.allTests),
-    testCase(PercentEncodingTests.allTests),
-    testCase(PortalTests.allTests),
-    testCase(ResultTests.allTests),
-    testCase(RFC1123Tests.allTests),
-    testCase(SemaphoreTests.allTests),
-    testCase(StaticDataBufferTests.allTests),
-    testCase(StringTests.allTests),
-    testCase(UnsignedIntegerChunkingTests.allTests),
-    testCase(UtilityTests.allTests),
-    testCase(PolymorphicTests.allTests),
+    testCase(FooErrorTests.allTests),
+    testCase(GeneralTests.allTests),
+    testCase(TraceableTests.allTests),
 ])
 
 #endif
