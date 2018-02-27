@@ -110,5 +110,7 @@ class KeyStringDecoderTests: XCTestCase {
     static let allTests = [
         ("testSimpleStruct", testSimpleStruct),
         ("testNestedStruct", testNestedStruct),
+        ("testProperties", testProperties),
+        ("testPropertyDepth", testPropertyDepth),
     ]
 }
