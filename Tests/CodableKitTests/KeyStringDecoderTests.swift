@@ -107,10 +107,21 @@ class KeyStringDecoderTests: XCTestCase {
         XCTAssertEqual(User.properties(depth: 2).description, "[pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
     }
 
+    func testPropertyA() {
+        final class A: Decodable {
+            public var id: UUID?
+            public var date: Date
+            public var length: Double
+            public var isOpen: Bool
+        }
+        XCTAssertEqual(A.properties().description, "[id: UUID?, date: Date, length: Double, isOpen: Bool]")
+    }
+
     static let allTests = [
         ("testSimpleStruct", testSimpleStruct),
         ("testNestedStruct", testNestedStruct),
         ("testProperties", testProperties),
         ("testPropertyDepth", testPropertyDepth),
+        ("testPropertyA", testPropertyA),
     ]
 }
