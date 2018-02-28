@@ -2,14 +2,11 @@ import Debugging
 import COperatingSystem
 
 /// Errors that can be thrown while working with TCP sockets.
-public struct FileError: Traceable, Debuggable, Helpable, Swift.Error, Encodable {
+public struct FileError: Debuggable {
     public static let readableName = "TCP Error"
     public let identifier: String
     public var reason: String
-    public var file: String
-    public var function: String
-    public var line: UInt
-    public var column: UInt
+    public var sourceLocation: SourceLocation?
     public var stackTrace: [String]
     public var possibleCauses: [String]
     public var suggestedFixes: [String]
@@ -20,17 +17,11 @@ public struct FileError: Traceable, Debuggable, Helpable, Swift.Error, Encodable
         reason: String,
         possibleCauses: [String] = [],
         suggestedFixes: [String] = [],
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column
-        ) {
+        sourceLocation: SourceLocation
+    ) {
         self.identifier = identifier
         self.reason = reason
-        self.file = file
-        self.function = function
-        self.line = line
-        self.column = column
+        self.sourceLocation = sourceLocation
         self.stackTrace = FileError.makeStackTrace()
         self.possibleCauses = possibleCauses
         self.suggestedFixes = suggestedFixes
@@ -42,10 +33,7 @@ public struct FileError: Traceable, Debuggable, Helpable, Swift.Error, Encodable
         identifier: String,
         possibleCauses: [String] = [],
         suggestedFixes: [String] = [],
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column
+        sourceLocation: SourceLocation
     ) -> FileError {
         let message = COperatingSystem.strerror(errno)
         let string = String(cString: message!, encoding: .utf8) ?? "unknown"
@@ -54,10 +42,7 @@ public struct FileError: Traceable, Debuggable, Helpable, Swift.Error, Encodable
             reason: string,
             possibleCauses: possibleCauses,
             suggestedFixes: suggestedFixes,
-            file: file,
-            function: function,
-            line: line,
-            column: column
+            sourceLocation: sourceLocation
         )
     }
 }

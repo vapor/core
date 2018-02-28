@@ -99,7 +99,6 @@ public final class FileSource: Async.OutputStream {
                 let view = UnsafeBufferPointer<UInt8>(start: buffer.baseAddress, count: count)
                 downstreamIsReady = false
                 let promise = Promise(Void.self)
-                excessSignalCount = 0
                 downstream.input(.next(view, promise))
                 promise.future.addAwaiter { result in
                     switch result {

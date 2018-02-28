@@ -83,13 +83,13 @@ public final class File {
         
         guard descriptor >= 0 else {
             let reason = String(cString: strerror(errno))
-            throw FileError(identifier: "file", reason: reason)
+            throw FileError(identifier: "file", reason: reason, sourceLocation: .capture())
         }
         
         var status = stat()
         
         guard fstat(self.descriptor, &status) == 0 else {
-            throw FileError.posix(errno, identifier: "fstat")
+            throw FileError.posix(errno, identifier: "fstat", sourceLocation: .capture())
         }
         
         self.details = Details(status)
@@ -112,7 +112,6 @@ public final class File {
         let receivedBytes = COperatingSystem.read(descriptor, buffer.baseAddress!, buffer.count)
         
         guard receivedBytes != -1 else {
-            print(errno)
             switch errno {
             case EINTR:
                 // try again
@@ -121,12 +120,11 @@ public final class File {
                 // no data yet
                 return .wouldBlock
             default:
-                throw FileError.posix(errno, identifier: "read")
+                throw FileError.posix(errno, identifier: "read", sourceLocation: .capture())
             }
         }
         
         offset += numericCast(receivedBytes)
-        print(receivedBytes, offset, self.details.size)
         return .read(count: receivedBytes)
     }
     
@@ -146,7 +144,7 @@ public final class File {
             case EAGAIN, EWOULDBLOCK:
                 return .wouldBlock
             default:
-                throw FileError.posix(errno, identifier: "write")
+                throw FileError.posix(errno, identifier: "write", sourceLocation: .capture())
             }
         }
         
@@ -161,3 +159,16 @@ public final class File {
         self.descriptor = -1
     }
 }
+
+#if os(Linux)
+    /// This extension simplifies API differences between Linux and Darwin
+    fileprivate extension stat {
+        var st_atimespec: time_t {
+            return self.st_atime
+        }
+        
+        var st_mtimespec: time_t {
+            return self.st_mtime
+        }
+    }
+#endif
