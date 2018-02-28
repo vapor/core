@@ -89,11 +89,39 @@ class KeyStringDecoderTests: XCTestCase {
         }
 
         let properties = User.properties()
-        XCTAssertEqual(properties.description, "[int: Int, oint: Int?, int8: Int8, oint8: Int8?, int16: Int16, oint16: Int16?, int32: Int32, oint32: Int32?, int64: Int64, oint64: Int64?, uint: UInt, uoint: UInt?, uint8: UInt8, uoint8: UInt8?, uint16: UInt16, uoint16: UInt16?, uint32: UInt32, uoint32: UInt32?, uint64: UInt64, uoint64: UInt64?, uuid: UUID, ouuid: UUID?, date: Date, odate: Date?, float: Float, ofloat: Float?, double: Double, odouble: Double?, string: String, ostring: String?, bool: Bool, obool: Bool?]")
+        XCTAssertEqual(properties.description, "[int: Int, oint: Int?, int8: Int8, oint8: Int8?, int16: Int16, oint16: Int16?, int32: Int32, oint32: Int32?, int64: Int64, oint64: Int64?, uint: UInt, uoint: UInt?, uint8: UInt8, uoint8: UInt8?, uint16: UInt16, uoint16: UInt16?, uint32: UInt32, uoint32: UInt32?, uint64: UInt64, uoint64: UInt64?, uuid: UUID, ouuid: UUID?, date: Date, odate: Date?, float: Float, ofloat: Float?, double: Double, odouble: Double?, string: String, ostring: String?, bool: Bool, obool: Bool?, array: Array<String>, oarray: Array<String>?, dict: Dictionary<String, String>, odict: Dictionary<String, String>?]")
+    }
+
+    func testPropertyDepth() {
+        struct Pet: Decodable {
+            var nickname: String
+            var favoriteTreat: String
+        }
+        struct User: Decodable {
+            var pet: Pet
+            var name: String
+            var age: Int
+        }
+
+        XCTAssertEqual(User.properties(depth: 1).description, "[pet: Pet #1, name: String, age: Int]")
+        XCTAssertEqual(User.properties(depth: 2).description, "[pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
+    }
+
+    func testPropertyA() {
+        final class A: Decodable {
+            public var id: UUID?
+            public var date: Date
+            public var length: Double
+            public var isOpen: Bool
+        }
+        XCTAssertEqual(A.properties().description, "[id: UUID?, date: Date, length: Double, isOpen: Bool]")
     }
 
     static let allTests = [
         ("testSimpleStruct", testSimpleStruct),
         ("testNestedStruct", testNestedStruct),
+        ("testProperties", testProperties),
+        ("testPropertyDepth", testPropertyDepth),
+        ("testPropertyA", testPropertyA),
     ]
 }

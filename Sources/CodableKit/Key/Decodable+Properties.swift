@@ -120,8 +120,15 @@ fileprivate struct CodingKeyCollectorSingleValueDecoder: SingleValueDecodingCont
             result.add(type: type, atPath: codingPath)
             return keyString._keyStringFalse as! T
         } else {
-            let decoder = CodingKeyCollector(codingPath: codingPath, result: result)
-            return try T(from: decoder)
+            if codingPath.count >= result.depth {
+                // stop nesting
+                result.add(type: type, atPath: codingPath)
+                return try T(from: ZeroDecoder())
+            } else {
+                // we can continue nesting
+                let decoder = CodingKeyCollector(codingPath: codingPath, result: result)
+                return try T(from: decoder)
+            }
         }
     }
 }
@@ -197,8 +204,16 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
             result.add(type: type, atPath: codingPath + [key])
             return keyString._keyStringFalse as! T
         } else {
-            let decoder = CodingKeyCollector(codingPath: codingPath + [key], result: result)
-            return try T(from: decoder)
+            let path = codingPath + [key]
+            if path.count >= result.depth {
+                // stop nesting
+                result.add(type: type, atPath: codingPath + [key])
+                return try T(from: ZeroDecoder())
+            } else {
+                // we can continue nesting
+                let decoder = CodingKeyCollector(codingPath: path, result: result)
+                return try T(from: decoder)
+            }
         }
     }
 }
@@ -244,11 +259,18 @@ fileprivate struct CodingKeyCollectorUnkeyedDecoder: UnkeyedDecodingContainer {
 
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         if let keyString = T.self as? AnyKeyStringDecodable.Type {
-            result.add(type: type, atPath: codingPath)
+            result.add(type: [T].self, atPath: codingPath)
             return keyString._keyStringFalse as! T
         } else {
-            let decoder = CodingKeyCollector(codingPath: codingPath, result: result)
-            return try T(from: decoder)
+            if codingPath.count + 1 >= result.depth {
+                // stop nesting
+                result.add(type: [T].self, atPath: codingPath)
+                return try T(from: ZeroDecoder())
+            } else {
+                // we can continue nesting
+                let decoder = CodingKeyCollector(codingPath: codingPath, result: result)
+                return try T(from: decoder)
+            }
         }
     }
 

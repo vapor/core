@@ -4,7 +4,7 @@ enum FooError: String, Error {
     case noFoo
 }
 
-extension FooError: Debuggable, Helpable {
+extension FooError: Debuggable {
     static var readableName: String {
         return "Foo Error"
     }

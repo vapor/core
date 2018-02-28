@@ -30,16 +30,11 @@ struct TestError: Error {
     }
 }
 
-extension TestError: Identifiable {
+extension TestError: Debuggable {
     var identifier: String {
         return kind.rawValue
     }
-}
-
-extension TestError: Traceable { }
-extension TestError: Debuggable { }
-
-extension TestError: Helpable {
+    
     var possibleCauses: [String] {
         switch kind {
         case .foo:

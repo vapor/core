@@ -77,24 +77,47 @@ extension Date: KeyStringDecodable {
     public static var keyStringFalse: Date { return Date(timeIntervalSince1970: 0) }
 }
 
-extension Array: KeyStringDecodable where Element: KeyStringDecodable {
-    public static func keyStringIsTrue(_ item: Array<Element>) -> Bool { return Element.keyStringIsTrue(item[0]) }
-    public static var keyStringTrue: Array<Element> { return [Element.keyStringTrue] }
-    public static var keyStringFalse: Array<Element> { return [Element.keyStringFalse] }
+extension Array: KeyStringDecodable, AnyKeyStringDecodable {
+    public static func keyStringIsTrue(_ item: Array<Element>) -> Bool {
+        return requireKeyStringDecodable(Element.self)._keyStringIsTrue(item[0])
+    }
+    public static var keyStringTrue: Array<Element> {
+        return [requireKeyStringDecodable(Element.self)._keyStringTrue as! Element]
+    }
+    public static var keyStringFalse: Array<Element> {
+        return [requireKeyStringDecodable(Element.self)._keyStringFalse as! Element]
+    }
 }
 
-extension Dictionary: KeyStringDecodable where Value: KeyStringDecodable, Key == String {
-    public static func keyStringIsTrue(_ item: Dictionary<String, Value>) -> Bool { return Value.keyStringIsTrue(item[""]!) }
-    public static var keyStringTrue: Dictionary<Key, Value> { return ["": Value.keyStringTrue] }
-    public static var keyStringFalse: Dictionary<Key, Value> { return ["": Value.keyStringFalse] }
+extension Dictionary: KeyStringDecodable, AnyKeyStringDecodable {
+    public static func keyStringIsTrue(_ item: Dictionary<Key, Value>) -> Bool {
+        return requireKeyStringDecodable(Value.self)._keyStringIsTrue(item["" as! Key]!)
+    }
+    public static var keyStringTrue: Dictionary<Key, Value> {
+        return ["" as! Key: requireKeyStringDecodable(Value.self)._keyStringTrue as! Value]
+    }
+    public static var keyStringFalse: Dictionary<Key, Value> {
+        return ["" as! Key: requireKeyStringDecodable(Value.self)._keyStringFalse as! Value]
+    }
 }
-extension Optional: KeyStringDecodable where Wrapped: KeyStringDecodable {
+extension Optional: KeyStringDecodable, AnyKeyStringDecodable {
     public static func keyStringIsTrue(_ item: Optional<Wrapped>) -> Bool {
         guard let item = item else {
             return false
         }
-        return Wrapped.keyStringIsTrue(item)
+        return requireKeyStringDecodable(Wrapped.self)._keyStringIsTrue(item)
     }
-    public static var keyStringTrue: Optional<Wrapped> { return Wrapped.keyStringTrue }
-    public static var keyStringFalse: Optional<Wrapped> { return Wrapped.keyStringFalse }
+    public static var keyStringTrue: Optional<Wrapped> {
+        return requireKeyStringDecodable(Wrapped.self)._keyStringTrue as? Wrapped
+    }
+    public static var keyStringFalse: Optional<Wrapped> {
+        return requireKeyStringDecodable(Wrapped.self)._keyStringFalse as? Wrapped
+    }
+}
+
+func requireKeyStringDecodable<T>(_ type: T.Type) -> AnyKeyStringDecodable.Type {
+    guard let type = T.self as? AnyKeyStringDecodable.Type else {
+        fatalError("\(T.self) does not conform to `KeyStringDecodable`.")
+    }
+    return type
 }
