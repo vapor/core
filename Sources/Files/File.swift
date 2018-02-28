@@ -57,13 +57,21 @@ public final class File {
         }
         
         public var lastModification: Date {
-            let epochSeconds = Double(stat.st_mtimespec.tv_nsec) * 1_000_000_000
+            #if os(Linux)
+                let epochSeconds = Double(self.st_mtime)
+            #else
+                let epochSeconds = Double(stat.st_mtimespec.tv_sec)
+            #endif
             
             return Date(timeIntervalSince1970: epochSeconds)
         }
         
         public var lastAccess: Date {
-            let epochSeconds = Double(stat.st_atimespec.tv_nsec) * 1_000_000_000
+            #if os(Linux)
+                let epochSeconds = Double(self.st_atime)
+            #else
+                let epochSeconds = Double(stat.st_atimespec.tv_sec)
+            #endif
             
             return Date(timeIntervalSince1970: epochSeconds)
         }
@@ -159,16 +167,3 @@ public final class File {
         self.descriptor = -1
     }
 }
-
-#if os(Linux)
-    /// This extension simplifies API differences between Linux and Darwin
-    fileprivate extension stat {
-        var st_atimespec: time_t {
-            return self.st_atime
-        }
-        
-        var st_mtimespec: time_t {
-            return self.st_mtime
-        }
-    }
-#endif
