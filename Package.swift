@@ -4,16 +4,18 @@ import PackageDescription
 let package = Package(
     name: "Core",
     products: [
+        .library(name: "Async", targets: ["Async"]),
         .library(name: "Bits", targets: ["Bits"]),
         .library(name: "CodableKit", targets: ["CodableKit"]),
         .library(name: "COperatingSystem", targets: ["COperatingSystem"]),
         .library(name: "Debugging", targets: ["Debugging"]),
     ],
     dependencies: [
-        // Swift Promises, Futures, and Streams.
-        .package(url: "https://github.com/vapor/async.git", from: "1.0.0-rc"),
+        // Event-driven network application framework for high performance protocol servers & clients, non-blocking.
+        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
     ],
     targets: [
+        .target(name: "Async", dependencies: ["NIO"]),
         .target(name: "Bits"),
         .target(name: "CodableKit", dependencies: ["Async", "Debugging"]),
         .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
