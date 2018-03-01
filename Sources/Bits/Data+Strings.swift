@@ -52,7 +52,7 @@ extension Array where Element == UInt8 {
     }
     
     /// Checks if the current bytes are equal to the contents of the provided ByteBuffer
-    public func caseInsensitiveEquals(to data: ByteBuffer) -> Bool {
+    public func caseInsensitiveEquals(to data: BytesBufferPointer) -> Bool {
         guard self.count == data.count else { return false }
         
         for i in 0..<self.count {
@@ -65,7 +65,7 @@ extension Array where Element == UInt8 {
 
 extension UnsafeBufferPointer where Element == UInt8 {
     /// Checks if the current bytes are equal to the contents of the provided ByteBuffer
-    public func caseInsensitiveEquals(to data: ByteBuffer) -> Bool {
+    public func caseInsensitiveEquals(to data: BytesBufferPointer) -> Bool {
         guard self.count == data.count else { return false }
         
         for i in 0..<self.count {
@@ -78,19 +78,19 @@ extension UnsafeBufferPointer where Element == UInt8 {
 
 extension Data {
     /// Reads from a `Data` buffer using a `BufferPointer` rather than a normal pointer
-    public func withByteBuffer<T>(_ closure: (ByteBuffer) throws -> T) rethrows -> T {
+    public func withByteBuffer<T>(_ closure: (BytesBufferPointer) throws -> T) rethrows -> T {
         return try self.withUnsafeBytes { (pointer: BytesPointer) in
-            let buffer = ByteBuffer(start: pointer,count: self.count)
+            let buffer = BytesBufferPointer(start: pointer,count: self.count)
             
             return try closure(buffer)
         }
     }
 
     /// Reads from a `Data` buffer using a `BufferPointer` rather than a normal pointer
-    public mutating func withMutableByteBuffer<T>(_ closure: (MutableByteBuffer) throws -> T) rethrows -> T {
+    public mutating func withMutableByteBuffer<T>(_ closure: (MutableBytesBufferPointer) throws -> T) rethrows -> T {
         let count = self.count
         return try self.withUnsafeMutableBytes { (pointer: MutableBytesPointer) in
-            let buffer = MutableByteBuffer(start: pointer,count: count)
+            let buffer = MutableBytesBufferPointer(start: pointer,count: count)
             return try closure(buffer)
         }
     }

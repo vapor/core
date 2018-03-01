@@ -1,7 +1,7 @@
 public typealias Byte = UInt8
 public typealias Bytes = [Byte]
-public typealias ByteBuffer = UnsafeBufferPointer<Byte>
-public typealias MutableByteBuffer = UnsafeMutableBufferPointer<Byte>
+public typealias BytesBufferPointer = UnsafeBufferPointer<Byte>
+public typealias MutableBytesBufferPointer = UnsafeMutableBufferPointer<Byte>
 public typealias BytesPointer = UnsafePointer<Byte>
 public typealias MutableBytesPointer = UnsafeMutablePointer<Byte>
 
