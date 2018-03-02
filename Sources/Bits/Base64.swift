@@ -115,7 +115,7 @@ public final class Base64 {
     }
 
     /// Encodes bytes into Base64 format
-    public func encode(_ bytes: Data) -> Data {
+    public func encode(data bytes: Data) -> Data {
         if bytes.count == 0 {
             return bytes
         }
@@ -164,7 +164,7 @@ public final class Base64 {
     }
 
     /// Decodes bytes into binary format
-    public func decode(_ s: Data) -> Data {
+    public func decode(data s: Data) -> Data {
         let maxolen = s.count
 
         var off: Int = 0
@@ -236,14 +236,18 @@ public final class Base64 {
     }
 }
 
-extension Base64 {
-    /// Decodes a Base64 encoded string to plaintext.
-    public func decode(_ string: String) -> String? {
-        return String(data: decode(Data(string.utf8)), encoding: .utf8)
-    }
+/// MARK: Convenience
 
-    /// Encodes a String to a Base64 encoded string.
-    public func encode(_ string: String) -> String? {
-        return String(data: encode(Data(string.utf8)), encoding: .utf8)
+extension String {
+    /// Transforms a Base64 encoded String to Data.
+    public func base64Decoded(_ coder: Base64 = .regular) -> Data {
+        return coder.decode(data: Data(utf8))
+    }
+}
+
+extension Data {
+    /// Transforms Data into a Base64 encoded string.
+    public func base64Encoded(_ coder: Base64 = .regular, encoding: String.Encoding = .utf8) -> String? {
+        return String(data: coder.encode(data: self), encoding: encoding)
     }
 }
