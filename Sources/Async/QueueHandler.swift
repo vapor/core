@@ -66,10 +66,10 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     private func writeOutputIfEnqueued(ctx: ChannelHandlerContext) {
         VERBOSE("QueueHandler.sendOutput(ctx: \(ctx)) [outputQueue.count=\(outputQueue.count)]")
         if let next = outputQueue.popLast() {
-            ctx.write(wrapOutboundOut(next)).do {
+            ctx.writeAndFlush(wrapOutboundOut(next)).do {
                 self.writeOutputIfEnqueued(ctx: ctx)
-                }.catch { error in
-                    self.errorHandler(error)
+            }.catch { error in
+                self.errorHandler(error)
             }
         } else {
             waitingCtx = ctx
