@@ -12,11 +12,30 @@ extension EventLoop {
     }
 }
 
+public typealias Worker = EventLoopGroup
+
 /// Has an EventLoop.
-public protocol Worker {
+extension Worker {
     /// This worker's event loop. All async work done
     /// on this worker _must_ occur on its event loop.
+    public var eventLoop: EventLoop {
+        return next()
+    }
+}
+
+public protocol BasicWorker: Worker {
     var eventLoop: EventLoop { get }
+}
+
+import Dispatch
+
+extension BasicWorker {
+    public func next() -> EventLoop {
+        return self.eventLoop
+    }
+    public func shutdownGracefully(queue: DispatchQueue, _ callback: @escaping (Error?) -> Void) {
+        eventLoop.shutdownGracefully(queue: queue, callback)
+    }
 }
 
 extension EventLoopFuture: FutureType {
@@ -64,15 +83,4 @@ extension Future where T == Void {
         promise.succeed()
         return promise.futureResult
     }
-}
-
-struct _EventLoopWorker: Worker {
-    let eventLoop: EventLoop
-    init(_ eventLoop: EventLoop) {
-        self.eventLoop = eventLoop
-    }
-}
-
-public func wrap(_ eventLoop: EventLoop) -> Worker {
-    return _EventLoopWorker(eventLoop)
 }
