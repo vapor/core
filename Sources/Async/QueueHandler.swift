@@ -89,11 +89,13 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
         do {
             if try current.onInput(input) {
                 current.promise.succeed()
-                assert(inputQueue.popLast() != nil)
+                let popped = inputQueue.popLast()
+                assert(popped != nil)
             }
         } catch {
             current.promise.fail(error: error)
-            assert(inputQueue.popLast() != nil)
+            let popped = inputQueue.popLast()
+            assert(popped != nil)
         }
     }
 
