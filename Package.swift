@@ -22,5 +22,6 @@ let package = Package(
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
         .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
+        .testTarget(name: "BitsTests", dependencies: ["Debugging", "NIO"]),
     ]
 )
