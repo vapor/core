@@ -49,5 +49,22 @@ extension ByteBuffer {
             return value
         }
     }
+}
 
+// Peek Buffers Whole String
+extension ByteBuffer {
+    public func peekString(encoding: String.Encoding = .ascii) -> String? {
+        guard let bytes = getBytes(at: 0, length: readableBytes) else { return nil }
+        return String(bytes: bytes, encoding: encoding)
+    }
+}
+
+
+// Peek Buffers First Byte
+extension ByteBuffer {
+    public func peekFirstByte() -> UInt8? {
+        guard readableBytes >= 1 else { return nil }
+        guard let bytes = getBytes(at: 0, length: 1) else { return nil }
+        return bytes.first
+    }
 }

@@ -72,7 +72,7 @@ extension ByteBuffer {
     }
 }
 
-//TODO: BinaryFloatingPoint
+//Read In BinaryFloatingPoint
 
 extension ByteBuffer {
     @discardableResult
