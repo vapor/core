@@ -5,14 +5,23 @@ extension Decodable {
     /// Returns the Decodable coding path `[CodingKey]` for the supplied key path.
     /// Note: Attempting to resolve a keyPath for non-decoded key paths (i.e., count, etc)
     /// will result in a fatalError.
-    public static func codingPath<T>(forKey keyPath: KeyPath<Self, T>) -> [CodingKey] where T: KeyStringDecodable {
+    public static func codingPath<T>(forKey keyPath: KeyPath<Self, T>) throws -> [CodingKey] where T: KeyStringDecodable {
         var depth = 0
         a: while true {
             defer { depth += 1 }
             var progress = 0
 
             if depth > 42 {
-                fatalError("Exceeded maximum `codingPath(forKey:)` depth.")
+                throw CodableKitError(
+                    identifier: "codingPathDepth",
+                    reason: "Exceeded maximum `codingPath(forKey:)` depth.",
+                    suggestedFixes: [],
+                    possibleCauses: [
+                        "The key path is a computed property, not a stored one: \(keyPath).",
+                        "The key path you are attempting to decode is not parsed in `\(Self.self).init(from: Decoder)`"
+                    ],
+                    source: .capture()
+                )
             }
 
             b: while true {
@@ -24,7 +33,17 @@ extension Decodable {
                 do {
                     decoded = try Self(from: decoder)
                 } catch {
-                    fatalError("\(error)")
+                    throw CodableKitError(
+                        identifier: "decodeError",
+                        reason: "An error occured while decoding path: \(error).",
+                        suggestedFixes: [
+                            "Ensure all types on the model you are decoding conform to `KeyStringDecodable`."
+                        ],
+                        possibleCauses: [
+                            "One of the properties on \(Self.self) is not `KeyStringDecodable`."
+                        ],
+                        source: .capture()
+                    )
                 }
                 guard let codingPath = result.codingPath else {
                     // no more values are being set at this depth
