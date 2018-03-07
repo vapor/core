@@ -86,5 +86,12 @@ final class ByteBufferTestRequireTests: XCTestCase {
         }
     }
 
+
+    static let allTests = [
+        ("testRequireFixedWidthInteger", testRequireFixedWidthInteger),
+        ("testRequireString", testRequireString),
+        ("testRequireData", testRequireData),
+        ("testRequireBinaryFloatingPoint", testRequireBinaryFloatingPoint),
+        ]
 }
 

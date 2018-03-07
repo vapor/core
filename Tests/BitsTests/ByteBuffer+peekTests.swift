@@ -30,7 +30,7 @@ final class ByteBufferTestpeekTests: XCTestCase {
                                       encoding: .utf8), second)
     }
 
-    func testPeekBytes() {
+    func testPeekData() {
         buf = allocator.buffer(capacity: 256)
         let first = Array("My String".utf8)
         let second = Array("My other string".utf8)
@@ -55,4 +55,11 @@ final class ByteBufferTestpeekTests: XCTestCase {
         XCTAssertEqual(buf.peekBinaryFloatingPoint(skipping: MemoryLayout<Double>.size,
             as: Float.self), second)
     }
+
+    static let allTests = [
+        ("testPeekFixedWidthInteger", testPeekFixedWidthInteger),
+        ("testPeekString", testPeekString),
+        ("testPeekData", testPeekData),
+        ("testPeekBinaryFloatingPoint", testPeekBinaryFloatingPoint),
+        ]
 }
