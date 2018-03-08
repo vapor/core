@@ -26,6 +26,18 @@ extension KeyStringDecodable where Self: Equatable {
     }
 }
 
+// MARK: Tuple
+
+public protocol TupleKeyStringDecodable: KeyStringDecodable {
+    static var keyString: TupleMap { get }
+}
+
+extension TupleKeyStringDecodable {
+    public typealias TupleMap = (Self, Self)
+    public static var keyStringTrue: Self { return keyString.0 }
+    public static var keyStringFalse: Self { return keyString.1 }
+}
+
 // MARK: Default Types
 
 extension FixedWidthInteger {
