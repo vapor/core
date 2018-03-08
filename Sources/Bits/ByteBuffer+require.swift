@@ -17,7 +17,7 @@ class ByteBufferReadError: Debuggable {
         possibleCauses: [String] = [],
         suggestedFixes: [String] = [],
         source: SourceLocation
-        ) {
+    ) {
         self.identifier = identifier
         self.reason = reason
         self.sourceLocation = source
@@ -31,13 +31,15 @@ class ByteBufferReadError: Debuggable {
 extension ByteBuffer {
     public mutating func requireReadInteger<I>(endianness: Endianness = .big) throws -> I where I: FixedWidthInteger {
         guard let i: I = readInteger(endianness: endianness, as: I.self) else {
-            throw ByteBufferReadError(identifier: "Error Reading FixedWidthInteger",
-                                      reason: "This was not available in the buffer",
-                                      possibleCauses: ["Buffer was already read",
-                                                       "Buffer was not checked before reading"],
-                                      suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                                      source: .capture())
+            throw ByteBufferReadError(
+                identifier: "fixedWidthInteger",
+                reason: "This was not available in the buffer",
+                possibleCauses: ["Buffer was already read","Buffer was not checked before reading"],
+                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
+                source: .capture()
+            )
         }
+
         return i
     }
 }
@@ -46,12 +48,13 @@ extension ByteBuffer {
 extension ByteBuffer {
     public mutating func requireReadString(length: Int) throws -> String {
         guard let string = readString(length: length) else {
-        throw ByteBufferReadError(identifier: "Error Reading String",
-                                  reason: "This was not available in the buffer",
-                                  possibleCauses: ["Buffer was already read",
-                                                   "Buffer was not checked before reading"],
-                                  suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                                  source: .capture())
+            throw ByteBufferReadError(
+                identifier: "string",
+                reason: "This was not available in the buffer",
+                possibleCauses: ["Buffer was already read", "Buffer was not checked before reading"],
+                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
+                source: .capture()
+            )
         }
         return string
     }
@@ -61,12 +64,13 @@ extension ByteBuffer {
 extension ByteBuffer {
     public mutating func requireReadData(length: Int) throws -> Data {
         guard let bytes = readBytes(length: length) else {
-            throw ByteBufferReadError(identifier: "Error Reading Data",
-                                      reason: "This was not available in the buffer",
-                                      possibleCauses: ["Buffer was already read",
-                                                       "Buffer was not checked before reading"],
-                                      suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                                      source: .capture())
+            throw ByteBufferReadError(
+                identifier: "data",
+                reason: "This was not available in the buffer",
+                possibleCauses: ["Buffer was already read", "Buffer was not checked before reading"],
+                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
+                source: .capture()
+            )
         }
         return Data(bytes: bytes)
     }
@@ -80,12 +84,13 @@ extension ByteBuffer {
         where T: BinaryFloatingPoint
     {
         guard let bytes = self.readBytes(length: MemoryLayout<T>.size) else {
-            throw ByteBufferReadError(identifier: "Error Reading Binary Floating Point",
-                                      reason: "This was not available in the buffer",
-                                      possibleCauses: ["Buffer was already read",
-                                                       "Buffer was not checked before reading"],
-                                      suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                                      source: .capture())
+            throw ByteBufferReadError(
+                identifier: "binaryFloatingPoint",
+                reason: "This was not available in the buffer",
+                possibleCauses: ["Buffer was already read", "Buffer was not checked before reading"],
+                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
+                source: .capture()
+            )
         }
         var value: T = 0
         withUnsafeMutableBytes(of: &value) { valuePtr in

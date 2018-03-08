@@ -13,9 +13,7 @@ extension ByteBuffer {
 
 // Peek Into String
 extension ByteBuffer {
-    public func peekString(count: Int,
-                           skipping: Int = 0,
-                           encoding: String.Encoding) -> String? {
+    public func peekString(count: Int, skipping: Int = 0, encoding: String.Encoding) -> String? {
         guard readableBytes >= count + skipping else { return nil }
         guard let bytes = getBytes(at: skipping, length: count) else { return nil }
         return String(bytes: bytes, encoding: encoding)
