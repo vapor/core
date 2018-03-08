@@ -1,7 +1,7 @@
 import Foundation
 
 
-// Peek Into FixedWidthInteger
+/// Peek Into FixedWidthInteger
 extension ByteBuffer {
     public func peekInteger<I>(skipping: Int = 0) -> I? where I: FixedWidthInteger {
         guard readableBytes >= MemoryLayout<I>.size + skipping else {
@@ -11,20 +11,20 @@ extension ByteBuffer {
     }
 }
 
-// Peek Into String
+/// Peek Into String
 extension ByteBuffer {
     public func peekString(count: Int, skipping: Int = 0, encoding: String.Encoding) -> String? {
         guard readableBytes >= count + skipping else { return nil }
-        guard let bytes = getBytes(at: skipping, length: count) else { return nil }
+        guard let bytes = getBytes(at: readerIndex + skipping, length: count) else { return nil }
         return String(bytes: bytes, encoding: encoding)
     }
 }
 
-// Peek Into ByteBuffer for Data
+/// Peek Into ByteBuffer for Data
 extension ByteBuffer {
     public func peekData(count: Int, skipping: Int = 0) -> Data? {
         guard readableBytes >= count + skipping else { return nil }
-        guard let bytes = getBytes(at: skipping, length: count)
+        guard let bytes = getBytes(at: readerIndex + skipping, length: count)
             else { return nil }
         return Data(bytes: bytes)
     }
@@ -41,7 +41,7 @@ extension ByteBuffer {
         return  self.withVeryUnsafeBytes { ptr in
             var value: T = 0
             withUnsafeMutableBytes(of: &value) { valuePtr in
-                valuePtr.copyMemory(from: UnsafeRawBufferPointer(start: ptr.baseAddress!.advanced(by: skipping),
+                valuePtr.copyMemory(from: UnsafeRawBufferPointer(start: ptr.baseAddress!.advanced(by: skipping + readerIndex),
                                                                  count: MemoryLayout<T>.size))
             }
             return value
@@ -49,20 +49,27 @@ extension ByteBuffer {
     }
 }
 
-// Peek Buffers Whole String
+/// Peek Buffer's Whole Readable String
 extension ByteBuffer {
     public func peekString(encoding: String.Encoding = .ascii) -> String? {
-        guard let bytes = getBytes(at: 0, length: readableBytes) else { return nil }
+        guard let bytes = getBytes(at: readerIndex, length: readableBytes) else { return nil }
         return String(bytes: bytes, encoding: encoding)
     }
 }
 
 
-// Peek Buffers First Byte
+/// Peek Buffers Readable Bytes
+extension ByteBuffer {
+    public func peekBytes(length: Int = 1) -> [UInt8]? {
+        guard length <= readableBytes else { return nil }
+        guard let bytes = getBytes(at: readerIndex, length: readableBytes) else { return nil }
+        return bytes
+    }
+}
+
+/// Peek Buffers First Readable Byte
 extension ByteBuffer {
     public func peekFirstByte() -> UInt8? {
-        guard readableBytes >= 1 else { return nil }
-        guard let bytes = getBytes(at: 0, length: 1) else { return nil }
-        return bytes.first
+        return peekBytes()?.first
     }
 }
