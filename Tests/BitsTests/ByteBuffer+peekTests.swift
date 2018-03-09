@@ -28,6 +28,10 @@ final class ByteBufferTestpeekTests: XCTestCase {
         XCTAssertEqual(buf.peekString(count: second.count,
                                       skipping: first.count,
                                       encoding: .utf8), second)
+
+        _ = buf.readBytes(length: first.count)
+        XCTAssertEqual(buf.peekString(count: second.count,
+                                      encoding: .utf8), second)
     }
 
     func testPeekData() {
@@ -41,9 +45,12 @@ final class ByteBufferTestpeekTests: XCTestCase {
         XCTAssertEqual(buf.peekData(count: first.count), Data(bytes: first))
         XCTAssertEqual(buf.peekData(count: second.count,
                                     skipping: first.count), Data(bytes: second))
+
+        _ = buf.readBytes(length: first.count)
+        XCTAssertEqual(buf.peekData(count: second.count), Data(bytes: second))
     }
 
-    func testPeekBinaryFloatingPoint() {
+    func testPeekBinaryFloatingPoint() throws {
         buf = allocator.buffer(capacity: 32)
         let first: Double = 9.42
         let second: Float = 9.43212
@@ -54,6 +61,39 @@ final class ByteBufferTestpeekTests: XCTestCase {
         XCTAssertEqual(buf.peekBinaryFloatingPoint(as: Double.self), first)
         XCTAssertEqual(buf.peekBinaryFloatingPoint(skipping: MemoryLayout<Double>.size,
             as: Float.self), second)
+
+
+        XCTAssertEqual(try buf.requireBinaryFloatingPoint(as: Double.self), first)
+
+        XCTAssertEqual(buf.peekBinaryFloatingPoint(as: Float.self), second)
+    }
+
+    func testPeekBytes() {
+        buf = allocator.buffer(capacity: 128)
+        let byte1 = UInt8(1)
+        let byte2 = UInt8(2)
+        buf.write(bytes: [byte1, byte2])
+
+        let peekedBytes = buf.peekBytes(length: 2)
+        XCTAssertEqual(peekedBytes?.first, byte1)
+        XCTAssertEqual(peekedBytes?.last, byte2)
+        XCTAssertEqual(buf.readBytes(length: 1)?.first, byte1)
+        XCTAssertEqual(buf.peekBytes()?.first, byte2)
+        XCTAssertEqual(buf.peekBytes(length: 2), nil)
+    }
+
+    func testPeekFirstByte() {
+        buf = allocator.buffer(capacity: 128)
+        let byte1 = UInt8(1)
+        let byte2 = UInt8(2)
+        buf.write(bytes: [byte1, byte2])
+
+        XCTAssertEqual(buf.peekFirstByte(), byte1)
+        XCTAssertEqual(buf.readBytes(length: 1)?.first, byte1)
+        XCTAssertEqual(buf.peekFirstByte(), byte2)
+
+        XCTAssertEqual(buf.readBytes(length: 1)?.first, byte2)
+        XCTAssertEqual(buf.peekFirstByte(), nil)
     }
 
     static let allTests = [
