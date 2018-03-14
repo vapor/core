@@ -21,7 +21,7 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     private var inputQueue: [InputContext<InboundIn>]
 
     /// Queue of output. Oldest objects are at the end of the array (output is dequeued with `popLast()`)
-    private var outputQueue: [OutboundOut]
+    private var outputQueue: [[OutboundOut]]
 
     /// This handler's event loop.
     private let eventLoop: EventLoop
@@ -50,7 +50,7 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     /// - returns: A future signal. Will be completed when `onInput` returns `true` or throws an error.
     public func enqueue(_ output: [OutboundOut], onInput: @escaping (InboundIn) throws -> Bool) -> Future<Void> {
         VERBOSE("QueueHandler.enqueue(\(output.count))")
-        outputQueue.insert(contentsOf: output.reversed(), at: 0)
+        outputQueue.insert(output, at: 0)
         let promise = eventLoop.newPromise(Void.self)
         let context = InputContext<InboundIn>(promise: promise, onInput: onInput)
         inputQueue.insert(context, at: 0)
@@ -66,11 +66,11 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     private func writeOutputIfEnqueued(ctx: ChannelHandlerContext) {
         VERBOSE("QueueHandler.sendOutput(ctx: \(ctx)) [outputQueue.count=\(outputQueue.count)]")
         if let next = outputQueue.popLast() {
-            ctx.writeAndFlush(wrapOutboundOut(next)).do {
-                self.writeOutputIfEnqueued(ctx: ctx)
-            }.catch { error in
-                self.errorHandler(error)
+            for output in next {
+                ctx.write(wrapOutboundOut(output), promise: nil)
             }
+            ctx.flush()
+            self.writeOutputIfEnqueued(ctx: ctx)
         } else {
             waitingCtx = ctx
         }
