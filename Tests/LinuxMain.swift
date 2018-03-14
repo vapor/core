@@ -1,5 +1,6 @@
 #if os(Linux)
 
+@testable import BitsTests
 @testable import CodableKitTests
 @testable import CoreTests
 @testable import DebuggingTests

@@ -34,11 +34,6 @@ jobs:
   linux-vapor:
     docker:
       - image: norionomura/swift:swift-4.1-branch
-      - image: circleci/postgres:latest
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: ""
     steps:
       - run:
           name: Update APT
