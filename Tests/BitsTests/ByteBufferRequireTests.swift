@@ -2,7 +2,7 @@ import NIO
 import XCTest
 @testable import Bits
 
-final class ByteBufferTestRequireTests: XCTestCase {
+final class ByteBufferRequireTests: XCTestCase {
     private let allocator = ByteBufferAllocator()
     private var buf: ByteBuffer! = nil
 
