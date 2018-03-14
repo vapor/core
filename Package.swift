@@ -6,6 +6,7 @@ let package = Package(
     products: [
         .library(name: "Async", targets: ["Async"]),
         .library(name: "Bits", targets: ["Bits"]),
+        .library(name: "Core", targets: ["Core"]),
         .library(name: "CodableKit", targets: ["CodableKit"]),
         .library(name: "COperatingSystem", targets: ["COperatingSystem"]),
         .library(name: "Debugging", targets: ["Debugging"]),
@@ -17,6 +18,8 @@ let package = Package(
     targets: [
         .target(name: "Async", dependencies: ["NIO"]),
         .target(name: "Bits", dependencies: ["NIO"]),
+        .target(name: "Core", dependencies: ["Debugging"]),
+        .testTarget(name: "CoreTests", dependencies: ["Core"]),
         .target(name: "CodableKit", dependencies: ["Async", "Debugging"]),
         .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
         .target(name: "COperatingSystem"),

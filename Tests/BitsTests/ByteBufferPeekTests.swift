@@ -2,7 +2,7 @@ import NIO
 import XCTest
 @testable import Bits
 
-final class ByteBufferTestpeekTests: XCTestCase {
+final class ByteBufferPeekTests: XCTestCase {
     private let allocator = ByteBufferAllocator()
     private var buf: ByteBuffer! = nil
 
@@ -101,5 +101,5 @@ final class ByteBufferTestpeekTests: XCTestCase {
         ("testPeekString", testPeekString),
         ("testPeekData", testPeekData),
         ("testPeekBinaryFloatingPoint", testPeekBinaryFloatingPoint),
-        ]
+    ]
 }
