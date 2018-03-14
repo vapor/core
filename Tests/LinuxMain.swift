@@ -1,6 +1,6 @@
 #if os(Linux)
 
-@testable import CodableTests
+@testable import CodableKitTests
 @testable import CoreTests
 @testable import DebuggingTests
 import XCTest
