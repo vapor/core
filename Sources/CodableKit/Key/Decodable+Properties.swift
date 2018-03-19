@@ -2,13 +2,23 @@ extension Decodable {
     /// Collect's the Decodable type's properties into an
     /// array of `CodingKeyProperty` using the `init(from: Decoder)` method.
     /// - parameter depth: Controls how deeply nested optional decoding will go.
-    public static func properties(depth: Int = 1) -> [CodingKeyProperty] {
+    public static func properties(depth: Int = 1) throws -> [CodingKeyProperty] {
         let result = CodingKeyCollectorResult(depth: depth)
         let decoder = CodingKeyCollector(codingPath: [], result: result)
         do {
             _ = try Self(from: decoder)
         } catch {
-            fatalError("Decoding properties from \(Self.self) failed: \(error).")
+            throw CodableKitError(
+                identifier: "properties",
+                reason: "Decoding properties from \(Self.self) failed: \(error).",
+                suggestedFixes: [
+                    "Ensure all types on the model you are decoding conform to `KeyStringDecodable`."
+                ],
+                possibleCauses: [
+                    "One of the properties on \(Self.self) is not `KeyStringDecodable`."
+                ],
+                source: .capture()
+            )
         }
         return result.properties
     }

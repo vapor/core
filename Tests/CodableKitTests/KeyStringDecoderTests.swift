@@ -2,7 +2,7 @@ import CodableKit
 import XCTest
 
 class KeyStringDecoderTests: XCTestCase {
-    func testSimpleStruct() {
+    func testSimpleStruct() throws {
         struct Foo: Decodable {
             var name: String
             var age: Double
@@ -10,13 +10,13 @@ class KeyStringDecoderTests: XCTestCase {
             var maybe: UInt32?
         }
 
-        XCTAssertEqual(Foo.codingPath(forKey: \.name).map { $0.stringValue }, ["name"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.age).map { $0.stringValue }, ["age"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.luckyNumber).map { $0.stringValue }, ["luckyNumber"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.maybe).map { $0.stringValue }, ["maybe"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.name).map { $0.stringValue }, ["name"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.age).map { $0.stringValue }, ["age"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.luckyNumber).map { $0.stringValue }, ["luckyNumber"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.maybe).map { $0.stringValue }, ["maybe"])
     }
 
-    func testNestedStruct() {
+    func testNestedStruct() throws {
         struct Foo: Decodable {
             var name: String
             var age: Double
@@ -31,17 +31,17 @@ class KeyStringDecoderTests: XCTestCase {
             var dict: [String: String]
         }
 
-        XCTAssertEqual(Foo.codingPath(forKey: \.name).map { $0.stringValue }, ["name"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.age).map { $0.stringValue }, ["age"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.luckyNumber).map { $0.stringValue }, ["luckyNumber"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.name).map { $0.stringValue }, ["name"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.age).map { $0.stringValue }, ["age"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.luckyNumber).map { $0.stringValue }, ["luckyNumber"])
         // XCTAssertEqual(Foo.codingPath(forKey: \.bar).map { $0.stringValue }, ["bar"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.bar.name).map { $0.stringValue }, ["bar", "name"])
-        XCTAssertEqual(Foo.codingPath(forKey: \.bar.age).map { $0.stringValue }, ["bar", "age"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.bar.name).map { $0.stringValue }, ["bar", "name"])
+        try XCTAssertEqual(Foo.codingPath(forKey: \.bar.age).map { $0.stringValue }, ["bar", "age"])
         // XCTAssertEqual(Foo.codingPath(forKey: \.bar.luckyNumbers).map { $0.stringValue }, ["bar", "luckyNumbers"])
         // XCTAssertEqual(Foo.codingPath(forKey: \.bar.dict).map { $0.stringValue }, ["bar", "dict"])
     }
 
-    func testProperties() {
+    func testProperties() throws {
         struct User: Decodable {
             var int: Int
             var oint: Int?
@@ -88,11 +88,11 @@ class KeyStringDecoderTests: XCTestCase {
             var odict: [String: String]?
         }
 
-        let properties = User.properties()
+        let properties = try User.properties()
         XCTAssertEqual(properties.description, "[int: Int, oint: Int?, int8: Int8, oint8: Int8?, int16: Int16, oint16: Int16?, int32: Int32, oint32: Int32?, int64: Int64, oint64: Int64?, uint: UInt, uoint: UInt?, uint8: UInt8, uoint8: UInt8?, uint16: UInt16, uoint16: UInt16?, uint32: UInt32, uoint32: UInt32?, uint64: UInt64, uoint64: UInt64?, uuid: UUID, ouuid: UUID?, date: Date, odate: Date?, float: Float, ofloat: Float?, double: Double, odouble: Double?, string: String, ostring: String?, bool: Bool, obool: Bool?, array: Array<String>, oarray: Array<String>?, dict: Dictionary<String, String>, odict: Dictionary<String, String>?]")
     }
 
-    func testPropertyDepth() {
+    func testPropertyDepth() throws {
         struct Pet: Decodable {
             var nickname: String
             var favoriteTreat: String
@@ -103,18 +103,29 @@ class KeyStringDecoderTests: XCTestCase {
             var age: Int
         }
 
-        XCTAssertEqual(User.properties(depth: 1).description, "[pet: Pet #1, name: String, age: Int]")
-        XCTAssertEqual(User.properties(depth: 2).description, "[pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
+        try XCTAssertEqual(User.properties(depth: 1).description, "[pet: Pet #1, name: String, age: Int]")
+        try XCTAssertEqual(User.properties(depth: 2).description, "[pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
     }
 
-    func testPropertyA() {
+    func testPropertyA() throws {
         final class A: Decodable {
             public var id: UUID?
             public var date: Date
             public var length: Double
             public var isOpen: Bool
         }
-        XCTAssertEqual(A.properties().description, "[id: UUID?, date: Date, length: Double, isOpen: Bool]")
+        try XCTAssertEqual(A.properties().description, "[id: UUID?, date: Date, length: Double, isOpen: Bool]")
+    }
+
+    func testThrows() throws {
+        struct FooDesc: Decodable, CustomStringConvertible {
+            var name: String
+            var description: String {
+                return "foo"
+            }
+        }
+
+        XCTAssertThrowsError(try FooDesc.codingPath(forKey: \.description).description)
     }
 
     static let allTests = [
@@ -123,5 +134,6 @@ class KeyStringDecoderTests: XCTestCase {
         ("testProperties", testProperties),
         ("testPropertyDepth", testPropertyDepth),
         ("testPropertyA", testPropertyA),
+        ("testThrows", testThrows),
     ]
 }
