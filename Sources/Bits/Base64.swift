@@ -115,7 +115,7 @@ public final class Base64 {
     }
 
     /// Encodes bytes into Base64 format
-    public func encode(data bytes: Data) -> Data {
+    public func encode(data bytes: Data) throws -> Data {
         if bytes.count == 0 {
             return bytes
         }
@@ -129,10 +129,10 @@ public final class Base64 {
         while offset < len {
             c1 = bytes[offset] & 0xff
             offset += 1
-            result.append(encode((c1 >> 2) & 0x3f))
+            try result.append(encode((c1 >> 2) & 0x3f))
             c1 = (c1 & 0x03) << 4
             if offset >= len {
-                result.append(encode(c1 & 0x3f))
+                try result.append(encode(c1 & 0x3f))
                 if let padding = self.padding {
                     result.append(padding)
                     result.append(padding)
@@ -143,10 +143,10 @@ public final class Base64 {
             c2 = bytes[offset] & 0xff
             offset += 1
             c1 |= (c2 >> 4) & 0x0f
-            result.append(encode(c1 & 0x3f))
+            try result.append(encode(c1 & 0x3f))
             c1 = (c2 & 0x0f) << 2
             if offset >= len {
-                result.append(encode(c1 & 0x3f))
+                try result.append(encode(c1 & 0x3f))
                 if let padding = self.padding {
                     result.append(padding)
                 }
@@ -156,15 +156,15 @@ public final class Base64 {
             c2 = bytes[offset] & 0xff
             offset += 1
             c1 |= (c2 >> 6) & 0x03
-            result.append(encode(c1 & 0x3f))
-            result.append(encode(c2 & 0x3f))
+            try result.append(encode(c1 & 0x3f))
+            try result.append(encode(c2 & 0x3f))
         }
 
         return result
     }
 
     /// Decodes bytes into binary format
-    public func decode(data s: Data) -> Data {
+    public func decode(data s: Data) throws -> Data {
         let maxolen = s.count
 
         var off: Int = 0
@@ -178,9 +178,9 @@ public final class Base64 {
         var o: Byte
 
         while off < s.count - 1 && olen < maxolen {
-            c1 = decode(s[off])
+            c1 = try decode(s[off])
             off += 1
-            c2 = decode(s[off])
+            c2 = try decode(s[off])
             off += 1
             if c1 == Byte.max || c2 == Byte.max {
                 break
@@ -194,7 +194,7 @@ public final class Base64 {
                 break
             }
 
-            c3 = decode(s[off])
+            c3 = try decode(s[off])
             off += 1
             if c3 == Byte.max {
                 break
@@ -208,7 +208,7 @@ public final class Base64 {
                 break
             }
 
-            c4 = decode(s[off])
+            c4 = try decode(s[off])
             off += 1
             if c4 == Byte.max {
                 break
@@ -223,16 +223,18 @@ public final class Base64 {
     }
 
     // MARK: Private
-    private func encode(_ x: Byte) -> Byte {
-        return encodeMap?(x)
-            ?? Base64.encodingTable[x]
-            ?? Byte.max
+    private func encode(_ x: Byte) throws -> Byte {
+        guard let encoded = encodeMap?(x) ?? Base64.encodingTable[x] else {
+            throw BitsError(identifier: "base64Encode", reason: "Could not base64 encode byte: \(x)", source: .capture())
+        }
+        return encoded
     }
 
-    private func decode(_ x: Byte) -> Byte {
-        return decodeMap?(x)
-            ?? Base64.decodingTable[x]
-            ?? Byte.max
+    private func decode(_ x: Byte) throws -> Byte {
+        guard let decoded = decodeMap?(x) ?? Base64.decodingTable[x] else {
+            throw BitsError(identifier: "base64Decode", reason: "Could not base64 decode byte: \(x)", source: .capture())
+        }
+        return decoded
     }
 }
 
@@ -240,14 +242,14 @@ public final class Base64 {
 
 extension String {
     /// Transforms a Base64 encoded String to Data.
-    public func base64Decoded(_ coder: Base64 = .regular) -> Data {
-        return coder.decode(data: Data(utf8))
+    public func base64Decoded(_ coder: Base64 = .regular) throws -> Data {
+        return try coder.decode(data: Data(utf8))
     }
 }
 
 extension Data {
     /// Transforms Data into a Base64 encoded string.
-    public func base64Encoded(_ coder: Base64 = .regular, encoding: String.Encoding = .utf8) -> String? {
-        return String(data: coder.encode(data: self), encoding: encoding)
+    public func base64Encoded(_ coder: Base64 = .regular, encoding: String.Encoding = .utf8) throws -> String? {
+        return try String(data: coder.encode(data: self), encoding: encoding)
     }
 }
