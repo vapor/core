@@ -12,13 +12,13 @@ let package = Package(
         .library(name: "Debugging", targets: ["Debugging"]),
     ],
     dependencies: [
-        // Event-driven network application framework for high performance protocol servers & clients, non-blocking.
+        /// Event-driven network application framework for high performance protocol servers & clients, non-blocking.
         .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
     ],
     targets: [
         .target(name: "Async", dependencies: ["NIO"]),
         .target(name: "Bits", dependencies: ["NIO"]),
-        .target(name: "Core", dependencies: ["Debugging"]),
+        .target(name: "Core", dependencies: ["Async", "Debugging"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
         .target(name: "CodableKit", dependencies: ["Async", "Debugging"]),
         .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
