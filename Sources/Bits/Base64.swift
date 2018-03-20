@@ -9,14 +9,12 @@ public final class Base64 {
     public static let shared = Base64.regular
 
     /// Standard Base64Encoder
-    public static var regular: Base64 {
-        return Base64()
-    }
+    public static let regular = Base64()
 
     // Base64URLEncoder
     // - note: uses hyphens and underscores
     //         in place of plus and forwardSlash
-    public static var url: Base64 {
+    public static let url: Base64 = {
         let encodeMap: Base64.ByteMap = { byte in
             switch byte {
             case 62:
@@ -44,7 +42,7 @@ public final class Base64 {
             encodeMap: encodeMap,
             decodeMap: decodeMap
         )
-    }
+    }()
 
     /// Maps binary format to base64 encoding
     static let encodingTable: [Byte: Byte] = [
@@ -115,7 +113,7 @@ public final class Base64 {
     }
 
     /// Encodes bytes into Base64 format
-    public func encode(data bytes: Data) throws -> Data {
+    public func encode(data bytes: Data) -> Data {
         if bytes.count == 0 {
             return bytes
         }
@@ -129,10 +127,11 @@ public final class Base64 {
         while offset < len {
             c1 = bytes[offset] & 0xff
             offset += 1
-            try result.append(encode((c1 >> 2) & 0x3f))
+			// These computations should never return a byte outside (0...63), so it is safe to forcibly try here.
+            try! result.append(encode((c1 >> 2) & 0x3f))
             c1 = (c1 & 0x03) << 4
             if offset >= len {
-                try result.append(encode(c1 & 0x3f))
+                try! result.append(encode(c1 & 0x3f))
                 if let padding = self.padding {
                     result.append(padding)
                     result.append(padding)
@@ -143,10 +142,10 @@ public final class Base64 {
             c2 = bytes[offset] & 0xff
             offset += 1
             c1 |= (c2 >> 4) & 0x0f
-            try result.append(encode(c1 & 0x3f))
+            try! result.append(encode(c1 & 0x3f))
             c1 = (c2 & 0x0f) << 2
             if offset >= len {
-                try result.append(encode(c1 & 0x3f))
+                try! result.append(encode(c1 & 0x3f))
                 if let padding = self.padding {
                     result.append(padding)
                 }
@@ -156,8 +155,8 @@ public final class Base64 {
             c2 = bytes[offset] & 0xff
             offset += 1
             c1 |= (c2 >> 6) & 0x03
-            try result.append(encode(c1 & 0x3f))
-            try result.append(encode(c2 & 0x3f))
+            try! result.append(encode(c1 & 0x3f))
+            try! result.append(encode(c2 & 0x3f))
         }
 
         return result
@@ -165,7 +164,8 @@ public final class Base64 {
 
     /// Decodes bytes into binary format
     public func decode(data s: Data) throws -> Data {
-        let maxolen = s.count
+        let ilen = s.count
+		let maxolen = (ilen * 3) / 4 + 1
 
         var off: Int = 0
         var olen: Int = 0
@@ -177,38 +177,59 @@ public final class Base64 {
         var c4: Byte
         var o: Byte
 
-        while off < s.count - 1 && olen < maxolen {
-            c1 = try decode(s[off])
+        while off < ilen && olen < maxolen {
+			let s1 = s[off]
+			if s1 == self.padding {
+				throw BitsError(identifier: "base64Decode", reason: "Unexpected padding character", source: .capture())
+			}
+            c1 = try decode(s1)
             off += 1
-            c2 = try decode(s[off])
+			if off >= ilen {
+				throw BitsError(identifier: "base64Decode", reason: "Unexpected string end", source: .capture())
+			}
+			let s2 = s[off]
+			if s2 == self.padding {
+				throw BitsError(identifier: "base64Decode", reason: "Unexpected padding character", source: .capture())
+			}
+            c2 = try decode(s2)
             off += 1
-            if c1 == Byte.max || c2 == Byte.max {
-                break
-            }
 
             o = c1 << 2
             o |= (c2 & 0x30) >> 4
             result[olen] = o
             olen += 1
-            if olen >= maxolen || off >= s.count {
+            if olen >= maxolen || off >= ilen {
                 break
             }
 
-            c3 = try decode(s[off])
+			let s3 = s[off]
+			if s3 == self.padding {
+				if ilen != off + 2 || s[off + 1] != self.padding {
+					throw BitsError(identifier: "base64Decode", reason: "Unexpected padding character", source: .capture())
+				}
+				off = ilen
+				break
+			}
+            c3 = try decode(s3)
             off += 1
-            if c3 == Byte.max {
-                break
-            }
 
             o = (c2 & 0x0f) << 4
             o |= (c3 & 0x3c) >> 2
             result[olen] = o
             olen += 1
-            if olen >= maxolen || off >= s.count {
+            if olen >= maxolen || off >= ilen {
                 break
             }
 
-            c4 = try decode(s[off])
+			let s4 = s[off]
+			if s4 == self.padding {
+				if ilen != off + 1 {
+					throw BitsError(identifier: "base64Decode", reason: "Unexpected padding character", source: .capture())
+				}
+				off = ilen
+				break
+			}
+            c4 = try decode(s4)
             off += 1
             if c4 == Byte.max {
                 break
@@ -218,6 +239,10 @@ public final class Base64 {
             result[olen] = o
             olen += 1
         }
+		
+		if off != ilen {
+			throw BitsError(identifier: "base64Decode", reason: "Unexpected string end", source: .capture())
+		}
 
         return Data(result[0..<olen])
     }
@@ -249,7 +274,9 @@ extension String {
 
 extension Data {
     /// Transforms Data into a Base64 encoded string.
-    public func base64Encoded(_ coder: Base64 = .regular, encoding: String.Encoding = .utf8) throws -> String? {
-        return try String(data: coder.encode(data: self), encoding: encoding)
+    public func base64Encoded(_ coder: Base64 = .regular) -> String {
+		// The result will always be a valid UTF8 string (unless you provided a terrible encoding table),
+		// so it is safe to forcibly unwrap here.
+        return String(data: coder.encode(data: self), encoding: .utf8)!
     }
 }
