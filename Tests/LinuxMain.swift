@@ -8,6 +8,7 @@ import XCTest
 
 XCTMain([
 	/// Bits
+	testCase(Base64Tests.allTests),
 	testCase(ByteBufferPeekTests.allTests),
 	testCase(ByteBufferRequireTests.allTests),
 
