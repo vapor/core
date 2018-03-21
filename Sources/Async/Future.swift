@@ -77,8 +77,8 @@ extension Future {
     }
 
     @available(*, deprecated, renamed: "map(on:_:)")
-    public static func map(_ callback: @escaping () throws -> Future<Expectation>) -> Future<Expectation> {
-        return flatMap(on: EmbeddedEventLoop(), callback)
+    public static func map(_ callback: @escaping () throws -> Expectation) -> Future<Expectation> {
+        return map(on: EmbeddedEventLoop(), callback)
     }
 }
 
