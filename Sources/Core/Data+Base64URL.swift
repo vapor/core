@@ -46,7 +46,12 @@ extension String {
         let replaced = replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
         /// https://stackoverflow.com/questions/43499651/decode-base64url-to-base64-swift
-        return replaced + String(repeating: "=", count: 4 - replaced.count % 4)
+        let padding = replaced.count % 4
+        if padding > 0 {
+            return replaced + String(repeating: "=", count: 4 - padding)
+        } else {
+            return replaced
+        }
     }
 
     /// Converts a base64 encoded string to a base64-url encoded string.
@@ -88,7 +93,10 @@ extension Data {
             }
         }
         /// https://stackoverflow.com/questions/43499651/decode-base64url-to-base64-swift
-        self += Data(repeating: .equals, count: 4 - count % 4)
+        let padding = count % 4
+        if padding > 0 {
+            self += Data(repeating: .equals, count: 4 - count % 4)
+        }
     }
 
     /// Converts base64 encoded data to a base64-url encoded data.
