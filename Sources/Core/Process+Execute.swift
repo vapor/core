@@ -28,8 +28,12 @@ extension Process {
     ///                path will be resolved using `/bin/sh -c which ...`.
     ///     - arguments: An array of arguments to pass to the program.
     public static func execute(_ program: String, _ arguments: [String]) throws -> String {
-        let resolvedPath = try launchAndWait(launchPath: "/bin/sh", ["-c", "which \(program)"])
-        return try launchAndWait(launchPath: resolvedPath, arguments)
+        if program.hasPrefix("/") {
+            return try launchAndWait(launchPath: program, arguments)
+        } else {
+            let resolvedPath = try launchAndWait(launchPath: "/bin/sh", ["-c", "which \(program)"])
+            return try launchAndWait(launchPath: resolvedPath, arguments)
+        }
     }
 
     /// Powers `Process.execute(_:_:)` methods. Separated so that `/bin/sh -c which` can run as a separate command.
@@ -51,7 +55,7 @@ extension Process {
             throw try ProcessExecuteError(
                 status: process.terminationStatus,
                 stderr: stderr.readString(),
-                stdout: stderr.readString()
+                stdout: stdout.readString()
             )
         }
 
