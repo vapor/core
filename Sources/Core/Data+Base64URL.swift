@@ -45,8 +45,7 @@ extension String {
     public func base64URLUnescaped() -> String {
         let replaced = replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
-        let decoded = Data(base64Encoded: replaced + "===") ?? .init()
-        return replaced + String(repeating: "=", count: 3 - (decoded.count % 3))
+        return replaced + String(repeating: "=", count: 4 - replaced.count % 4)
     }
 
     /// Converts a base64 encoded string to a base64-url encoded string.
@@ -87,8 +86,7 @@ extension Data {
             default: break
             }
         }
-        let decoded = Data(base64Encoded: self + Data([.equals, .equals, .equals])) ?? .init()
-        self += Data(repeating: .equals, count: 3 - (decoded.count % 3))
+        self += Data(repeating: .equals, count: 4 - count % 4)
     }
 
     /// Converts base64 encoded data to a base64-url encoded data.
