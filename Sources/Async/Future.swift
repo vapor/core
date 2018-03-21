@@ -1,7 +1,5 @@
 import NIO
 
-
-
 public typealias Future = EventLoopFuture
 public typealias Promise = EventLoopPromise
 
@@ -64,6 +62,23 @@ extension Promise {
     @available(*, deprecated, renamed: "futureResult")
     public var future: Future<T> {
         return futureResult
+    }
+}
+
+extension Future {
+    @available(*, deprecated, renamed: "wait()")
+    public func await(on worker: Worker) throws -> T {
+        return try wait()
+    }
+
+    @available(*, deprecated, renamed: "flatMap(on:_:)")
+    public static func flatMap(_ callback: @escaping () throws -> Future<Expectation>) -> Future<Expectation> {
+        return flatMap(on: EmbeddedEventLoop(), callback)
+    }
+
+    @available(*, deprecated, renamed: "map(on:_:)")
+    public static func map(_ callback: @escaping () throws -> Expectation) -> Future<Expectation> {
+        return map(on: EmbeddedEventLoop(), callback)
     }
 }
 
