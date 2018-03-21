@@ -45,6 +45,7 @@ extension String {
     public func base64URLUnescaped() -> String {
         let replaced = replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
+        /// https://stackoverflow.com/questions/43499651/decode-base64url-to-base64-swift
         return replaced + String(repeating: "=", count: 4 - replaced.count % 4)
     }
 
@@ -86,6 +87,7 @@ extension Data {
             default: break
             }
         }
+        /// https://stackoverflow.com/questions/43499651/decode-base64url-to-base64-swift
         self += Data(repeating: .equals, count: 4 - count % 4)
     }
 
