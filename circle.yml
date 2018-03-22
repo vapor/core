@@ -48,17 +48,17 @@ jobs:
       - image: codevapor/swift:4.1
     steps:
       - run:
-          name: Clone Fluent
-          command: git clone -b master https://github.com/vapor/fluent.git
+          name: Clone Fluent SQLite
+          command: git clone -b master https://github.com/vapor/fluent-sqlite.git
           working_directory: ~/
       - run:
-          name: Switch Fluent to this Core revision
+          name: Switch Fluent SQLite to this Core revision
           command: swift package edit Core --revision $CIRCLE_SHA1
-          working_directory: ~/fluent
+          working_directory: ~/fluent-sqlite
       - run:
           name: Run Fluent unit tests
           command: swift test
-          working_directory: ~/fluent
+          working_directory: ~/fluent-sqlite
 
 
 workflows:
