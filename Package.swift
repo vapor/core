@@ -20,7 +20,7 @@ let package = Package(
         .target(name: "Bits", dependencies: ["NIO"]),
         .target(name: "Core", dependencies: ["Async", "Debugging"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
-        .target(name: "CodableKit", dependencies: ["Async", "Debugging"]),
+        .target(name: "CodableKit", dependencies: ["Async", "Core", "Debugging"]),
         .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
