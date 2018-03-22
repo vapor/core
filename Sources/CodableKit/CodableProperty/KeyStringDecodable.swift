@@ -127,6 +127,16 @@ extension Optional: KeyStringDecodable, AnyKeyStringDecodable {
     }
 }
 
+extension URL: KeyStringDecodable {
+    public static var keyStringTrue: URL {
+        return URL(string: "true")!
+    }
+
+    public static var keyStringFalse: URL {
+        return URL(string: "false")!
+    }
+}
+
 func requireKeyStringDecodable<T>(_ type: T.Type) -> AnyKeyStringDecodable.Type {
     guard let type = T.self as? AnyKeyStringDecodable.Type else {
         fatalError("\(T.self) does not conform to `KeyStringDecodable`.")
