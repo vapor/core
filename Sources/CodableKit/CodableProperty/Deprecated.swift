@@ -47,3 +47,6 @@ extension UUID: LosslessStringConvertible {
         self.init(uuidString: string)
     }
 }
+
+@available(*, deprecated, renamed: "Core.OptionalType")
+public typealias OptionalType = Core.OptionalType
