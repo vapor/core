@@ -7,11 +7,3 @@ public protocol CodableProperties {
     /// Returns the Decodable coding path `CodableProperty` for the supplied key path.
     static func property<T>(forKey keyPath: KeyPath<Self, T>) throws -> CodableProperty
 }
-
-extension CodableProperties {
-    /// Collect's the Decodable type's properties into an
-    /// array of `CodingKeyProperty` using the `init(from: Decoder)` method.
-    public static func properties() throws -> [CodableProperty] {
-        return try properties(depth: 1)
-    }
-}

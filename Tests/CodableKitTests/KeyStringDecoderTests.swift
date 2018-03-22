@@ -12,7 +12,7 @@ class KeyStringDecoderTests: XCTestCase {
             var osarr: [String]?
         }
 
-        let properties = try Foo.properties()
+        let properties = try Foo.properties(depth: 1)
         XCTAssertEqual(properties.description, "[bool: Bool, obool: Optional<Bool>, int: Int, oint: Optional<Int>, sarr: Array<String>, osarr: Optional<Array<String>>]")
 
         try XCTAssertEqual(Foo.property(forKey: \.bool).path, ["bool"])
@@ -47,7 +47,7 @@ class KeyStringDecoderTests: XCTestCase {
             }
         }
 
-        let properties = try CustomStruct.properties()
+        let properties = try CustomStruct.properties(depth: 1)
         XCTAssertEqual(properties.description, "[hi: Bool]")
 
         try XCTAssertEqual(CustomStruct.property(forKey: \.hi).path, ["hi"])
@@ -126,7 +126,7 @@ class KeyStringDecoderTests: XCTestCase {
             var odict: [String: String]?
         }
 
-        let properties = try User.properties()
+        let properties = try User.properties(depth: 1)
         XCTAssertEqual(properties.description, "[int: Int, oint: Optional<Int>, int8: Int8, oint8: Optional<Int8>, int16: Int16, oint16: Optional<Int16>, int32: Int32, oint32: Optional<Int32>, int64: Int64, oint64: Optional<Int64>, uint: UInt, uoint: Optional<UInt>, uint8: UInt8, uoint8: Optional<UInt8>, uint16: UInt16, uoint16: Optional<UInt16>, uint32: UInt32, uoint32: Optional<UInt32>, uint64: UInt64, uoint64: Optional<UInt64>, uuid: UUID, ouuid: Optional<UUID>, date: Date, odate: Optional<Date>, float: Float, ofloat: Optional<Float>, double: Double, odouble: Optional<Double>, string: String, ostring: Optional<String>, bool: Bool, obool: Optional<Bool>, array: Array<String>, oarray: Optional<Array<String>>, dict: Dictionary<String, String>, odict: Optional<Dictionary<String, String>>]")
     }
 
@@ -152,7 +152,7 @@ class KeyStringDecoderTests: XCTestCase {
             public var length: Double
             public var isOpen: Bool
         }
-        try XCTAssertEqual(A.properties().description, "[id: Optional<UUID>, date: Date, length: Double, isOpen: Bool]")
+        try XCTAssertEqual(A.properties(depth: 1).description, "[id: Optional<UUID>, date: Date, length: Double, isOpen: Bool]")
     }
 
     func testThrows() throws {
