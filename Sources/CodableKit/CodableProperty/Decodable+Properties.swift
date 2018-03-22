@@ -1,8 +1,18 @@
+import Core
+
+/// Add free `CodingKeyPropertiesStaticRepresentable` conformance to `Decodable` types.
+extension Reflectable where Self: Decodable {
+    /// See `CodingKeyPropertiesStaticRepresentable.properties(depth:)`
+    public static func reflectProperties(depth: Int) throws -> [ReflectedProperty] {
+        return try decodeProperties(depth: depth)
+    }
+}
+
 extension Decodable {
     /// Collect's the Decodable type's properties into an
     /// array of `CodingKeyProperty` using the `init(from: Decoder)` method.
     /// - parameter depth: Controls how deeply nested optional decoding will go.
-    public static func properties(depth: Int = 1) throws -> [CodingKeyProperty] {
+    public static func decodeProperties(depth: Int) throws -> [ReflectedProperty] {
         let result = CodingKeyCollectorResult(depth: depth)
         let decoder = CodingKeyCollector(codingPath: [], result: result)
         do {
@@ -24,42 +34,27 @@ extension Decodable {
     }
 }
 
-/// A property from a Decodable type.
-public struct CodingKeyProperty {
-    /// The coding path to this property.
-    public let codingPath: [CodingKey]
-
-    /// This property's type.
-    public let type: Any.Type
-
-    /// True if the original property is optional.
-    public let isOptional: Bool
-}
-
-extension CodingKeyProperty: CustomStringConvertible {
-    /// See CustomStringConvertible.description
-    public var description: String {
-        let path = codingPath.map { $0.stringValue }.joined(separator: ".")
-        return "\(path): \(type)\(isOptional ? "?" : "")"
-    }
-}
-
-/// MARK: Private
+/// MARK: Private - Decoders
 
 fileprivate final class CodingKeyCollectorResult {
-    var properties: [CodingKeyProperty]
+    var properties: [ReflectedProperty]
     var depth: Int
-    var isOptional: Bool
+    var nextIsOptional: Bool
 
     init(depth: Int) {
         self.depth = depth
         properties = []
-        isOptional = false
+        self.nextIsOptional = false
     }
 
-    func add(type: Any.Type, atPath codingPath: [CodingKey]) {
-        let property = CodingKeyProperty(codingPath: codingPath, type: type, isOptional: isOptional)
-        isOptional = false
+    func add<T>(type: T.Type, atPath codingPath: [CodingKey]) {
+        let property: ReflectedProperty
+        if nextIsOptional {
+            nextIsOptional = false
+            property = ReflectedProperty(T?.self, at: codingPath.map { $0.stringValue })
+        } else {
+            property = ReflectedProperty(T.self, at: codingPath.map { $0.stringValue })
+        }
         properties.append(property)
     }
 }
@@ -105,26 +100,6 @@ fileprivate struct CodingKeyCollectorSingleValueDecoder: SingleValueDecodingCont
         return false
     }
 
-    func decode(_ type: Bool.Type) throws -> Bool {
-        result.add(type: type, atPath: codingPath)
-        return false
-    }
-
-    func decode(_ type: Int.Type) throws -> Int {
-        result.add(type: type, atPath: codingPath)
-        return 0
-    }
-
-    func decode(_ type: Double.Type) throws -> Double {
-        result.add(type: type, atPath: codingPath)
-        return 0
-    }
-
-    func decode(_ type: String.Type) throws -> String {
-        result.add(type: type, atPath: codingPath)
-        return "0"
-    }
-
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         if let keyString = T.self as? AnyKeyStringDecodable.Type {
             result.add(type: type, atPath: codingPath)
@@ -156,12 +131,12 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
     }
 
     func contains(_ key: K) -> Bool {
+        result.nextIsOptional = true
         return true
     }
 
     func decodeNil(forKey key: K) throws -> Bool {
         if result.depth > codingPath.count {
-            result.isOptional = true
             return false
         }
         return true
@@ -178,7 +153,7 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
     }
 
     func nestedUnkeyedContainer(forKey key: K) throws -> UnkeyedDecodingContainer {
-        fatalError()
+        return CodingKeyCollectorUnkeyedDecoder(codingPath: codingPath + [key], result: result)
     }
 
     func superDecoder() throws -> Decoder {
@@ -189,29 +164,9 @@ fileprivate struct CodingKeyCollectorKeyedDecoder<K>: KeyedDecodingContainerProt
         return CodingKeyCollector(codingPath: codingPath + [key], result: result)
     }
 
-    func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool {
-        result.add(type: type, atPath: codingPath + [key])
-        return false
-    }
-
-    func decode(_ type: Int.Type, forKey key: K) throws -> Int {
-        result.add(type: type, atPath: codingPath + [key])
-        return 0
-    }
-
-    func decode(_ type: Double.Type, forKey key: K) throws -> Double {
-        result.add(type: type, atPath: codingPath + [key])
-        return 0
-    }
-
-    func decode(_ type: String.Type, forKey key: K) throws -> String {
-        result.add(type: type, atPath: codingPath + [key])
-        return "0"
-    }
-
     func decode<T>(_ type: T.Type, forKey key: K) throws -> T where T: Decodable {
         if let keyString = T.self as? AnyKeyStringDecodable.Type {
-            result.add(type: type, atPath: codingPath + [key])
+            result.add(type: T.self, atPath: codingPath + [key])
             return keyString._keyStringFalse as! T
         } else {
             let path = codingPath + [key]
@@ -247,26 +202,6 @@ fileprivate struct CodingKeyCollectorUnkeyedDecoder: UnkeyedDecodingContainer {
         return false
     }
 
-    func decode(_ type: Bool.Type) throws -> Bool {
-        result.add(type: [Bool].self, atPath: codingPath)
-        return false
-    }
-
-    func decode(_ type: Int.Type) throws -> Int {
-        result.add(type: [Int].self, atPath: codingPath)
-        return 0
-    }
-
-    func decode(_ type: Double.Type) throws -> Double {
-        result.add(type: [Double].self, atPath: codingPath)
-        return 0
-    }
-
-    func decode(_ type: String.Type) throws -> String {
-        result.add(type: [String].self, atPath: codingPath)
-        return "0"
-    }
-
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         if let keyString = T.self as? AnyKeyStringDecodable.Type {
             result.add(type: [T].self, atPath: codingPath)
@@ -296,5 +231,4 @@ fileprivate struct CodingKeyCollectorUnkeyedDecoder: UnkeyedDecodingContainer {
     mutating func superDecoder() throws -> Decoder {
         return CodingKeyCollector(codingPath: codingPath, result: result)
     }
-
 }
