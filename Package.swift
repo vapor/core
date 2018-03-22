@@ -21,7 +21,7 @@ let package = Package(
         .target(name: "Core", dependencies: ["Async", "Bits", "Debugging"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
         .target(name: "CodableKit", dependencies: ["Async", "Core", "Debugging"]),
-        .testTarget(name: "CodableKitTests", dependencies: ["CodableKit"]),
+        .testTarget(name: "CodableKitTests", dependencies: ["CodableKit", "Core"]),
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
         .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),

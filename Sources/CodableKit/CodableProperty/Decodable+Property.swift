@@ -1,14 +1,16 @@
+import Core
+
 /// Maps KeyPath to [CodingKey] on Decodable types.
-extension CodableProperties where Self: Decodable {
+extension Reflectable where Self: Decodable {
     /// See `CodableProperties.property(forKey:)`
-    public static func property<T>(forKey keyPath: KeyPath<Self, T>) throws -> CodableProperty {
+    public static func reflectProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty {
         return try decodeProperty(forKey: keyPath)
     }
 }
 
 extension Decodable {
     /// Automatically decodes a `CodableProperty` for the supplied `KeyPath`.
-    public static func decodeProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> CodableProperty {
+    public static func decodeProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty {
         var depth = 0
         a: while true {
             defer { depth += 1 }

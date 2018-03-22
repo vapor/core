@@ -30,9 +30,9 @@ public struct CodingKeyProperty {
         return _p.path.map { BasicKey($0) }
     }
 
-    private let _p: CodableProperty
+    private let _p: ReflectedProperty
 
-    init(_ p: CodableProperty) {
+    init(_ p: ReflectedProperty) {
         _p = p
     }
 }

@@ -1,7 +1,9 @@
+import Core
+
 /// Add free `CodingKeyPropertiesStaticRepresentable` conformance to `Decodable` types.
-extension CodableProperties where Self: Decodable {
+extension Reflectable where Self: Decodable {
     /// See `CodingKeyPropertiesStaticRepresentable.properties(depth:)`
-    public static func properties(depth: Int) throws -> [CodableProperty] {
+    public static func reflectProperties(depth: Int) throws -> [ReflectedProperty] {
         return try decodeProperties(depth: depth)
     }
 }
@@ -10,7 +12,7 @@ extension Decodable {
     /// Collect's the Decodable type's properties into an
     /// array of `CodingKeyProperty` using the `init(from: Decoder)` method.
     /// - parameter depth: Controls how deeply nested optional decoding will go.
-    public static func decodeProperties(depth: Int) throws -> [CodableProperty] {
+    public static func decodeProperties(depth: Int) throws -> [ReflectedProperty] {
         let result = CodingKeyCollectorResult(depth: depth)
         let decoder = CodingKeyCollector(codingPath: [], result: result)
         do {
@@ -35,7 +37,7 @@ extension Decodable {
 /// MARK: Private - Decoders
 
 fileprivate final class CodingKeyCollectorResult {
-    var properties: [CodableProperty]
+    var properties: [ReflectedProperty]
     var depth: Int
     var nextIsOptional: Bool
 
@@ -46,12 +48,12 @@ fileprivate final class CodingKeyCollectorResult {
     }
 
     func add<T>(type: T.Type, atPath codingPath: [CodingKey]) {
-        let property: CodableProperty
+        let property: ReflectedProperty
         if nextIsOptional {
             nextIsOptional = false
-            property = CodableProperty(T?.self, at: codingPath.map { $0.stringValue })
+            property = ReflectedProperty(T?.self, at: codingPath.map { $0.stringValue })
         } else {
-            property = CodableProperty(T.self, at: codingPath.map { $0.stringValue })
+            property = ReflectedProperty(T.self, at: codingPath.map { $0.stringValue })
         }
         properties.append(property)
     }
