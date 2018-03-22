@@ -20,3 +20,8 @@ extension String {
         return self + end
     }
 }
+
+@available(*, deprecated, renamed: "LosslessStringConvertible")
+public protocol StringDecodable: LosslessStringConvertible {
+    static func decode(from: String) -> Self?
+}
