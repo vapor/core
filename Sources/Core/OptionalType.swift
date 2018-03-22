@@ -1,21 +1,8 @@
-public extension Future where Expectation: OptionalType {
-    /// Unwraps an optional value contained inside a Future's expectation.
-    /// If the optional resolves to `nil` (`.none`), the supplied error will be thrown instead.
-    public func unwrap(or error: @autoclosure @escaping () -> Error) -> Future<Expectation.WrappedType> {
-        return map(to: Expectation.WrappedType.self) { optional in
-            guard let wrapped = optional.wrapped else {
-                throw error()
-            }
-            return wrapped
-        }
-    }
-}
-
 /// Capable of being represented by an optional wrapped type.
 ///
 /// This protocol mostly exists to allow constrained extensions on generic
 /// types where an associatedtype is an `Optional<T>`.
-public protocol OptionalType {
+public protocol OptionalType: AnyOptionalType {
     /// Underlying wrapped type.
     associatedtype WrappedType
 
@@ -44,4 +31,21 @@ extension Optional: OptionalType {
     public static func makeOptionalType(_ wrapped: Wrapped?) -> Optional<Wrapped> {
         return wrapped
     }
+}
+
+/// Type-erased `OptionalType`
+public protocol AnyOptionalType {
+    /// Returns the wrapped type, if it exists.
+    var anyWrapped: Any? { get }
+
+    /// Returns the wrapped type, if it exists.
+    static var anyWrappedType: Any.Type { get }
+}
+
+extension AnyOptionalType where Self: OptionalType {
+    /// See `AnyOptionalType.anyWrapped`
+    public var anyWrapped: Any? { return wrapped }
+
+    /// See `AnyOptionalType.anyWrappedType`
+    public static var anyWrappedType: Any.Type { return WrappedType.self }
 }

@@ -1,19 +1,3 @@
-import Debugging
-
-extension String {
-    /// Convert self to any type that conforms to LosslessStringConvertible
-    func convertTo<T: LosslessStringConvertible>(_ type: T.Type) throws -> T {
-        guard let converted = T.self.init(self) else {
-            throw CodableError(
-                identifier: "string",
-                reason: "Unable to convert \(self) to \(T.self)"
-            )
-        }
-
-        return converted
-    }
-}
-
 extension String {
     /// Converts the string to a boolean or return nil.
     public var bool: Bool? {
@@ -35,10 +19,4 @@ extension String {
         guard !self.hasSuffix(end) else { return self }
         return self + end
     }
-}
-
-/// Capable of being decoded from a string.
-public protocol StringDecodable {
-    /// Decode self from a string.
-    static func decode(from string: String) -> Self?
 }

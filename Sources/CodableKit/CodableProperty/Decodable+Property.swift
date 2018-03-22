@@ -1,11 +1,14 @@
-import Foundation
-
 /// Maps KeyPath to [CodingKey] on Decodable types.
+extension CodableProperties where Self: Decodable {
+    /// See `CodableProperties.property(forKey:)`
+    public static func property<T>(forKey keyPath: KeyPath<Self, T>) throws -> CodableProperty {
+        return try decodeProperty(forKey: keyPath)
+    }
+}
+
 extension Decodable {
-    /// Returns the Decodable coding path `[CodingKey]` for the supplied key path.
-    /// Note: Attempting to resolve a keyPath for non-decoded key paths (i.e., count, etc)
-    /// will result in a fatalError.
-    public static func codingPath<T>(forKey keyPath: KeyPath<Self, T>) throws -> [CodingKey] where T: KeyStringDecodable {
+    /// Automatically decodes a `CodableProperty` for the supplied `KeyPath`.
+    public static func decodeProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> CodableProperty {
         var depth = 0
         a: while true {
             defer { depth += 1 }
@@ -50,8 +53,12 @@ extension Decodable {
                     break b
                 }
 
-                if T.keyStringIsTrue(decoded[keyPath: keyPath]) {
-                    return codingPath
+                guard let t = T.self as? AnyKeyStringDecodable.Type else {
+                    break b
+                }
+
+                if t._keyStringIsTrue(decoded[keyPath: keyPath]) {
+                    return .init(T.self, at: codingPath.map { $0.stringValue })
                 }
             }
         }
@@ -118,38 +125,6 @@ fileprivate struct KeyStringSingleValueDecoder: SingleValueDecodingContainer {
         return false
     }
 
-    func decode(_ type: Bool.Type) throws -> Bool {
-        if result.cycle {
-            result.codingPath = codingPath
-            return true
-        }
-        return false
-    }
-
-    func decode(_ type: Int.Type) throws -> Int {
-        if result.cycle {
-            result.codingPath = codingPath
-            return 1
-        }
-        return 0
-    }
-
-    func decode(_ type: Double.Type) throws -> Double {
-        if result.cycle {
-            result.codingPath = codingPath
-            return 1
-        }
-        return 0
-    }
-
-    func decode(_ type: String.Type) throws -> String {
-        if result.cycle {
-            result.codingPath = codingPath
-            return "1"
-        }
-        return "0"
-    }
-
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         if let type = T.self as? AnyKeyStringDecodable.Type {
             if result.cycle {
@@ -195,7 +170,7 @@ fileprivate struct KeyStringKeyedDecoder<K>: KeyedDecodingContainerProtocol wher
     }
 
     func nestedUnkeyedContainer(forKey key: K) throws -> UnkeyedDecodingContainer {
-        fatalError()
+        return KeyStringUnkeyedDecoder(codingPath: codingPath + [key], result: result)
     }
 
     func superDecoder() throws -> Decoder {
@@ -204,38 +179,6 @@ fileprivate struct KeyStringKeyedDecoder<K>: KeyedDecodingContainerProtocol wher
 
     func superDecoder(forKey key: K) throws -> Decoder {
         return KeyStringDecoder(codingPath: codingPath + [key], result: result)
-    }
-
-    func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool {
-        if result.cycle {
-            result.codingPath = codingPath + [key]
-            return true
-        }
-        return false
-    }
-
-    func decode(_ type: Int.Type, forKey key: K) throws -> Int {
-        if result.cycle {
-            result.codingPath = codingPath + [key]
-            return 1
-        }
-        return 0
-    }
-
-    func decode(_ type: Double.Type, forKey key: K) throws -> Double {
-        if result.cycle {
-            result.codingPath = codingPath + [key]
-            return 1
-        }
-        return 0
-    }
-
-    func decode(_ type: String.Type, forKey key: K) throws -> String {
-        if result.cycle {
-            result.codingPath = codingPath + [key]
-            return "1"
-        }
-        return "0"
     }
 
     func decode<T>(_ type: T.Type, forKey key: K) throws -> T where T : Decodable {
@@ -276,26 +219,6 @@ fileprivate struct KeyStringUnkeyedDecoder: UnkeyedDecodingContainer {
     mutating func decodeNil() throws -> Bool {
         isAtEnd = true
         return true
-    }
-
-    mutating func decode(_ type: Bool.Type) throws -> Bool {
-        isAtEnd = true
-        return true
-    }
-
-    mutating func decode(_ type: Int.Type) throws -> Int {
-        isAtEnd = true
-        return 1
-    }
-
-    mutating func decode(_ type: Double.Type) throws -> Double {
-        isAtEnd = true
-        return 1.0
-    }
-
-    mutating func decode(_ type: String.Type) throws -> String {
-        isAtEnd = true
-        return "1"
     }
 
     mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
