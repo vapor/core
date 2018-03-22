@@ -41,3 +41,9 @@ public struct CodingKeyProperty {
 public protocol StringDecodable: LosslessStringConvertible {
     static func decode(from: String) -> Self?
 }
+
+extension UUID: LosslessStringConvertible {
+    public init?(_ string: String) {
+        self.init(uuidString: string)
+    }
+}
