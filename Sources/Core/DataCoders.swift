@@ -61,5 +61,3 @@ public protocol DataEncoder {
 
 extension JSONDecoder: DataDecoder { }
 extension JSONEncoder: DataEncoder { }
-extension PropertyListDecoder: DataDecoder { }
-extension PropertyListEncoder: DataEncoder { }
