@@ -10,7 +10,7 @@ extension String {
 }
 
 extension String {
-    /// Ensures a string has a strailing suffix w/o duplicating
+    /// Ensures a string has a trailing suffix w/o duplicating
     ///
     ///     "hello.jpg".finished(with: ".jpg") // hello.jpg
     ///     "hello".finished(with: ".jpg") // hello.jpg
