@@ -8,7 +8,7 @@ extension Process {
     ///     print(result) /// "hi"
     ///
     /// - parameters:
-    ///     - program: The name of the program to execute. If it does not being with a `/`, the full
+    ///     - program: The name of the program to execute. If it does not begin with a `/`, the full
     ///                path will be resolved using `/bin/sh -c which ...`.
     ///     - arguments: An array of arguments to pass to the program.
     public static func execute(_ program: String, _ arguments: String...) throws -> String {
@@ -24,7 +24,7 @@ extension Process {
     ///     print(result) /// "hi"
     ///
     /// - parameters:
-    ///     - program: The name of the program to execute. If it does not being with a `/`, the full
+    ///     - program: The name of the program to execute. If it does not begin with a `/`, the full
     ///                path will be resolved using `/bin/sh -c which ...`.
     ///     - arguments: An array of arguments to pass to the program.
     public static func execute(_ program: String, _ arguments: [String]) throws -> String {
