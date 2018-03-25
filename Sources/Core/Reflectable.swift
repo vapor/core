@@ -25,7 +25,7 @@ extension Reflectable {
 }
 
 
-/// Represents a property on a type that has been refleted using the `Reflectable` protocol.
+/// Represents a property on a type that has been reflected using the `Reflectable` protocol.
 public struct ReflectedProperty {
     /// This property's type.
     public let type: Any.Type
