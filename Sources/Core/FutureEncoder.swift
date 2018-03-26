@@ -1,5 +1,3 @@
-import Async
-
 /// Capable of encoding futures.
 public protocol FutureEncoder: class {
     /// Encodes a future to the encoder.

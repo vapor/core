@@ -1,7 +1,6 @@
 #if os(Linux)
 
 @testable import BitsTests
-@testable import CodableKitTests
 @testable import CoreTests
 @testable import DebuggingTests
 import XCTest
@@ -11,11 +10,9 @@ XCTMain([
 	testCase(ByteBufferPeekTests.allTests),
 	testCase(ByteBufferRequireTests.allTests),
 
-    /// Codable
-    testCase(KeyStringDecoderTests.allTests),
-
     /// Core
     testCase(CoreTests.allTests),
+    testCase(ReflectableTests.allTests),
 
     /// Debugging
     testCase(FooErrorTests.allTests),
