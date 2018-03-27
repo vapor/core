@@ -1,8 +1,7 @@
-import Core
-import CodableKit
+@testable import Core
 import XCTest
 
-class KeyStringDecoderTests: XCTestCase {
+class ReflectableTests: XCTestCase {
     func testStruct() throws {
         struct Foo: Reflectable, Decodable {
             var bool: Bool
@@ -16,23 +15,23 @@ class KeyStringDecoderTests: XCTestCase {
         let properties = try Foo.reflectProperties()
         XCTAssertEqual(properties.description, "[bool: Bool, obool: Optional<Bool>, int: Int, oint: Optional<Int>, sarr: Array<String>, osarr: Optional<Array<String>>]")
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bool).path, ["bool"])
-        try XCTAssert(Foo.reflectProperty(forKey: \.bool).type is Bool.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bool)?.path, ["bool"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.bool)?.type is Bool.Type)
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.obool).path, ["obool"])
-        try XCTAssert(Foo.reflectProperty(forKey: \.obool).type is Bool?.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.obool)?.path, ["obool"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.obool)?.type is Bool?.Type)
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.int).path, ["int"])
-        try XCTAssert(Foo.reflectProperty(forKey: \.int).type is Int.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.int)?.path, ["int"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.int)?.type is Int.Type)
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.oint).path, ["oint"])
-        try XCTAssert(Foo.reflectProperty(forKey: \.oint).type is Int?.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.oint)?.path, ["oint"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.oint)?.type is Int?.Type)
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.sarr).path, ["sarr"])
-        try XCTAssert(Foo.reflectProperty(forKey: \.sarr).type is [String].Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.sarr)?.path, ["sarr"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.sarr)?.type is [String].Type)
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.osarr).path, ["osarr"])
-        try XCTAssert(Foo.reflectProperty(forKey: \.osarr).type is [String]?.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.osarr)?.path, ["osarr"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.osarr)?.type is [String]?.Type)
     }
 
     func testStructCustomProperties() throws {
@@ -70,14 +69,13 @@ class KeyStringDecoderTests: XCTestCase {
             var dict: [String: String]
         }
 
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.name).path, ["name"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.age).path, ["age"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.luckyNumber).path, ["luckyNumber"])
-        XCTAssertThrowsError(try Foo.reflectProperty(forKey: \.bar))
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.name).path, ["bar", "name"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.age).path, ["bar", "age"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.luckyNumbers).path, ["bar", "luckyNumbers"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.dict).path, ["bar", "dict"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.name)?.path, ["name"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.age)?.path, ["age"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.luckyNumber)?.path, ["luckyNumber"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.name)?.path, ["bar"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.age)?.path, ["bar"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.luckyNumbers)?.path, ["bar"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.dict)?.path, ["bar"])
     }
 
     func testProperties() throws {
@@ -143,7 +141,6 @@ class KeyStringDecoderTests: XCTestCase {
         }
 
         try XCTAssertEqual(User.reflectProperties().description, "[pet: Pet #1, name: String, age: Int]")
-        try XCTAssertEqual(User.reflectProperties(depth: 2).description, "[pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
     }
 
     func testPropertyA() throws {
@@ -153,18 +150,7 @@ class KeyStringDecoderTests: XCTestCase {
             public var length: Double
             public var isOpen: Bool
         }
-        try XCTAssertEqual(A.reflectProperties(depth: 1).description, "[id: Optional<UUID>, date: Date, length: Double, isOpen: Bool]")
-    }
-
-    func testThrows() throws {
-        struct FooDesc: Reflectable, Decodable {
-            var name: String
-            var description: String {
-                return "foo"
-            }
-        }
-
-        XCTAssertThrowsError(try FooDesc.reflectProperty(forKey: \.description).description)
+        try XCTAssertEqual(A.reflectProperties().description, "[id: Optional<UUID>, date: Date, length: Double, isOpen: Bool]")
     }
 
     static let allTests = [
@@ -174,6 +160,5 @@ class KeyStringDecoderTests: XCTestCase {
         ("testProperties", testProperties),
         ("testPropertyDepth", testPropertyDepth),
         ("testPropertyA", testPropertyA),
-        ("testThrows", testThrows),
     ]
 }
