@@ -3,6 +3,15 @@ import XCTest
 
 class ReflectableTests: XCTestCase {
     func testStruct() throws {
+        enum Pet: String, ReflectionCodable, Decodable {
+            static func reflectCodable() -> (Pet, Pet) { return (.cat, .dog) }
+            case cat, dog
+        }
+
+        enum Direction: UInt8, ReflectionCodable, Decodable {
+            case left, right
+        }
+
         struct Foo: Reflectable, Decodable {
             var bool: Bool
             var obool: Bool?
@@ -10,48 +19,68 @@ class ReflectableTests: XCTestCase {
             var oint: Int?
             var sarr: [String]
             var osarr: [String]?
+            var pet: Pet
+            var opet: Pet?
+            var dir: Direction
+            var odir: Direction?
         }
 
         let properties = try Foo.reflectProperties()
-        XCTAssertEqual(properties.description, "[bool: Bool, obool: Optional<Bool>, int: Int, oint: Optional<Int>, sarr: Array<String>, osarr: Optional<Array<String>>]")
+        XCTAssertEqual(properties.description, """
+        [bool: Bool, obool: Optional<Bool>, int: Int, oint: Optional<Int>, sarr: Array<String>, osarr: Optional<Array<String>>, pet: Pet #1, opet: Optional<Pet #1>, dir: Direction #1, odir: Optional<Direction #1>]
+        """)
 
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bool)?.path, ["bool"])
         try XCTAssert(Foo.reflectProperty(forKey: \.bool)?.type is Bool.Type)
-
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.obool)?.path, ["obool"])
         try XCTAssert(Foo.reflectProperty(forKey: \.obool)?.type is Bool?.Type)
-
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.int)?.path, ["int"])
         try XCTAssert(Foo.reflectProperty(forKey: \.int)?.type is Int.Type)
-
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.oint)?.path, ["oint"])
         try XCTAssert(Foo.reflectProperty(forKey: \.oint)?.type is Int?.Type)
-
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.sarr)?.path, ["sarr"])
         try XCTAssert(Foo.reflectProperty(forKey: \.sarr)?.type is [String].Type)
-
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.osarr)?.path, ["osarr"])
         try XCTAssert(Foo.reflectProperty(forKey: \.osarr)?.type is [String]?.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.pet)?.path, ["pet"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.pet)?.type is Pet.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.opet)?.path, ["opet"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.opet)?.type is Pet?.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.dir)?.path, ["dir"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.dir)?.type is Direction.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.odir)?.path, ["odir"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.odir)?.type is Direction?.Type)
     }
 
     func testStructCustomProperties() throws {
-        struct CustomStruct: Reflectable, Decodable {
-            var hi: Bool
+        struct User: Reflectable {
+            var firstName: String
+            var lastName: String
 
             static func reflectProperties(depth: Int) throws -> [ReflectedProperty] {
-                return [ReflectedProperty(Bool.self, at: ["hi"])]
+                switch depth {
+                case 0: return [.init(String.self, at: ["first_name"]), .init(String.self, at: ["last_name"])]
+                default: return []
+                }
             }
 
-            static func reflectProperty<T>(forKey keyPath: KeyPath<CustomStruct, T>) throws -> ReflectedProperty {
-                return ReflectedProperty(Bool.self, at: ["hi"])
+            static func reflectProperty<T>(forKey keyPath: KeyPath<User, T>) throws -> ReflectedProperty? {
+                let key: String
+                switch keyPath {
+                case \User.firstName: key = "first_name"
+                case \User.lastName: key = "last_name"
+                default: return nil
+                }
+                return .init(T.self, at: [key])
             }
         }
 
-        let properties = try CustomStruct.reflectProperties(depth: 1)
-        XCTAssertEqual(properties.description, "[hi: Bool]")
-
-        try XCTAssertEqual(CustomStruct.reflectProperty(forKey: \.hi).path, ["hi"])
-        try XCTAssert(CustomStruct.reflectProperty(forKey: \.hi).type is Bool.Type)
+        let properties = try User.reflectProperties(depth: 0)
+        XCTAssertEqual(properties.description, "[first_name: String, last_name: String]")
+        try XCTAssertEqual(User.reflectProperty(forKey: \.firstName)?.path, ["first_name"])
+        try XCTAssert(User.reflectProperty(forKey: \.firstName)?.type is String.Type)
+        try XCTAssertEqual(User.reflectProperty(forKey: \.lastName)?.path, ["last_name"])
+        try XCTAssert(User.reflectProperty(forKey: \.lastName)?.type is String.Type)
     }
 
     func testNestedStruct() throws {
@@ -131,17 +160,21 @@ class ReflectableTests: XCTestCase {
     }
 
     func testPropertyDepth() throws {
-        struct Pet: Decodable {
-            var nickname: String
-            var favoriteTreat: String
-        }
+    struct Pet: Decodable {
+        var name: String
+        var age: Int
+    }
+        
         struct User: Reflectable, Decodable {
+            var id: UUID?
             var pet: Pet
             var name: String
             var age: Int
         }
 
-        try XCTAssertEqual(User.reflectProperties().description, "[pet: Pet #1, pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
+        try XCTAssertEqual(User.reflectProperties(depth: 0).description, "[id: Optional<UUID>, pet: Pet #1, name: String, age: Int]")
+        try XCTAssertEqual(User.reflectProperties(depth: 1).description, "[pet.name: String, pet.age: Int]")
+        try XCTAssertEqual(User.reflectProperties(depth: 2).description, "[]")
     }
 
     func testPropertyA() throws {
