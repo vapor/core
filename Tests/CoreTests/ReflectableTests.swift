@@ -35,7 +35,7 @@ class ReflectableTests: XCTestCase {
     }
 
     func testStructCustomProperties() throws {
-        struct CustomStruct: Reflectable {
+        struct CustomStruct: Reflectable, Decodable {
             var hi: Bool
 
             static func reflectProperties(depth: Int) throws -> [ReflectedProperty] {
@@ -72,10 +72,11 @@ class ReflectableTests: XCTestCase {
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.name)?.path, ["name"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.age)?.path, ["age"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.luckyNumber)?.path, ["luckyNumber"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.name)?.path, ["bar"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.age)?.path, ["bar"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.luckyNumbers)?.path, ["bar"])
-        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.dict)?.path, ["bar"])
+        XCTAssertThrowsError(try Foo.reflectProperty(forKey: \.bar))
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.name)?.path, ["bar", "name"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.age)?.path, ["bar", "age"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.luckyNumbers)?.path, ["bar", "luckyNumbers"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.dict)?.path, ["bar", "dict"])
     }
 
     func testProperties() throws {
@@ -140,7 +141,7 @@ class ReflectableTests: XCTestCase {
             var age: Int
         }
 
-        try XCTAssertEqual(User.reflectProperties().description, "[pet: Pet #1, name: String, age: Int]")
+        try XCTAssertEqual(User.reflectProperties().description, "[pet: Pet #1, pet.nickname: String, pet.favoriteTreat: String, name: String, age: Int]")
     }
 
     func testPropertyA() throws {
@@ -155,7 +156,7 @@ class ReflectableTests: XCTestCase {
 
     func testGH112() throws {
         /// A single entry of a Todo list.
-        final class Todo: FooModel {
+        final class Todo: FooModel, Decodable {
             /// The unique identifier for this `Todo`.
             var id: Int?
 
@@ -168,11 +169,27 @@ class ReflectableTests: XCTestCase {
                 self.title = title
             }
         }
-//        try XCTAssertEqual(Todo.reflectProperties().description, "[id: Optional<Int>, title: String]")
+
+        try XCTAssertEqual(Todo.reflectProperties().description, "[id: Optional<Int>, title: String]")
         try XCTAssertEqual(Todo.reflectProperty(forKey: \.id)?.path, ["id"])
-//        try XCTAssertEqual(Todo.reflectProperty(forKey: \.title)?.path, ["title"])
+        try XCTAssertEqual(Todo.reflectProperty(forKey: \.title)?.path, ["title"])
         try XCTAssertEqual(Todo.reflectProperty(forKey: Todo.idKey)?.path, ["id"])
 
+    }
+
+    func testCustomCodingKeys() throws {
+        final class Team: Reflectable, Decodable {
+            var id: Int?
+            var name: String
+            enum CodingKeys: String, CodingKey {
+                case id = "id"
+                case name = "name_asdf"
+            }
+            init() { fatalError() }
+        }
+        try XCTAssertEqual(Team.reflectProperty(forKey: \.id)?.path, ["id"])
+        try XCTAssertEqual(Team.reflectProperty(forKey: \.name)?.path, ["name_asdf"])
+        try XCTAssertEqual(Team.reflectProperties().description, "[id: Optional<Int>, name_asdf: String]")
     }
 
     static let allTests = [
@@ -183,6 +200,7 @@ class ReflectableTests: XCTestCase {
         ("testPropertyDepth", testPropertyDepth),
         ("testPropertyA", testPropertyA),
         ("testGH112", testGH112),
+        ("testCustomCodingKeys", testCustomCodingKeys),
     ]
 }
 
