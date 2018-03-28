@@ -86,22 +86,13 @@ struct ReflectionSingleValueDecoder: SingleValueDecodingContainer {
 
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         context.addProperty(type: T.self, at: codingPath)
-        if let type = T.self as? AnyReflectionCodable.Type {
-            let reflected = try type.anyReflectCodable()
-            if context.isActive {
-                context.activeCodingPath = codingPath
-                return reflected.0 as! T
-            }
-            return reflected.1 as! T
-        } else {
-            throw CoreError(
-                identifier: "reflectionCodable",
-                reason: "\(T.self) is not `ReflectionCodable`",
-                suggestedFixes: [
-                    "Conform `\(T.self)` to `ReflectionCodable`: `extension \(T.self): ReflectionCodable { }`."
-                ]
-            )
+        let type = try forceCast(T.self)
+        let reflected = try type.anyReflectCodable()
+        if context.isActive {
+            context.activeCodingPath = codingPath
+            return reflected.0 as! T
         }
+        return reflected.1 as! T
     }
 }
 
@@ -154,8 +145,7 @@ final class ReflectionKeyedDecoder<K>: KeyedDecodingContainerProtocol where K: C
         } else {
             context.addProperty(type: T.self, at: codingPath + [key])
         }
-        if let type = T.self as? AnyReflectionCodable.Type {
-            let reflected = try type.anyReflectCodable()
+        if let type = T.self as? AnyReflectionCodable.Type, let reflected = try? type.anyReflectCodable() {
             if context.isActive {
                 context.activeCodingPath = codingPath + [key]
                 return reflected.0 as! T
@@ -198,8 +188,7 @@ fileprivate struct ReflectionUnkeyedDecoder: UnkeyedDecodingContainer {
     mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
         context.addProperty(type: [T].self, at: codingPath)
         isAtEnd = true
-        if let type = T.self as? AnyReflectionCodable.Type {
-            let reflected = try type.anyReflectCodable()
+        if let type = T.self as? AnyReflectionCodable.Type, let reflected = try? type.anyReflectCodable() {
             return reflected.0 as! T
         } else {
             let decoder = ReflectionDecoder(codingPath: codingPath, context: context)

@@ -87,7 +87,7 @@ public protocol Reflectable {
     ///     try User.reflectProperty(forKey: \.pet.name) // ["pet", "name"] String
     ///
     /// - parameters:
-    ///     - keyPath: KeyPath to decode a property for.
+    ///     - keyPath: `KeyPath` to reflect a property for.
     /// - throws: Any error reflecting this property.
     /// - returns: `ReflectedProperty` if one was found.
     static func reflectProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty?

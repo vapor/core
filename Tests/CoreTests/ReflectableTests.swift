@@ -160,10 +160,10 @@ class ReflectableTests: XCTestCase {
     }
 
     func testPropertyDepth() throws {
-    struct Pet: Decodable {
-        var name: String
-        var age: Int
-    }
+        struct Pet: Decodable {
+            var name: String
+            var age: Int
+        }
         
         struct User: Reflectable, Decodable {
             var id: UUID?
@@ -225,6 +225,32 @@ class ReflectableTests: XCTestCase {
         try XCTAssertEqual(Team.reflectProperties().description, "[id: Optional<Int>, name_asdf: String]")
     }
 
+    func testCache() throws {
+        final class A: Reflectable, Decodable {
+            public var b: String
+        }
+
+        for _ in 0..<1_000 {
+            try XCTAssertEqual(A.reflectProperty(forKey: \.b)?.path, ["b"])
+        }
+    }
+
+    func testArrayNested() throws {
+        struct Pet: Codable {
+            var name: String
+            var type: String
+        }
+
+        struct Person: Reflectable, Codable {
+            var id: Int?
+            var title: String
+            var pets: [Pet]
+        }
+
+        try XCTAssertEqual(Person.reflectProperties().description, "[id: Optional<Int>, title: String, pets: Array<Pet #1>]")
+        XCTAssertThrowsError(try Person.reflectProperty(forKey: \.pets))
+    }
+
     static let allTests = [
         ("testStruct", testStruct),
         ("testStructCustomProperties", testStructCustomProperties),
@@ -234,6 +260,8 @@ class ReflectableTests: XCTestCase {
         ("testPropertyA", testPropertyA),
         ("testGH112", testGH112),
         ("testCustomCodingKeys", testCustomCodingKeys),
+        ("testCache", testCache),
+        ("testArrayNested", testArrayNested),
     ]
 }
 

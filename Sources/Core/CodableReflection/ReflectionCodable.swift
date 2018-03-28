@@ -1,6 +1,6 @@
 /// Types conforming to this protocol can be created dynamically for use in reflecting the structure of a `Decodable` type.
 ///
-/// `ReflectionCodable` requires that a type declare two, _distinct_ representations of itself. It also requires that the type
+/// `ReflectionCodable` requires that a type declare two _distinct_ representations of itself. It also requires that the type
 /// declare a method for comparing those two representations. If the conforming type is already equatable, this method will
 /// not be required.
 ///
@@ -31,7 +31,7 @@
 ///     }
 ///
 public protocol ReflectionCodable: AnyReflectionCodable {
-    /// Returns a tuple containing two, _distinct_ instances for this type.
+    /// Returns a tuple containing two _distinct_ instances for this type.
     ///
     ///     extension Bool: ReflectionCodable {
     ///         static func reflectCodable() -> (Bool, Bool) { return (false, true) }
@@ -41,18 +41,18 @@ public protocol ReflectionCodable: AnyReflectionCodable {
     /// - returns: Two distinct instances of this type.
     static func reflectCodable() throws -> (Self, Self)
 
-    /// Returns `true` if the supplied instance of this type is equal to the _left_ type returned
+    /// Returns `true` if the supplied instance of this type is equal to the _left_ instance returned
     /// by `reflectCodable()`.
     ///
     ///     extension Pet: ReflectionCodable {
     ///         static func reflectCodable() -> (Pet, Pet) { return (cat, dog) }
     ///     }
     ///
-    /// In the case of the above example, this method should return `true` if supplied `Pet.cat`.
+    /// In the case of the above example, this method should return `true` if supplied `Pet.cat` and false for anything else.
     /// This method is automatically implemented for types that conform to `Equatable.
     ///
     /// - throws: Any errors comparing instances.
-    /// - returns: `True` if supplied instance equals left side of `reflectCodable()`.
+    /// - returns: `true` if supplied instance equals left side of `reflectCodable()`.
     static func reflectCodableIsLeft(_ item: Self) throws -> Bool
 }
 
@@ -217,7 +217,13 @@ extension ReflectionCodable {
 /// Trys to cast a type to `AnyReflectionCodable.Type`. This can be removed when conditional conformance supports runtime querying.
 func forceCast<T>(_ type: T.Type) throws -> AnyReflectionCodable.Type {
     guard let casted = T.self as? AnyReflectionCodable.Type else {
-        throw CoreError(identifier: "reflectionCodableCast", reason: "Could not cast '\(T.self)' to 'ReflectionCodable'.")
+        throw CoreError(
+            identifier: "reflectionCodable",
+            reason: "\(T.self) is not `ReflectionCodable`",
+            suggestedFixes: [
+                "Conform `\(T.self)` to `ReflectionCodable`: `extension \(T.self): ReflectionCodable { }`."
+            ]
+        )
     }
     return casted
 }
