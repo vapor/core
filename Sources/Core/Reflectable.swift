@@ -68,7 +68,6 @@ extension Reflectable {
         guard let metadata = metadataLayout(Self.self) else {
             return nil
         }
-
         let keyPathOffset = fieldOffset(for: keyPath as AnyKeyPath)
         for (i, fieldOffset) in metadata.fieldOffsets.enumerated() {
             if fieldOffset == keyPathOffset {
@@ -103,12 +102,16 @@ func metadataLayout(_ type: Any.Type) -> CommonMetadataLayout? {
 
 func fieldOffset(for keyPath: AnyKeyPath) -> Int {
     let keyPathDescriptor = unsafeBitCast(keyPath, to: UnsafeRawPointer.self)
-    let offset = keyPathDescriptor.advanced(by: 32).assumingMemoryBound(to: Int.self).pointee & 0x00FFFFFF
-    guard offset != 0x00FFFFFF else {
-        // overflowed
-        return keyPathDescriptor.advanced(by: 40).assumingMemoryBound(to: Int.self).pointee & 0x00FFFFFF  //- 64
+//    let offset = keyPathDescriptor.advanced(by: 32).assumingMemoryBound(to: Int.self).pointee & 0x00FFFFFF
+//    guard offset != 0x00FFFFFF else {
+//        // overflowed
+//        return keyPathDescriptor.advanced(by: 40).assumingMemoryBound(to: Int.self).pointee & 0x00FFFFFF  //- 64
+//    }
+    let offset = keyPathDescriptor.advanced(by: 32).assumingMemoryBound(to: UInt32.self).pointee & 0x1FFFFFFF
+    guard offset != 0x1FFFFFFF else {
+        fatalError("AnyKeyPath can not represent a field that appears more than 512GB into a type.")
     }
-    return offset
+    return Int(offset)
 }
 
 func dump(_ ptr: UnsafeRawPointer, count: Int = 64) {
