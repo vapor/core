@@ -87,7 +87,7 @@ struct ReflectionSingleValueDecoder: SingleValueDecodingContainer {
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         context.addProperty(type: T.self, at: codingPath)
         let type = try forceCast(T.self)
-        let reflected = try type.anyReflectCodable()
+        let reflected = try type.anyReflectDecoded()
         if context.isActive {
             context.activeCodingPath = codingPath
             return reflected.0 as! T
@@ -145,7 +145,7 @@ final class ReflectionKeyedDecoder<K>: KeyedDecodingContainerProtocol where K: C
         } else {
             context.addProperty(type: T.self, at: codingPath + [key])
         }
-        if let type = T.self as? AnyReflectionCodable.Type, let reflected = try? type.anyReflectCodable() {
+        if let type = T.self as? AnyReflectionDecodable.Type, let reflected = try? type.anyReflectDecoded() {
             if context.isActive {
                 context.activeCodingPath = codingPath + [key]
                 return reflected.0 as! T
@@ -188,7 +188,7 @@ fileprivate struct ReflectionUnkeyedDecoder: UnkeyedDecodingContainer {
     mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
         context.addProperty(type: [T].self, at: codingPath)
         isAtEnd = true
-        if let type = T.self as? AnyReflectionCodable.Type, let reflected = try? type.anyReflectCodable() {
+        if let type = T.self as? AnyReflectionDecodable.Type, let reflected = try? type.anyReflectDecoded() {
             return reflected.0 as! T
         } else {
             let decoder = ReflectionDecoder(codingPath: codingPath, context: context)

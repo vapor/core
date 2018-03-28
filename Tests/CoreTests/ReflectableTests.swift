@@ -3,12 +3,12 @@ import XCTest
 
 class ReflectableTests: XCTestCase {
     func testStruct() throws {
-        enum Pet: String, ReflectionCodable, Decodable {
-            static func reflectCodable() -> (Pet, Pet) { return (.cat, .dog) }
+        enum Pet: String, ReflectionDecodable, Decodable {
+            static func reflectDecoded() -> (Pet, Pet) { return (.cat, .dog) }
             case cat, dog
         }
 
-        enum Direction: UInt8, ReflectionCodable, Decodable {
+        enum Direction: UInt8, ReflectionDecodable, Decodable {
             case left, right
         }
 

@@ -16,7 +16,7 @@ extension Reflectable where Self: Decodable {
 }
 
 extension Decodable {
-    /// Decodes all `CodableProperty`s for this type. This requires that all propeties on this type are `ReflectionCodable`.
+    /// Decodes all `CodableProperty`s for this type. This requires that all propeties on this type are `ReflectionDecodable`.
     ///
     /// This is used to provide a default implementation for `reflectProperties(depth:)` on `Reflectable`.
     ///
@@ -33,7 +33,7 @@ extension Decodable {
     }
 
     /// Decodes a `CodableProperty` for the supplied `KeyPath`. This requires that all propeties on this
-    /// type are `ReflectionCodable`.
+    /// type are `ReflectionDecodable`.
     ///
     /// This is used to provide a default implementation for `reflectProperty(forKey:)` on `Reflectable`.
     ///
@@ -42,8 +42,8 @@ extension Decodable {
     /// - throws: Any error decoding this property.
     /// - returns: `ReflectedProperty` if one was found.
     public static func decodeProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty? {
-        guard T.self is AnyReflectionCodable.Type else {
-            throw CoreError(identifier: "reflectionCodable", reason: "`\(T.self)` does not conform to `ReflectionCodable`.")
+        guard T.self is AnyReflectionDecodable.Type else {
+            throw CoreError(identifier: "ReflectionDecodable", reason: "`\(T.self)` does not conform to `ReflectionDecodable`.")
         }
 
         if let cached = ReflectedPropertyCache.storage[keyPath] {
@@ -70,11 +70,11 @@ extension Decodable {
                     break b
                 }
 
-                guard let t = T.self as? AnyReflectionCodable.Type else {
+                guard let t = T.self as? AnyReflectionDecodable.Type else {
                     break b
                 }
 
-                if try t.anyReflectCodableIsLeft(decoded[keyPath: keyPath]) {
+                if try t.anyReflectDecodedIsLeft(decoded[keyPath: keyPath]) {
                     let property = ReflectedProperty(T.self, at: codingPath.map { $0.stringValue })
                     ReflectedPropertyCache.storage[keyPath] = property
                     return property
