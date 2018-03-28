@@ -1,5 +1,23 @@
 import Foundation
 
+public protocol KeyStringDecodable: ReflectionCodable {
+    static var keyStringTrue: Self { get }
+    static var keyStringFalse: Self { get }
+    static func keyStringIsTrue(_ item: Self) -> Bool
+}
+
+extension KeyStringDecodable {
+    public static func reflectTrue() throws -> Self {
+        return keyStringTrue
+    }
+    public static func reflectFalse() throws -> Self {
+        return keyStringFalse
+    }
+    public static func reflectIsTrue(_ item: Self) throws -> Bool {
+        return keyStringIsTrue(item)
+    }
+}
+
 public protocol AnyReflectionCodable {
     static func anyReflectTrue() throws -> Any
     static func anyReflectFalse() throws -> Any
