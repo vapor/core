@@ -20,3 +20,9 @@ extension String {
         return self + end
     }
 }
+
+extension UUID: LosslessStringConvertible {
+    public init?(_ string: String) {
+        self.init(uuidString: string)
+    }
+}
