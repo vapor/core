@@ -5,4 +5,10 @@ extension Future where T: Sequence {
             return try this.map(transform)
         })
     }
+    
+    func flatEach<Wrapped>(to: Wrapped.Type, transform: @escaping (Expectation.Element)throws -> Future<Wrapped>) -> Future<[Wrapped]> {
+        return self.flatMap(to: [Wrapped].self, { (this) in
+            return try this.map(transform).flatten(on: self.eventLoop)
+        })
+    }
 }
