@@ -3,7 +3,7 @@ version: 2
 jobs:
   macos:
     macos:
-      xcode: "9.2"
+      xcode: "9.3"
     steps:
       - checkout
       - run: swift build
@@ -140,6 +140,23 @@ jobs:
           command: swift test
           working_directory: ~/jwt
 
+  linux-leaf:
+    docker:
+      - image: codevapor/swift:4.1
+    steps:
+      - run:
+          name: Clone Leaf
+          command: git clone -b master https://github.com/vapor/leaf.git
+          working_directory: ~/
+      - run:
+          name: Switch Leaf to this Core revision
+          command: swift package edit Core --revision $CIRCLE_SHA1
+          working_directory: ~/leaf
+      - run:
+          name: Run Leaf unit tests
+          command: swift test
+          working_directory: ~/leaf
+
 workflows:
   version: 2
   tests:
@@ -151,7 +168,8 @@ workflows:
       - linux-fluent-postgresql
       - linux-redis
       - linux-jwt
-      # - macos
+      - linux-leaf
+      - macos
 
   nightly:
     triggers:
@@ -163,5 +181,5 @@ workflows:
                 - master
     jobs:
       - linux
-      # - macos
+      - macos
       
