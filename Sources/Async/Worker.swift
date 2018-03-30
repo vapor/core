@@ -1,9 +1,41 @@
 import Dispatch
 
-/// Convenience shorthand for `EventLoopGroup`.
+/// `Worker`s are types that have a reference to an `EventLoop`.
+///
+/// You will commonly see `Worker`s required after an `on:` label.
+///
+///     return Future.map(on: req) { ... }
+///
+/// The most common containers you will interact with in Vapor are:
+/// - `Application`
+/// - `Request`
+/// - `Response`
+///
+/// You can also use a SwiftNIO `EventGroup` directly as your `Worker`.
+///
+///     let worker = MultiThreadedEventLoopGroup(numThreads: 2)
+///     ...
+///     let connection = database.makeConnection(on: worker)
+///
 public typealias Worker = EventLoopGroup
 
-/// Has an `EventLoop`.
+/// `Worker`s are types that have a reference to an `EventLoop`.
+///
+/// You will commonly see `Worker`s required after an `on:` label.
+///
+///     return Future.map(on: req) { ... }
+///
+/// The most common containers you will interact with in Vapor are:
+/// - `Application`
+/// - `Request`
+/// - `Response`
+///
+/// You can also use a SwiftNIO `EventGroup` directly as your `Worker`.
+///
+///     let worker = MultiThreadedEventLoopGroup(numThreads: 2)
+///     ...
+///     let connection = database.makeConnection(on: worker)
+///
 extension Worker {
     /// See `BasicWorker`.
     public var eventLoop: EventLoop {
