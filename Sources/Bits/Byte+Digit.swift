@@ -1,5 +1,4 @@
-// MARK: Digits
-
+/// Adds digit conveniences to `Byte`.
 extension Byte {
     /// Returns whether or not a given byte represents a UTF8 digit 0 through 9
     public var isDigit: Bool {

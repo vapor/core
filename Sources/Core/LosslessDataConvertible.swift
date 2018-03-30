@@ -1,4 +1,4 @@
-/// A type that can be represented as Data in a lossless, unambiguous way.
+/// A type that can be represented as `Data` in a lossless, unambiguous way.
 public protocol LosslessDataConvertible {
     /// Losslessly converts this type to `Data`.
     func convertToData() throws -> Data

@@ -18,7 +18,7 @@ final class ByteBufferRequireTests: XCTestCase {
         do {
             let _: Int = try buf.requireReadInteger()
             XCTFail()
-        } catch _ as ByteBufferReadError {
+        } catch _ as BitsError {
             XCTAssert(true)
         } catch {
             XCTFail()
@@ -37,7 +37,7 @@ final class ByteBufferRequireTests: XCTestCase {
         do {
             _ = try buf.requireReadString(length: 1)
             XCTFail()
-        } catch _ as ByteBufferReadError {
+        } catch _ as BitsError {
             XCTAssert(true)
         } catch {
             XCTFail()
@@ -58,7 +58,7 @@ final class ByteBufferRequireTests: XCTestCase {
         do {
             _ = try buf.requireReadData(length: 1)
             XCTFail()
-        } catch _ as ByteBufferReadError {
+        } catch _ as BitsError {
             XCTAssert(true)
         } catch {
             XCTFail()
@@ -73,13 +73,13 @@ final class ByteBufferRequireTests: XCTestCase {
         buf.write(floatingPoint: first)
         buf.write(floatingPoint: second)
 
-        try XCTAssertEqual(buf.requireBinaryFloatingPoint(), first)
-        try XCTAssertEqual(buf.requireBinaryFloatingPoint(), second)
+        try XCTAssertEqual(buf.requireReadFloatingPoint(), first)
+        try XCTAssertEqual(buf.requireReadFloatingPoint(), second)
 
         do {
-            let _: Double = try buf.requireBinaryFloatingPoint()
+            let _: Double = try buf.requireReadFloatingPoint()
             XCTFail()
-        } catch _ as ByteBufferReadError {
+        } catch _ as BitsError {
             XCTAssert(true)
         } catch {
             XCTFail()

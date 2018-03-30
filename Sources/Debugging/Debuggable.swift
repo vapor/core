@@ -60,10 +60,9 @@ public protocol Debuggable: CustomDebugStringConvertible, CustomStringConvertibl
 /// MARK: Computed
 
 extension Debuggable {
-    /// Generates a stack trace from the call point.
-    /// Must call this from the error's init.
+    /// Generates a stack trace from the call point. Must call this from the error's init.
     public static func makeStackTrace() -> [String] {
-        return StackTrace.get()
+        return Thread.callStackSymbols
     }
 }
 
@@ -76,42 +75,48 @@ extension Debuggable {
 // MARK: Defaults
 
 extension Debuggable {
-    /// Default implementation of readable name that expands
-    /// SomeModule.MyType.Error => My Type Error
+    /// See `Debuggable`
     public static var readableName: String {
         return typeIdentifier
     }
 
-    /// See `Identifiable.typeIdentifier`
+    /// See `Debuggable`
     public static var typeIdentifier: String {
         let type = "\(self)"
         return type.split(separator: ".").last.flatMap(String.init) ?? type
     }
 
+    /// See `Debuggable`
     public var possibleCauses: [String] {
         return []
     }
 
+    /// See `Debuggable`
     public var suggestedFixes: [String] {
         return []
     }
 
+    /// See `Debuggable`
     public var documentationLinks: [String] {
         return []
     }
 
+    /// See `Debuggable`
     public var stackOverflowQuestions: [String] {
         return []
     }
 
+    /// See `Debuggable`
     public var gitHubIssues: [String] {
         return []
     }
 
+    /// See `Debuggable`
     public var sourceLocation: SourceLocation? {
         return nil
     }
 
+    /// See `Debuggable`
     public var stackTrace: [String]? {
         return nil
     }
@@ -120,10 +125,12 @@ extension Debuggable {
 /// MARK: Custom...StringConvertible
 
 extension Debuggable {
+    /// See `CustomDebugStringConvertible`
     public var debugDescription: String {
         return debuggableHelp(format: .long)
     }
 
+    /// See `CustomStringConvertible`
     public var description: String {
         return debuggableHelp(format: .short)
     }
@@ -148,15 +155,15 @@ extension Debuggable {
 
 // MARK: Representations
 
+/// Available formatting options for generating debug info for `Debuggable` errors.
 public enum HelpFormat {
     case short
     case long
 }
 
 extension Debuggable {
-    /// A computed property returning a `String` that encapsulates
-    /// why the error occurred, suggestions on how to fix the problem,
-    /// and resources to consult in debugging (if these are available).
+    /// A computed property returning a `String` that encapsulates why the error occurred, suggestions on how to
+    /// fix the problem, and resources to consult in debugging (if these are available).
     /// - note: This representation is best used with functions like print()
     public func debuggableHelp(format: HelpFormat) -> String {
         var print: [String] = []

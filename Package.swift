@@ -17,7 +17,7 @@ let package = Package(
     targets: [
         .target(name: "Async", dependencies: ["NIO"]),
         .target(name: "Bits", dependencies: ["NIO"]),
-        .target(name: "Core", dependencies: ["Async", "Bits", "Debugging"]),
+        .target(name: "Core", dependencies: ["Async", "Bits", "COperatingSystem", "Debugging", "NIOFoundationCompat"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),

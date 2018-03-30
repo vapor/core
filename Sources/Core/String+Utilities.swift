@@ -1,9 +1,9 @@
 extension String {
-    /// Converts the string to a boolean or return nil.
+    /// Converts the string to a `Bool` or returns `nil`.
     public var bool: Bool? {
         switch self {
-        case "true", "yes", "1": return true
-        case "false", "no", "0": return false
+        case "true", "yes", "1", "y": return true
+        case "false", "no", "0", "n": return false
         default: return nil
         }
     }
@@ -22,6 +22,7 @@ extension String {
 }
 
 extension UUID: LosslessStringConvertible {
+    /// See `LosslessStringConvertible`.
     public init?(_ string: String) {
         self.init(uuidString: string)
     }

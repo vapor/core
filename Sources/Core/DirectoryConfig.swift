@@ -1,22 +1,25 @@
-#if os(Linux)
-import Glibc
-#else
-import Darwin.C
-#endif
+import COperatingSystem
 
-/// FIXME: move this to a better module
-
-/// Contains a configured working directory.
+/// `DirectoryConfig` represents a configured working directory. It can also be used to derive a working directory automatically.
+///
+///     let dirConfig = DirectoryConfig.detect()
+///     print(dirConfig.workDir) // "/path/to/workdir"
+///
 public struct DirectoryConfig {
-    /// The working directory
+    /// Path to the current working directory.
     public let workDir: String
 
-    /// Create a new directory config.
+    /// Create a new `DirectoryConfig` with a custom working directory.
+    ///
+    /// - parameters:
+    ///     - workDir: Custom working directory path.
     public init(workDir: String) {
         self.workDir = workDir
     }
 
-    /// Creates a directory config with default working directory.
+    /// Creates a `DirectoryConfig` by deriving a working directory using the `#file` variable or `getcwd` method.
+    ///
+    /// - returns: The derived `DirectoryConfig` if it could be created, otherwise just "./".
     public static func detect() -> DirectoryConfig {
         let fileBasedWorkDir: String?
 

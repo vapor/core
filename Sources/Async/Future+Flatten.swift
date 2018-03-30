@@ -1,13 +1,9 @@
 /// A closure that returns a future.
 public typealias LazyFuture<T> = () -> (Future<T>)
 
-/// FIXME: some way to make this generic?
 extension Collection where Element == LazyFuture<Void> {
     /// Flattens an array of lazy futures into a future with an array of results.
-    /// note: each subsequent future will wait for the previous to
-    /// complete before starting.
-    ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/advanced-futures/#combining-multiple-futures)
+    /// - note: each subsequent future will wait for the previous to complete before starting.
     public func syncFlatten(on worker: Worker) -> Future<Void> {
         let promise = worker.eventLoop.newPromise(Void.self)
 
@@ -36,10 +32,7 @@ extension Collection where Element == LazyFuture<Void> {
 
 extension Collection where Element: FutureType {
     /// Flattens an array of futures into a future with an array of results.
-    /// note: the order of the results will match the order of the
-    /// futures in the input array.
-    ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/advanced-futures/#combining-multiple-futures)
+    /// - note: the order of the results will match the order of the futures in the input array.
     public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
         var elements: [Element.Expectation] = []
 
@@ -71,8 +64,6 @@ extension Collection where Element: FutureType {
 
 extension Collection where Element == Future<Void> {
     /// Flattens an array of void futures into a single one.
-    ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/advanced-futures/#combining-multiple-futures)
     public func flatten(on worker: Worker) -> Future<Void> {
         let flatten: Future<[Void]> = self.flatten(on: worker)
         return flatten.map(to: Void.self) { _ in return }

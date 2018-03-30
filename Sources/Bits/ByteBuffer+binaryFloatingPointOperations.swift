@@ -1,5 +1,3 @@
-import Foundation
-
 extension ByteBuffer {
     /// Write `integer` into this `ByteBuffer`, moving the writer index forward appropriately.
     ///

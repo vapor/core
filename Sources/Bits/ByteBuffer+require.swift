@@ -2,95 +2,42 @@ import Debugging
 import NIO
 import Foundation
 
-class ByteBufferReadError: Debuggable {
-    public static let readableName = "Byte Buffer Read Error"
-    public let identifier: String
-    public var reason: String
-    public var sourceLocation: SourceLocation?
-    public var stackTrace: [String]
-    public var possibleCauses: [String]
-    public var suggestedFixes: [String]
-
-    public init(
-        identifier: String,
-        reason: String,
-        possibleCauses: [String] = [],
-        suggestedFixes: [String] = [],
-        source: SourceLocation
-    ) {
-        self.identifier = identifier
-        self.reason = reason
-        self.sourceLocation = source
-        self.stackTrace = ByteBufferReadError.makeStackTrace()
-        self.possibleCauses = possibleCauses
-        self.suggestedFixes = suggestedFixes
-    }
-}
-
-// Read In Integer In Whatever Endianness you wish
 extension ByteBuffer {
-    public mutating func requireReadInteger<I>(endianness: Endianness = .big) throws -> I where I: FixedWidthInteger {
+    /// Reads a `FixedWidthInteger` from this `ByteBuffer` or throws an error.
+    ///
+    /// See `readInteger(endianniess:as:)`
+    public mutating func requireReadInteger<I>(endianness: Endianness = .big, as: I.Type = I.self) throws -> I where I: FixedWidthInteger {
         guard let i: I = readInteger(endianness: endianness, as: I.self) else {
-            throw ByteBufferReadError(
-                identifier: "fixedWidthInteger",
-                reason: "This was not available in the buffer",
-                possibleCauses: ["Buffer was already read","Buffer was not checked before reading"],
-                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                source: .capture()
-            )
+            throw BitsError(identifier: "requireReadInteger", reason: "Not enough data available in the ByteBuffer.")
         }
 
         return i
     }
-}
 
-//Read In String
-extension ByteBuffer {
+    /// Reads a `String` from this `ByteBuffer` or throws an error.
+    ///
+    /// See `readString(endianniess:as:)`
     public mutating func requireReadString(length: Int) throws -> String {
         guard let string = readString(length: length) else {
-            throw ByteBufferReadError(
-                identifier: "string",
-                reason: "This was not available in the buffer",
-                possibleCauses: ["Buffer was already read", "Buffer was not checked before reading"],
-                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                source: .capture()
-            )
+            throw BitsError(identifier: "requireReadString", reason: "Not enough data available in the ByteBuffer.")
         }
         return string
     }
-}
 
-//Read In Data
-extension ByteBuffer {
+    /// Reads a `Data` from this `ByteBuffer` or throws an error.
+    ///
+    /// See `readData(endianniess:as:)`
     public mutating func requireReadData(length: Int) throws -> Data {
         guard let bytes = readBytes(length: length) else {
-            throw ByteBufferReadError(
-                identifier: "data",
-                reason: "This was not available in the buffer",
-                possibleCauses: ["Buffer was already read", "Buffer was not checked before reading"],
-                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                source: .capture()
-            )
+            throw BitsError(identifier: "requireReadData", reason: "Not enough data available in the ByteBuffer.")
         }
         return Data(bytes: bytes)
     }
-}
 
-//Read In BinaryFloatingPoint
-
-extension ByteBuffer {
-    @discardableResult
-    public mutating func  requireBinaryFloatingPoint<T>(as: T.Type = T.self) throws -> T
-        where T: BinaryFloatingPoint
-    {
+    /// Reads a `BinaryFloatingPoint` from this `ByteBuffer` or throws an error.
+    public mutating func requireReadFloatingPoint<T>(as: T.Type = T.self) throws -> T where T: BinaryFloatingPoint {
         guard let bytes = self.readBytes(length: MemoryLayout<T>.size) else {
-            throw ByteBufferReadError(
-                identifier: "binaryFloatingPoint",
-                reason: "This was not available in the buffer",
-                possibleCauses: ["Buffer was already read", "Buffer was not checked before reading"],
-                suggestedFixes: ["Before each buffer read use the peak functions included to insure the bytes needed are their"],
-                source: .capture()
-            )
+            throw BitsError(identifier: "requireReadFloat", reason: "Not enough data available in the ByteBuffer.")
         }
         var value: T = 0
         withUnsafeMutableBytes(of: &value) { valuePtr in
