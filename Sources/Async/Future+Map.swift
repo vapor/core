@@ -1,8 +1,16 @@
 extension Future {
-    /// Maps a future to a future of a different type.
-    /// The result returned within should be non-future type.
+    /// Maps a `Future` to a `Future` of a different type.
     ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/promise-future-introduction/#mapping-results)
+    /// - note: The result returned within should be non-`Future` type.
+    ///
+    ///     print(futureString) // Future<String>
+    ///     let futureInt = futureString.map(to: Int.self) { string in
+    ///         print(string) // The actual String
+    ///         return Int(string) ?? 0
+    ///     }
+    ///     print(futureInt) // Future<Int>
+    ///
+    /// See `flatMap(to:_:)` for mapping `Future` results to other `Future` types.
     public func map<T>(to type: T.Type, _ callback: @escaping (Expectation) throws -> T) -> Future<T> {
         let promise = eventLoop.newPromise(T.self)
 
@@ -20,12 +28,19 @@ extension Future {
         return promise.futureResult
     }
 
-    /// Maps a future to a future of a different type.
-    /// The result returned within should be a future.
-    public func flatMap<Wrapped>(
-        to type: Wrapped.Type,
-        _ callback: @escaping (Expectation) throws -> Future<Wrapped>
-    ) -> Future<Wrapped> {
+    /// Maps a `Future` to a `Future` of a different type.
+    ///
+    /// - note: The result returned within the closure should be another `Future`.
+    ///
+    ///     print(futureURL) // Future<URL>
+    ///     let futureRes = futureURL.flatMap(to: Response.self) { url in
+    ///         print(url) // The actual URL
+    ///         return client.get(url: url) // Returns Future<Response>
+    ///     }
+    ///     print(futureRes) // Future<Response>
+    ///
+    /// See `map(to:_:)` for mapping `Future` results to non-`Future` types.
+    public func flatMap<Wrapped>(to type: Wrapped.Type, _ callback: @escaping (Expectation) throws -> Future<Wrapped>) -> Future<Wrapped> {
         let promise = eventLoop.newPromise(Wrapped.self)
 
         self.do { expectation in
@@ -41,114 +56,7 @@ extension Future {
 
         return promise.futureResult
     }
-}
-
-/// Applies nil coalescing to a future's optional and a concrete type
-public func ??<T>(lhs: Future<T?>, rhs: T) -> Future<T> {
-    return lhs.map(to: T.self) { value in
-        return value ?? rhs
-    }
-}
-
-/// MARK: Array
-
-extension Collection where Element: FutureType {
-    /// See `Future.map`
-    public func map<T>(to type: T.Type, on worker: Worker, _ callback: @escaping ([Element.Expectation]) throws -> T) -> Future<T> {
-        return flatten(on: worker).map(to: T.self, callback)
-    }
-
-    /// See `Future.flatMap`
-    public func flatMap<T>(to type: T.Type, on worker: Worker, _ callback: @escaping ([Element.Expectation]) throws -> Future<T>) -> Future<T> {
-        return flatten(on: worker).flatMap(to: T.self, callback)
-    }
-}
-
-extension Collection where Element == Future<Void> {
-    /// See `Future.map`
-    public func map<T>(to type: T.Type, on worker: Worker, _ callback: @escaping () throws -> T) -> Future<T> {
-        return flatten(on: worker).map(to: T.self) { _ in
-            return try callback()
-        }
-    }
-
-
-    /// See `Future.flatMap`
-    public func flatMap<T>(to type: T.Type, on worker: Worker, _ callback: @escaping () throws -> Future<T>) -> Future<T> {
-        return flatten(on: worker).flatMap(to: T.self) { _ in
-            return try callback()
-        }
-    }
-}
-
-/// MARK: Variadic
-
-/// Calls the supplied callback when both futures have completed.
-public func map<A, B, Result>(
-    to result: Result.Type,
-    _ futureA: Future<A>,
-    _ futureB: Future<B>,
-    _ callback: @escaping (A, B) throws -> (Result)
-) -> Future<Result> {
-    return futureA.flatMap(to: Result.self) { a in
-        return futureB.map(to: Result.self) { b in
-            return try callback(a, b)
-        }
-    }
-}
-
-/// Calls the supplied callback when all three futures have completed.
-public func map<A, B, C, Result>(
-    to result: Result.Type,
-    _ futureA: Future<A>,
-    _ futureB: Future<B>,
-    _ futureC: Future<C>,
-    _ callback: @escaping (A, B, C) throws -> (Result)
-) -> Future<Result> {
-    return futureA.flatMap(to: Result.self) { a in
-        return futureB.flatMap(to: Result.self) { b in
-            return futureC.map(to: Result.self) { c in
-                return try callback(a, b, c)
-            }
-        }
-    }
-}
-
-/// Calls the supplied callback when both futures have completed.
-public func flatMap<A, B, Result>(
-    to result: Result.Type,
-    _ futureA: Future<A>,
-    _ futureB: Future<B>,
-    _ callback: @escaping (A, B) throws -> (Future<Result>)
-) -> Future<Result> {
-    return futureA.flatMap(to: Result.self) { a in
-        return futureB.flatMap(to: Result.self) { b in
-            return try callback(a, b)
-        }
-    }
-}
-
-/// Calls the supplied callback when all three futures have completed.
-public func flatMap<A, B, C, Result>(
-    to result: Result.Type,
-    _ futureA: Future<A>,
-    _ futureB: Future<B>,
-    _ futureC: Future<C>,
-    _ callback: @escaping (A, B, C) throws -> (Future<Result>)
-    ) -> Future<Result> {
-    return futureA.flatMap(to: Result.self) { a in
-        return futureB.flatMap(to: Result.self) { b in
-            return futureC.flatMap(to: Result.self) { c in
-                return try callback(a, b, c)
-            }
-        }
-    }
-}
-
-
-/// MARK: Catch
-
-extension Future {
+    
     /// Calls the supplied closure if the chained Future resolves to an Error.
     ///
     /// The closure gives you a chance to rectify the error (returning the desired expectation)

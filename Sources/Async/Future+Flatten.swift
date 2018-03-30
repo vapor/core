@@ -1,12 +1,9 @@
 /// A closure that returns a future.
 public typealias LazyFuture<T> = () -> (Future<T>)
 
-/// FIXME: some way to make this generic?
 extension Collection where Element == LazyFuture<Void> {
     /// Flattens an array of lazy futures into a future with an array of results.
     /// - note: each subsequent future will wait for the previous to complete before starting.
-    ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/advanced-futures/#combining-multiple-futures)
     public func syncFlatten(on worker: Worker) -> Future<Void> {
         let promise = worker.eventLoop.newPromise(Void.self)
 

@@ -118,8 +118,7 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     }
 }
 
-/// Contains the `onInput` handler and promise created by enqueuing one or more
-/// output to a `QueueHandler`.
+/// Contains the `onInput` handler and promise created by enqueuing one or more output to a `QueueHandler`.
 fileprivate struct InputContext<In> {
     /// Should be completed when `onInput` returns `true` or an error is thrown.
     var promise: Promise<Void>

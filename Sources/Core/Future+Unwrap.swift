@@ -17,3 +17,15 @@ public extension Future where Expectation: OptionalType {
         }
     }
 }
+
+/// Applies `nil` coalescing to a future's optional and a concrete type.
+///
+///     print(maybeFutureInt) // Future<Int>?
+///     let futureInt = maybeFutureInt ?? 0
+///     print(futureInt) // Future<Int>
+///
+public func ??<T>(lhs: Future<T?>, rhs: T) -> Future<T> {
+    return lhs.map(to: T.self) { value in
+        return value ?? rhs
+    }
+}
