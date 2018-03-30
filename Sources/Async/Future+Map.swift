@@ -1,3 +1,5 @@
+// MARK: Map
+
 extension Future {
     /// Maps a `Future` to a `Future` of a different type.
     ///

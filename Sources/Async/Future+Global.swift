@@ -1,3 +1,5 @@
+// MARK: Global
+
 extension Future {
     /// Statically available method for mimicking behavior of calling `return future.map` where no starting future is available.
     ///

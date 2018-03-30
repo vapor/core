@@ -1,3 +1,5 @@
+// MARK: Variadic
+
 extension Future {
     /// Calls the supplied callback when both futures have completed.
     ///

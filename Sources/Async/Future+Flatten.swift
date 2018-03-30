@@ -1,3 +1,5 @@
+// MARK: Flatten
+
 /// A closure that returns a future.
 public typealias LazyFuture<T> = () -> (Future<T>)
 
