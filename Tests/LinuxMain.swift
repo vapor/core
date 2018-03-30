@@ -1,11 +1,15 @@
 #if os(Linux)
 
+@testable import AsyncTests
 @testable import BitsTests
 @testable import CoreTests
 @testable import DebuggingTests
 import XCTest
 
 XCTMain([
+	/// Async
+	testCase(AsyncTests.allTests),
+
 	/// Bits
 	testCase(ByteBufferPeekTests.allTests),
 	testCase(ByteBufferRequireTests.allTests),

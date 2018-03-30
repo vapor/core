@@ -16,12 +16,13 @@ let package = Package(
     ],
     targets: [
         .target(name: "Async", dependencies: ["NIO"]),
+        .testTarget(name: "AsyncTests", dependencies: ["Async"]),
         .target(name: "Bits", dependencies: ["NIO"]),
+        .testTarget(name: "BitsTests", dependencies: ["Bits", "NIO"]),
         .target(name: "Core", dependencies: ["Async", "Bits", "COperatingSystem", "Debugging", "NIOFoundationCompat"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
         .target(name: "COperatingSystem"),
         .target(name: "Debugging"),
         .testTarget(name: "DebuggingTests", dependencies: ["Debugging"]),
-        .testTarget(name: "BitsTests", dependencies: ["Bits", "NIO"]),
     ]
 )
