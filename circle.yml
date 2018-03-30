@@ -169,7 +169,7 @@ workflows:
       - linux-redis
       - linux-jwt
       - linux-leaf
-      - macos
+#      - macos
 
   nightly:
     triggers:
@@ -181,5 +181,5 @@ workflows:
                 - master
     jobs:
       - linux
-      - macos
+#      - macos
       
