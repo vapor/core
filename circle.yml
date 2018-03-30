@@ -43,7 +43,7 @@ jobs:
           working_directory: ~/vapor
 
 
-  linux-fluent:
+  linux-fluent-sqlite:
     docker:
       - image: codevapor/swift:4.1
     steps:
@@ -60,6 +60,50 @@ jobs:
           command: swift test
           working_directory: ~/fluent-sqlite
 
+  linux-fluent-mysql:
+    docker:
+      - image: codevapor/swift:4.1
+      - image: mysql:5.7
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: vapor_database
+          # MYSQL_ROOT_HOST: %
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+    steps:
+      - run:
+          name: Clone Fluent MySQL
+          command: git clone -b master https://github.com/vapor/fluent-mysql.git
+          working_directory: ~/
+      - run:
+          name: Switch Fluent MySQL to this Core revision
+          command: swift package edit Core --revision $CIRCLE_SHA1
+          working_directory: ~/fluent-mysql
+      - run:
+          name: Run Fluent unit tests
+          command: swift test
+          working_directory: ~/fluent-mysql
+
+  linux-fluent-postgresql:
+    docker:
+      - image: codevapor/swift:4.1
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_USER: vapor_username
+          POSTGRES_DB: vapor_database
+    steps:
+      - run:
+          name: Clone Fluent PostgreSQL
+          command: git clone -b master https://github.com/vapor/fluent-postgresql.git
+          working_directory: ~/
+      - run:
+          name: Switch Fluent PostgreSQL to this Core revision
+          command: swift package edit Core --revision $CIRCLE_SHA1
+          working_directory: ~/fluent-postgresql
+      - run:
+          name: Run Fluent unit tests
+          command: swift test
+          working_directory: ~/fluent-postgresql
 
 workflows:
   version: 2
@@ -67,7 +111,9 @@ workflows:
     jobs:
       - linux
       - linux-vapor
-      - linux-fluent
+      - linux-fluent-sqlite
+      - linux-fluent-mysql
+      - linux-fluent-postgresql
       # - macos
 
   nightly:
