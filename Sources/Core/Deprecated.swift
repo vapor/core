@@ -1,5 +1,3 @@
-/// Nothing here yet
-
 @available(*, deprecated, renamed: "Future.map(_:_:_:)")
 public func map<A, B, Result>(
     to result: Result.Type,
@@ -14,6 +12,7 @@ public func map<A, B, Result>(
     }
 }
 
+@available(*, deprecated, renamed: "Future.map(_:_:_:_:)")
 public func map<A, B, C, Result>(
     to result: Result.Type,
     _ futureA: Future<A>,
@@ -30,6 +29,7 @@ public func map<A, B, C, Result>(
     }
 }
 
+@available(*, deprecated, renamed: "Future.flatMap(_:_:_:)")
 public func flatMap<A, B, Result>(
     to result: Result.Type,
     _ futureA: Future<A>,
@@ -43,7 +43,7 @@ public func flatMap<A, B, Result>(
     }
 }
 
-/// Calls the supplied callback when all three futures have completed.
+@available(*, deprecated, renamed: "Future.flatMap(_:_:_:_:)")
 public func flatMap<A, B, C, Result>(
     to result: Result.Type,
     _ futureA: Future<A>,
@@ -60,9 +60,15 @@ public func flatMap<A, B, C, Result>(
     }
 }
 
+extension Future {
+    @available(*, deprecated, renamed: "cascade(promise:)")
+    public func chain(to promise: Promise<T>) {
+        self.cascade(promise: promise)
+    }
+}
 
 extension Array where Element == Future<Void> {
-    /// Transforms a successful future to the supplied value.
+    @available(*, deprecated)
     public func transform<T>(on worker: Worker, to callback: @escaping () throws -> Future<T>) -> Future<T> {
         return flatten(on: worker).flatMap(to: T.self, callback)
     }
