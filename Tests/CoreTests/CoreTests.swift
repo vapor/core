@@ -35,10 +35,16 @@ class CoreTests: XCTestCase {
         }
     }
 
+    func testHexEncodedString() throws {
+        XCTAssertEqual(Data("hello".utf8).hexEncodedString(), "68656c6c6f")
+        XCTAssertEqual(Data("hello".utf8).hexEncodedString(uppercase: true), "68656C6C6F")
+    }
+
     static let allTests = [
         ("testProcessExecute", testProcessExecute),
         ("testBase64", testBase64),
         ("testBase64URL", testBase64URL),
         ("testBase64URLEscaping", testBase64URLEscaping),
+        ("testHexEncodedString", testHexEncodedString),
     ]
 }

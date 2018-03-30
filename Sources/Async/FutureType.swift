@@ -49,14 +49,3 @@ public indirect enum FutureResult<T> {
         }
     }
 }
-
-public extension Future {
-    /// Chains a future to a promise of the same type.
-    func chain(to promise: Promise<T>) {
-        self.do { result in
-            promise.succeed(result: result)
-        }.catch { error in
-            promise.fail(error: error)
-        }
-    }
-}

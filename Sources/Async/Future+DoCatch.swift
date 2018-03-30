@@ -1,30 +1,44 @@
 extension Future {
-    /// Adds a handler to be asynchronously executed on
-    /// completion of this future.
+    /// Adds a callback for handling this `Future`'s result when it becomes available.
+    /// - warning: Don't forget to use `catch` to handle the error case.
     ///
-    /// Will *not* be executed if an error occurrs
+    ///     futureString.do { string in
+    ///         print(string)
+    ///     }.catch { error in
+    ///         print("oops: \(error)")
+    ///     }
     ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/promise-future-introduction/#on-future-completion)
     public func `do`(_ callback: @escaping (T) -> ()) -> Future<T> {
         whenSuccess(callback)
         return self
     }
 
-    /// Adds a handler to be asynchronously executed on
-    /// completion of this future.
+    /// Adds a callback for handling this `Future`'s result if an error occurs.
+    /// - note: Will *only* be executed if an error occurs. Successful results will not call this handler.
     ///
-    /// Will *only* be executed if an error occurred.
-    //// Successful results will not call this handler.
+    ///     futureString.do { string in
+    ///         print(string)
+    ///     }.catch { error in
+    ///         print("oops: \(error)")
+    ///     }
     ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/promise-future-introduction/#on-future-completion)
     @discardableResult
     public func `catch`(_ callback: @escaping (Error) -> ()) -> Future<T> {
         whenFailure(callback)
         return self
     }
 
-    /// Get called back whenever the future is complete,
-    /// ignoring the result.
+    /// Adds a handler to be asynchronously executed on completion of this future.
+    /// - note: Will be executed on both success and failure, but will not receive any input.
+    ///
+    ///     futureString.do { string in
+    ///         print(string)
+    ///     }.catch { error in
+    ///         print("oops: \(error)")
+    ///     }.always {
+    ///         print("done")
+    ///     }
+    ///
     @discardableResult
     public func always(_ callback: @escaping () -> ()) -> Future<T> {
         whenComplete(callback)
@@ -33,30 +47,45 @@ extension Future {
 }
 
 extension Collection where Element: FutureType {
-    /// Adds a handler to be asynchronously executed on
-    /// completion of all of these futures.
+    /// Adds a callback for handling this `[Future]`'s result when it becomes available.
+    /// - warning: Don't forget to use `catch` to handle the error case.
     ///
-    /// Will *not* be executed if an error occurrs
+    ///     futureStrings.do { strings in
+    ///         print(strings)
+    ///     }.catch { error in
+    ///         print("oops: \(error)")
+    ///     }
     ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/promise-future-introduction/#on-future-completion)
     public func `do`(on worker: Worker, _ callback: @escaping ([Element.Expectation]) -> ()) -> Future<[Element.Expectation]> {
         return self.flatten(on: worker).do(callback)
     }
 
-    /// Adds a handler to be asynchronously executed on
-    /// completion of all of these futures.
+    /// Adds a callback for handling this `[Future]`'s result if an error occurs.
+    /// - note: Will *only* be executed if an error occurs. Successful results will not call this handler.
     ///
-    /// Will *only* be executed if an error occurred in one of these futures.
-    /// Successful results will not call this handler.
+    ///     futureStrings.do { strings in
+    ///         print(strings)
+    ///     }.catch { error in
+    ///         print("oops: \(error)")
+    ///     }
     ///
-    /// [Learn More →](https://docs.vapor.codes/3.0/async/promise-future-introduction/#on-future-completion)
     @discardableResult
     public func `catch`(on worker: Worker,_ callback: @escaping (Error) -> ()) -> Future<[Element.Expectation]> {
         return self.flatten(on: worker).catch(callback)
     }
 
-    /// Get called back whenever all of these futures are complete,
-    /// ignoring the result.
+
+    /// Adds a handler to be asynchronously executed on completion of these futures.
+    /// - note: Will be executed on both success and failure, but will not receive any input.
+    ///
+    ///     futureStrings.do { strings in
+    ///         print(strings)
+    ///     }.catch { error in
+    ///         print("oops: \(error)")
+    ///     }.always {
+    ///         print("done")
+    ///     }
+    ///
     @discardableResult
     public func always(on worker: Worker,_ callback: @escaping () -> ()) -> Future<[Element.Expectation]> {
         return self.flatten(on: worker).always(callback)

@@ -24,13 +24,13 @@ final class ByteBufferPeekTests: XCTestCase {
         buf.write(string: first)
         buf.write(string: second)
 
-        XCTAssertEqual(buf.peekString(count: first.count, encoding: .utf8), first)
-        XCTAssertEqual(buf.peekString(count: second.count,
+        XCTAssertEqual(buf.peekString(length: first.count, encoding: .utf8), first)
+        XCTAssertEqual(buf.peekString(length: second.count,
                                       skipping: first.count,
                                       encoding: .utf8), second)
 
         _ = buf.readBytes(length: first.count)
-        XCTAssertEqual(buf.peekString(count: second.count,
+        XCTAssertEqual(buf.peekString(length: second.count,
                                       encoding: .utf8), second)
     }
 
@@ -42,12 +42,12 @@ final class ByteBufferPeekTests: XCTestCase {
         buf.write(bytes: first)
         buf.write(bytes: second)
 
-        XCTAssertEqual(buf.peekData(count: first.count), Data(bytes: first))
-        XCTAssertEqual(buf.peekData(count: second.count,
+        XCTAssertEqual(buf.peekData(length: first.count), Data(bytes: first))
+        XCTAssertEqual(buf.peekData(length: second.count,
                                     skipping: first.count), Data(bytes: second))
 
         _ = buf.readBytes(length: first.count)
-        XCTAssertEqual(buf.peekData(count: second.count), Data(bytes: second))
+        XCTAssertEqual(buf.peekData(length: second.count), Data(bytes: second))
     }
 
     func testPeekBinaryFloatingPoint() throws {
@@ -58,14 +58,14 @@ final class ByteBufferPeekTests: XCTestCase {
         buf.write(floatingPoint: first)
         buf.write(floatingPoint: second)
 
-        XCTAssertEqual(buf.peekBinaryFloatingPoint(as: Double.self), first)
-        XCTAssertEqual(buf.peekBinaryFloatingPoint(skipping: MemoryLayout<Double>.size,
+        XCTAssertEqual(buf.peekFloatingPoint(as: Double.self), first)
+        XCTAssertEqual(buf.peekFloatingPoint(skipping: MemoryLayout<Double>.size,
             as: Float.self), second)
 
 
-        XCTAssertEqual(try buf.requireBinaryFloatingPoint(as: Double.self), first)
+        XCTAssertEqual(try buf.requireReadFloatingPoint(as: Double.self), first)
 
-        XCTAssertEqual(buf.peekBinaryFloatingPoint(as: Float.self), second)
+        XCTAssertEqual(buf.peekFloatingPoint(as: Float.self), second)
     }
 
     func testPeekBytes() {
@@ -74,12 +74,12 @@ final class ByteBufferPeekTests: XCTestCase {
         let byte2 = UInt8(2)
         buf.write(bytes: [byte1, byte2])
 
-        let peekedBytes = buf.peekBytes(length: 2)
+        let peekedBytes = buf.peekBytes(count: 2)
         XCTAssertEqual(peekedBytes?.first, byte1)
         XCTAssertEqual(peekedBytes?.last, byte2)
         XCTAssertEqual(buf.readBytes(length: 1)?.first, byte1)
-        XCTAssertEqual(buf.peekBytes()?.first, byte2)
-        XCTAssertEqual(buf.peekBytes(length: 2), nil)
+        XCTAssertEqual(buf.peekBytes(count: 1)?.first, byte2)
+        XCTAssertEqual(buf.peekBytes(count: 2), nil)
     }
 
     func testPeekFirstByte() {
@@ -88,12 +88,12 @@ final class ByteBufferPeekTests: XCTestCase {
         let byte2 = UInt8(2)
         buf.write(bytes: [byte1, byte2])
 
-        XCTAssertEqual(buf.peekFirstByte(), byte1)
+        XCTAssertEqual(buf.peekInteger(as: Byte.self), byte1)
         XCTAssertEqual(buf.readBytes(length: 1)?.first, byte1)
-        XCTAssertEqual(buf.peekFirstByte(), byte2)
+        XCTAssertEqual(buf.peekInteger(as: Byte.self), byte2)
 
         XCTAssertEqual(buf.readBytes(length: 1)?.first, byte2)
-        XCTAssertEqual(buf.peekFirstByte(), nil)
+        XCTAssertEqual(buf.peekInteger(as: Byte.self), nil)
     }
 
     static let allTests = [

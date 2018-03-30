@@ -1,3 +1,4 @@
+/// Adds control character conveniences to `Byte`.
 extension Byte {
     /// Returns whether or not the given byte can be considered UTF8 whitespace
     public var isWhitespace: Bool {
@@ -108,9 +109,7 @@ extension Byte {
 }
 
 extension Byte {
-    /// Defines the `crlf` used to denote
-    /// line breaks in HTTP and many other
-    ///  formatters
+    /// Defines the `crlf` used to denote line breaks in HTTP and many other formatters
     public static let crlf: Bytes = [
         .carriageReturn,
         .newLine

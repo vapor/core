@@ -1,6 +1,4 @@
-
-// MARK: Alphabet
-
+/// Adds alphabet conveniences to `Byte`.
 extension Byte {
     /// Returns true if the given byte is between lowercase or uppercase A-Z in UTF8.
     public var isLetter: Bool {

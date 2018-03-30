@@ -31,7 +31,7 @@ extension Future {
         self.do { expectation in
             do {
                 let mapped = try callback(expectation)
-                mapped.chain(to: promise)
+                mapped.cascade(promise: promise)
             } catch {
                 promise.fail(error: error)
             }
@@ -195,7 +195,7 @@ extension Future {
             switch result {
             case .error(let error):
                 do {
-                    try callback(error).chain(to: promise)
+                    try callback(error).cascade(promise: promise)
                 } catch {
                     promise.fail(error: error)
                 }
