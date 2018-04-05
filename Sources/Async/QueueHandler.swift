@@ -90,14 +90,16 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
         }
         do {
             if try current.onInput(input) {
-                current.promise.succeed()
                 let popped = inputQueue.popLast()
                 assert(popped != nil)
+                
+                current.promise.succeed()
             }
         } catch {
-            current.promise.fail(error: error)
             let popped = inputQueue.popLast()
             assert(popped != nil)
+            
+            current.promise.fail(error: error)
         }
     }
 
