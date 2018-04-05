@@ -41,7 +41,10 @@ final class ReflectionDecoderContext {
 
     /// Adds a property to this `ReflectionDecoderContext`.
     func addProperty<T>(type: T.Type, at path: [CodingKey]) {
-        let property = ReflectedProperty.init(T.self, at: path.map { $0.stringValue })
+        let path = path.map { $0.stringValue }
+        // remove any duplicates, favoring the new type
+        properties = properties.filter { $0.path != path }
+        let property = ReflectedProperty.init(T.self, at: path)
         properties.append(property)
     }
 }
