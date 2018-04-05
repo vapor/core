@@ -65,14 +65,17 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     /// Triggers a context write if any output is enqueued.
     private func writeOutputIfEnqueued(ctx: ChannelHandlerContext) {
         VERBOSE("QueueHandler.sendOutput(ctx: \(ctx)) [outputQueue.count=\(outputQueue.count)]")
-        if let next = outputQueue.popLast() {
+        if outputQueue.count == 0 {
+            waitingCtx = ctx
+            return
+        }
+
+        while let next = outputQueue.popLast() {
             for output in next {
                 ctx.write(wrapOutboundOut(output), promise: nil)
             }
             ctx.flush()
             self.writeOutputIfEnqueued(ctx: ctx)
-        } else {
-            waitingCtx = ctx
         }
     }
 

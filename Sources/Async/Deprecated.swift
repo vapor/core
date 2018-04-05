@@ -1,4 +1,3 @@
-
 extension Future {
     @available(*, deprecated, renamed: "cascade(promise:)")
     public func chain(to promise: Promise<T>) {
