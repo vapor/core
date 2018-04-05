@@ -251,6 +251,17 @@ class ReflectableTests: XCTestCase {
         XCTAssertThrowsError(try Person.reflectProperty(forKey: \.pets))
     }
 
+    func testGH119() throws {
+        enum PetType: Int, Codable {
+            case cat, dog
+        }
+        struct Pet: Reflectable, Codable {
+            var name: String
+            var type: PetType
+        }
+        try XCTAssertEqual(Pet.reflectProperties().description, "[name: String, type: Int]")
+    }
+
     static let allTests = [
         ("testStruct", testStruct),
         ("testStructCustomProperties", testStructCustomProperties),
@@ -262,6 +273,7 @@ class ReflectableTests: XCTestCase {
         ("testCustomCodingKeys", testCustomCodingKeys),
         ("testCache", testCache),
         ("testArrayNested", testArrayNested),
+        ("testGH119", testGH119),
     ]
 }
 
