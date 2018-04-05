@@ -251,6 +251,7 @@ class ReflectableTests: XCTestCase {
         XCTAssertThrowsError(try Person.reflectProperty(forKey: \.pets))
     }
 
+    /// https://github.com/vapor/core/issues/119
     func testGH119() throws {
         enum PetType: Int, Codable {
             case cat, dog
