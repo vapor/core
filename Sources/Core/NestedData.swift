@@ -14,10 +14,10 @@ public protocol NestedData {
     var array: [Self]? { get }
 
     /// Creates `self` from a dictionary representation.
-    init(dictionary: [String: Self])
+    static func dictionary(_ value: [String: Self]) -> Self
 
     /// Creates `self` from an array representation.
-    init(array: [Self])
+    static func array(_ value: [Self]) -> Self
 }
 
 extension NestedData {
@@ -68,11 +68,11 @@ extension NestedData {
                 if array.count > index {
                     child = array[index]
                 } else {
-                    child = .init(array: [])
+                    child = .array([])
                 }
                 set(&child, to: value, at: Array(path[1...]))
             } else {
-                child = context.dictionary?[end.stringValue] ?? .init(dictionary: [:])
+                child = context.dictionary?[end.stringValue] ?? .dictionary([:])
                 set(&child, to: value, at: Array(path[1...]))
             }
         default: fatalError("Unreachable")
@@ -85,16 +85,16 @@ extension NestedData {
                 } else {
                     arr.append(child)
                 }
-                context = .init(array: arr)
+                context = .array(arr)
             } else {
-                context = .init(array: [child])
+                context = .array([child])
             }
         } else {
             if var dict = context.dictionary {
                 dict[end.stringValue] = child
-                context = .init(dictionary: dict)
+                context = .dictionary(dict)
             } else {
-                context = .init(dictionary: [end.stringValue: child])
+                context = .dictionary([end.stringValue: child])
             }
         }
     }
