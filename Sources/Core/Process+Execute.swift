@@ -31,7 +31,9 @@ extension Process {
         if program.hasPrefix("/") {
             return try launchAndWait(launchPath: program, arguments)
         } else {
-            let resolvedPath = try launchAndWait(launchPath: "/bin/sh", ["-c", "which \(program)"])
+            guard let resolvedPath = try? launchAndWait(launchPath: "/bin/sh", ["-c", "which \(program)"]) else {
+                throw CoreError(identifier: "executablePath", reason: "Could not find executable path for program: \(program).")
+            }
             return try launchAndWait(launchPath: resolvedPath, arguments)
         }
     }

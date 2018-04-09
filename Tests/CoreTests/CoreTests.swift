@@ -6,6 +6,10 @@ class CoreTests: XCTestCase {
         try XCTAssertEqual(Process.execute("echo", "hi"), "hi")
     }
 
+    func testProcessExecuteMissing() throws {
+        XCTAssertThrowsError(try Process.execute("foo", "hi"), "hi")
+    }
+
     func testBase64() {
         let original = Data("The quick brown fox jumps over 13 lazy dogs.".utf8)
         XCTAssertEqual(original.base64EncodedString(), "VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIDEzIGxhenkgZG9ncy4=")
@@ -42,6 +46,7 @@ class CoreTests: XCTestCase {
 
     static let allTests = [
         ("testProcessExecute", testProcessExecute),
+        ("testProcessExecuteMissing", testProcessExecuteMissing),
         ("testBase64", testBase64),
         ("testBase64URL", testBase64URL),
         ("testBase64URLEscaping", testBase64URLEscaping),
