@@ -44,6 +44,22 @@ class CoreTests: XCTestCase {
         XCTAssertEqual(Data("hello".utf8).hexEncodedString(uppercase: true), "68656C6C6F")
     }
 
+    func testHeaderValue() throws {
+        func parse(_ string: String) throws -> HeaderValue {
+            guard let value = HeaderValue.parse(string) else {
+                throw CoreError(identifier: "headerValueParse", reason: "Could not parse: \(string)")
+            }
+            return value
+        }
+
+        let multipart1 = try parse("""
+        form-data; name="multinamed[]"; filename=""
+        """)
+        XCTAssertEqual(multipart1.value, "form-data")
+        XCTAssertEqual(multipart1.parameters["name"], "multinamed[]")
+        XCTAssertEqual(multipart1.parameters["filename"], "")
+    }
+
     static let allTests = [
         ("testProcessExecute", testProcessExecute),
         ("testProcessExecuteMissing", testProcessExecuteMissing),
@@ -51,5 +67,6 @@ class CoreTests: XCTestCase {
         ("testBase64URL", testBase64URL),
         ("testBase64URLEscaping", testBase64URLEscaping),
         ("testHexEncodedString", testHexEncodedString),
+        ("testHeaderValue", testHeaderValue),
     ]
 }

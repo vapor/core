@@ -25,7 +25,7 @@ public struct HeaderValue {
     ///
     public static func parse(_ string: String) -> HeaderValue? {
         /// separate the zero or more parameters
-        let parts = string.split(separator: ";", maxSplits: 2, omittingEmptySubsequences: true)
+        let parts = string.split(separator: ";", maxSplits: 1)
 
         /// there must be at least one part, the value
         guard let value = parts.first else {
@@ -45,7 +45,7 @@ public struct HeaderValue {
         /// loop over all parts after the value
         while remaining.count > 0 {
             /// parse the parameters by splitting on the `=`
-            let parameterParts = remaining.split(separator: "=", maxSplits: 2)
+            let parameterParts = remaining.split(separator: "=", maxSplits: 1)
             guard parameterParts.count == 2 else {
                 /// the parameter was not form `foo=bar`
                 return nil
@@ -58,11 +58,12 @@ public struct HeaderValue {
             if trailing.first == "\"" {
                 /// find first unescaped quote
                 var quoteIndex: String.Index?
-                for i in 1..<trailing.count {
+                findQuote: for i in 1..<trailing.count {
                     let prev = trailing.index(trailing.startIndex, offsetBy: i - 1)
                     let curr = trailing.index(trailing.startIndex, offsetBy: i)
                     if trailing[prev] != "\\" && trailing[curr] == "\"" {
                         quoteIndex = curr
+                        break findQuote
                     }
                 }
 
@@ -70,17 +71,21 @@ public struct HeaderValue {
                     /// could never find a closing quote
                     return nil
                 }
-                val = .init(trailing[trailing.startIndex..<i])
-                remaining = trailing[trailing.index(i, offsetBy: 2)...]
-
-                // TODO: get rid of next `;` or ` ;` dynamically
+                val = .init(trailing[trailing.index(after: trailing.startIndex)..<i])
+                let rest = trailing[trailing.index(after: i)...]
+                if let nextSemicolon = rest.index(of: ";") {
+                    remaining = rest[rest.index(after: nextSemicolon)...]
+                } else {
+                    remaining = ""
+                }
             } else {
                 /// find first semicolon
                 var semicolonIndex: String.Index?
-                for i in 1..<trailing.count {
+                findSemicolon: for i in 1..<trailing.count {
                     let curr = trailing.index(trailing.startIndex, offsetBy: i)
                     if trailing[curr] == ";" {
                         semicolonIndex = curr
+                        break findSemicolon
                     }
                 }
 
