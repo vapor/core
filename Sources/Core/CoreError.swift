@@ -18,7 +18,7 @@ public struct CoreError: Debuggable, Error {
     /// Creates a new `CoreError`.
     ///
     /// See `Debuggable`
-    init(identifier: String, reason: String, possibleCauses: [String] = [], suggestedFixes: [String] = []) {
+    public init(identifier: String, reason: String, possibleCauses: [String] = [], suggestedFixes: [String] = []) {
         self.identifier = identifier
         self.reason = reason
         self.suggestedFixes = suggestedFixes
