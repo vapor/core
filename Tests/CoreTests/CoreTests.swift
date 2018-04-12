@@ -55,8 +55,8 @@ class CoreTests: XCTestCase {
         // content-disposition
         do {
             let header = try parse("""
-        form-data; name="multinamed[]"; filename=""
-        """)
+            form-data; name="multinamed[]"; filename=""
+            """)
             XCTAssertEqual(header.value, "form-data")
             XCTAssertEqual(header.parameters["name"], "multinamed[]")
             XCTAssertEqual(header.parameters["filename"], "")
@@ -66,8 +66,8 @@ class CoreTests: XCTestCase {
         // content type no charset
         do {
             let header = try parse("""
-        application/json
-        """)
+            application/json
+            """)
             XCTAssertEqual(header.value, "application/json")
             XCTAssertEqual(header.parameters.count, 0)
         }
@@ -75,8 +75,8 @@ class CoreTests: XCTestCase {
         // content type
         do {
             let header = try parse("""
-        application/json; charset=utf8
-        """)
+            application/json; charset=utf8
+            """)
             XCTAssertEqual(header.value, "application/json")
             XCTAssertEqual(header.parameters["charset"], "utf8")
             XCTAssertEqual(header.parameters.count, 1)
@@ -85,8 +85,8 @@ class CoreTests: XCTestCase {
         // quoted content type
         do {
             let header = try parse("""
-        application/json; charset="utf8"
-        """)
+            application/json; charset="utf8"
+            """)
             XCTAssertEqual(header.value, "application/json")
             XCTAssertEqual(header.parameters["charset"], "utf8")
             XCTAssertEqual(header.parameters.count, 1)
@@ -95,8 +95,8 @@ class CoreTests: XCTestCase {
         // random letters
         do {
             let header = try parse("""
-        af332r92832llgalksdfjsjf
-        """)
+            af332r92832llgalksdfjsjf
+            """)
             XCTAssertEqual(header.value, "af332r92832llgalksdfjsjf")
             XCTAssertEqual(header.parameters.count, 0)
         }
@@ -104,8 +104,8 @@ class CoreTests: XCTestCase {
         // empty value
         do {
             let header = try parse("""
-        form-data; name=multinamed[]; filename=
-        """)
+            form-data; name=multinamed[]; filename=
+            """)
             XCTAssertEqual(header.value, "form-data")
             XCTAssertEqual(header.parameters["name"], "multinamed[]")
             XCTAssertEqual(header.parameters["filename"], "")
@@ -115,13 +115,23 @@ class CoreTests: XCTestCase {
         // empty value with trailing
         do {
             let header = try parse("""
-        form-data; name=multinamed[]; filename=; foo=bar
-        """)
+            form-data; name=multinamed[]; filename=; foo=bar
+            """)
             XCTAssertEqual(header.value, "form-data")
             XCTAssertEqual(header.parameters["name"], "multinamed[]")
             XCTAssertEqual(header.parameters["filename"], "")
             XCTAssertEqual(header.parameters["foo"], "bar")
             XCTAssertEqual(header.parameters.count, 3)
+        }
+
+        // escaped quote
+        do {
+            let header = try parse("""
+            application/json; charset="u\\"t\\"f8"
+            """)
+            XCTAssertEqual(header.value, "application/json")
+            XCTAssertEqual(header.parameters["charset"], "u\"t\"f8")
+            XCTAssertEqual(header.parameters.count, 1)
         }
     }
 

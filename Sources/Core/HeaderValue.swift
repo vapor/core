@@ -31,12 +31,17 @@
 ///     ; Must be in quoted-string,
 ///     ; to use within parameter values
 public struct HeaderValue {
+    /// Internal storage.
+    internal let _value: Data
+
     /// The `HeaderValue`'s main value.
     ///
     /// In the `HeaderValue` `"application/json; charset=utf8"`:
     ///
     /// - value: `"application/json"`
-    public var value: String
+    public var value: String {
+        return String(data: _value, encoding: .utf8) ?? ""
+    }
 
     /// The `HeaderValue`'s metadata. Zero or more key/value pairs.
     ///
@@ -46,8 +51,8 @@ public struct HeaderValue {
     public var parameters: [CaseInsensitiveString: String]
 
     /// Creates a new `HeaderValue`.
-    public init(_ value: String, parameters: [CaseInsensitiveString: String] = [:]) {
-        self.value = value
+    public init(_ value: LosslessDataConvertible, parameters: [CaseInsensitiveString: String] = [:]) {
+        self._value = value.convertToData()
         self.parameters = parameters
     }
 
@@ -64,9 +69,11 @@ public struct HeaderValue {
     ///
     ///     guard let headerValue = HeaderValue.parse("application/json; charset=utf8") else { ... }
     ///
-    public static func parse(_ string: String) -> HeaderValue? {
+    public static func parse(_ data: LosslessDataConvertible) -> HeaderValue? {
+        let data = data.convertToData()
+
         /// separate the zero or more parameters
-        let parts = string.split(separator: ";", maxSplits: 1)
+        let parts = data.split(separator: .semicolon, maxSplits: 1)
 
         /// there must be at least one part, the value
         guard let value = parts.first else {
@@ -75,12 +82,12 @@ public struct HeaderValue {
         }
 
         /// get the remaining parameters string
-        var remaining: Substring
+        var remaining: Data
 
         switch parts.count {
         case 1:
             /// no parameters, early exit
-            return HeaderValue(.init(value), parameters: [:])
+            return HeaderValue(value, parameters: [:])
         case 2: remaining = parts[1]
         default: return nil
         }
@@ -91,73 +98,88 @@ public struct HeaderValue {
         /// loop over all parts after the value
         parse: while remaining.count > 0 {
             /// parse the parameters by splitting on the `=`
-            let parameterParts = remaining.split(separator: "=", maxSplits: 1)
+            let parameterParts = remaining.split(separator: .equals, maxSplits: 1)
 
-            let key = parameterParts[0].trimmingCharacters(in: .whitespaces)
+            let key = parameterParts[0]
+            let val: Data
 
             switch parameterParts.count {
             case 1:
-                parameters[.init(key)] = ""
-                break parse
-            case 2: break
+                val = .init()
+                remaining = .init()
+            case 2:
+                let trailing = parameterParts[1]
+
+                if trailing.first == .quote {
+                    /// find first unescaped quote
+                    var quoteIndex: Data.Index?
+                    var escapedIndexes: [Data.Index] = []
+                    findQuote: for i in 1..<trailing.count {
+                        let prev = trailing.index(trailing.startIndex, offsetBy: i - 1)
+                        let curr = trailing.index(trailing.startIndex, offsetBy: i)
+                        if trailing[curr] == .quote {
+                            if trailing[prev] != .backSlash {
+                                quoteIndex = curr
+                                break findQuote
+                            } else {
+                                escapedIndexes.append(prev)
+                            }
+                        }
+                    }
+
+                    guard let i = quoteIndex else {
+                        /// could never find a closing quote
+                        return nil
+                    }
+
+                    var valpart = trailing[trailing.index(after: trailing.startIndex)..<i]
+
+                    if escapedIndexes.count > 0 {
+                        /// go reverse so that we can correctly remove multiple
+                        for escapeLoc in escapedIndexes.reversed() {
+                            valpart.remove(at: escapeLoc)
+                        }
+                    }
+
+                    val = valpart
+
+                    let rest = trailing[trailing.index(after: trailing.startIndex)...]
+                    if let nextSemicolon = rest.index(of: .semicolon) {
+                        remaining = rest[rest.index(after: nextSemicolon)...]
+                    } else {
+                        remaining = .init()
+                    }
+                } else {
+                    /// find first semicolon
+                    var semicolonOffset: Data.Index?
+                    findSemicolon: for i in 0..<trailing.count {
+                        let curr = trailing.index(trailing.startIndex, offsetBy: i)
+                        if trailing[curr] == .semicolon {
+                            semicolonOffset = curr
+                            break findSemicolon
+                        }
+                    }
+
+                    if let i = semicolonOffset {
+                        /// cut to next semicolon
+                        val = trailing[trailing.startIndex..<i]
+                        remaining = trailing[trailing.index(after: i)...]
+                    } else {
+                        /// no more semicolons
+                        val = trailing
+                        remaining = .init()
+                    }
+                }
             default:
                 /// the parameter was not form `foo=bar`
                 return nil
             }
 
-            let trailing = parameterParts[1].trimmingCharacters(in: .whitespaces)
-
-            let val: String
-            if trailing.first == "\"" {
-                /// find first unescaped quote
-                var quoteIndex: String.Index?
-                findQuote: for i in 1..<trailing.count {
-                    let prev = trailing.index(trailing.startIndex, offsetBy: i - 1)
-                    let curr = trailing.index(trailing.startIndex, offsetBy: i)
-                    if trailing[prev] != "\\" && trailing[curr] == "\"" {
-                        quoteIndex = curr
-                        break findQuote
-                    }
-                }
-
-                guard let i = quoteIndex else {
-                    /// could never find a closing quote
-                    return nil
-                }
-                val = .init(trailing[trailing.index(after: trailing.startIndex)..<i])
-                let rest = trailing[trailing.index(after: i)...]
-                if let nextSemicolon = rest.index(of: ";") {
-                    remaining = rest[rest.index(after: nextSemicolon)...]
-                } else {
-                    remaining = ""
-                }
-            } else {
-                /// find first semicolon
-                var semicolonIndex: String.Index?
-                findSemicolon: for i in 0..<trailing.count {
-                    let curr = trailing.index(trailing.startIndex, offsetBy: i)
-                    if trailing[curr] == ";" {
-                        semicolonIndex = curr
-                        break findSemicolon
-                    }
-                }
-
-                if let i = semicolonIndex {
-                    /// cut to next semicolon
-                    val = trailing[trailing.startIndex..<i].trimmingCharacters(in: .whitespaces)
-                    remaining = trailing[trailing.index(after: i)...]
-                } else {
-                    /// no more semicolons
-                    val = trailing.trimmingCharacters(in: .whitespaces)
-                    remaining = ""
-                }
-            }
-
-            parameters[.init(key)] = val
+            let trimmedKey = String(data: key, encoding: .utf8)?.trimmingCharacters(in: .whitespaces) ?? ""
+            let trimmedVal = String(data: val, encoding: .utf8)?.trimmingCharacters(in: .whitespaces) ?? ""
+            parameters[.init(trimmedKey)] = .init(trimmedVal)
         }
 
-        return HeaderValue(.init(value), parameters: parameters)
+        return HeaderValue(value, parameters: parameters)
     }
 }
-
-

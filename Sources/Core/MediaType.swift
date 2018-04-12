@@ -137,22 +137,22 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     ///
     ///     guard let mediaType = MediaType.parse("application/json; charset=utf8") else { ... }
     ///
-    public static func parse(_ string: String) -> MediaType? {
-        guard let headerValue = HeaderValue.parse(string) else {
+    public static func parse(_ data: LosslessDataConvertible) -> MediaType? {
+        guard let headerValue = HeaderValue.parse(data) else {
             /// not a valid header value
             return nil
         }
 
         /// parse out type and subtype
-        let typeParts = headerValue.value.split(separator: "/", maxSplits: 2)
+        let typeParts = headerValue._value.split(separator: .forwardSlash, maxSplits: 2)
         guard typeParts.count == 2 else {
             /// the type was not form `foo/bar`
             return nil
         }
 
-        let type = typeParts[0].trimmingCharacters(in: .whitespaces)
-        let subType = typeParts[1].trimmingCharacters(in: .whitespaces)
-
+        let type = String(data: typeParts[0], encoding: .utf8)?.trimmingCharacters(in: .whitespaces) ?? ""
+        let subType = String(data: typeParts[1], encoding: .utf8)?.trimmingCharacters(in: .whitespaces) ?? ""
+        
         return MediaType(type: .init(type), subType: .init(subType), parameters: headerValue.parameters)
     }
 
