@@ -179,8 +179,10 @@ public extension MediaType {
     public static let css = MediaType(type: "text", subType: "css", parameters: ["charset": "utf-8"])
     /// URL encoded form media type.
     public static let urlEncodedForm = MediaType(type: "application", subType: "x-www-form-urlencoded", parameters: ["charset": "utf-8"])
-    /// URL encoded form media type.
-    public static let multipart = MediaType(type: "multipart", subType: "form-data")
+    /// Multipart encoded form data.
+    public static let formData = MediaType(type: "multipart", subType: "form-data")
+    /// Mixed multipart encoded data.
+    public static let multipart = MediaType(type: "multipart", subType: "mixed")
     /// JSON media type.
     public static let json = MediaType(type: "application", subType: "json", parameters: ["charset": "utf-8"])
     /// XML media type.

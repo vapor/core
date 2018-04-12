@@ -7,6 +7,20 @@ public protocol LosslessDataConvertible {
     static func convertFromData(_ data: Data) -> Self
 }
 
+extension Data {
+    /// Converts this `Data` to a `LosslessDataConvertible` type.
+    ///
+    ///     let string = Data([0x68, 0x69]).convert(to: String.self)
+    ///     print(string) // "hi"
+    ///
+    /// - parameters:
+    ///     - type: The `LosslessDataConvertible` to convert to.
+    /// - returns: Instance of the `LosslessDataConvertible` type.
+    public func convert<T>(to type: T.Type = T.self) -> T where T: LosslessDataConvertible {
+        return T.convertFromData(self)
+    }
+}
+
 extension String: LosslessDataConvertible {
     /// Converts this `String` to data using `.utf8`.
     public func convertToData() -> Data {
