@@ -1,6 +1,6 @@
 /// Represents a header value with optional parameter metadata.
 ///
-/// Parses a header string like `"application/json; charset=utf8"`, into:
+/// Parses a header string like `application/json; charset="utf8"`, into:
 ///
 /// - value: `"application/json"`
 /// - parameters: ["charset": "utf8"]
@@ -34,24 +34,36 @@ public struct HeaderValue {
         }
 
         /// get the remaining parameters string
-        guard var remaining = parts.last else {
+        var remaining: Substring
+
+        switch parts.count {
+        case 1:
             /// no parameters, early exit
             return HeaderValue(value: .init(value), parameters: [:])
+        case 2: remaining = parts[1]
+        default: return nil
         }
 
         /// collect all of the parameters
         var parameters: [String: String] = [:]
 
         /// loop over all parts after the value
-        while remaining.count > 0 {
+        parse: while remaining.count > 0 {
             /// parse the parameters by splitting on the `=`
             let parameterParts = remaining.split(separator: "=", maxSplits: 1)
-            guard parameterParts.count == 2 else {
+
+            let key = parameterParts[0].trimmingCharacters(in: .whitespaces)
+
+            switch parameterParts.count {
+            case 1:
+                parameters[key] = ""
+                break parse
+            case 2: break
+            default:
                 /// the parameter was not form `foo=bar`
                 return nil
             }
 
-            let key = parameterParts[0].trimmingCharacters(in: .whitespaces)
             let trailing = parameterParts[1].trimmingCharacters(in: .whitespaces)
 
             let val: String
@@ -81,7 +93,7 @@ public struct HeaderValue {
             } else {
                 /// find first semicolon
                 var semicolonIndex: String.Index?
-                findSemicolon: for i in 1..<trailing.count {
+                findSemicolon: for i in 0..<trailing.count {
                     let curr = trailing.index(trailing.startIndex, offsetBy: i)
                     if trailing[curr] == ";" {
                         semicolonIndex = curr
@@ -89,12 +101,15 @@ public struct HeaderValue {
                     }
                 }
 
-                guard let i = semicolonIndex else {
-                    /// could never find a closing quote
-                    return nil
+                if let i = semicolonIndex {
+                    /// cut to next semicolon
+                    val = trailing[trailing.startIndex..<i].trimmingCharacters(in: .whitespaces)
+                    remaining = trailing[trailing.index(after: i)...]
+                } else {
+                    /// no more semicolons
+                    val = trailing.trimmingCharacters(in: .whitespaces)
+                    remaining = ""
                 }
-                val = trailing[trailing.startIndex..<i].trimmingCharacters(in: .whitespaces)
-                remaining = trailing[trailing.index(after: i)...]
             }
 
             parameters[.init(key)] = val

@@ -52,12 +52,77 @@ class CoreTests: XCTestCase {
             return value
         }
 
-        let multipart1 = try parse("""
+        // content-disposition
+        do {
+            let header = try parse("""
         form-data; name="multinamed[]"; filename=""
         """)
-        XCTAssertEqual(multipart1.value, "form-data")
-        XCTAssertEqual(multipart1.parameters["name"], "multinamed[]")
-        XCTAssertEqual(multipart1.parameters["filename"], "")
+            XCTAssertEqual(header.value, "form-data")
+            XCTAssertEqual(header.parameters["name"], "multinamed[]")
+            XCTAssertEqual(header.parameters["filename"], "")
+            XCTAssertEqual(header.parameters.count, 2)
+        }
+
+        // content type no charset
+        do {
+            let header = try parse("""
+        application/json
+        """)
+            XCTAssertEqual(header.value, "application/json")
+            XCTAssertEqual(header.parameters.count, 0)
+        }
+
+        // content type
+        do {
+            let header = try parse("""
+        application/json; charset=utf8
+        """)
+            XCTAssertEqual(header.value, "application/json")
+            XCTAssertEqual(header.parameters["charset"], "utf8")
+            XCTAssertEqual(header.parameters.count, 1)
+        }
+
+        // quoted content type
+        do {
+            let header = try parse("""
+        application/json; charset="utf8"
+        """)
+            XCTAssertEqual(header.value, "application/json")
+            XCTAssertEqual(header.parameters["charset"], "utf8")
+            XCTAssertEqual(header.parameters.count, 1)
+        }
+
+        // random letters
+        do {
+            let header = try parse("""
+        af332r92832llgalksdfjsjf
+        """)
+            XCTAssertEqual(header.value, "af332r92832llgalksdfjsjf")
+            XCTAssertEqual(header.parameters.count, 0)
+        }
+
+        // empty value
+        do {
+            let header = try parse("""
+        form-data; name=multinamed[]; filename=
+        """)
+            XCTAssertEqual(header.value, "form-data")
+            XCTAssertEqual(header.parameters["name"], "multinamed[]")
+            XCTAssertEqual(header.parameters["filename"], "")
+            XCTAssertEqual(header.parameters.count, 2)
+        }
+
+        // empty value with trailing
+        do {
+            let header = try parse("""
+        form-data; name=multinamed[]; filename=; foo=bar
+        """)
+            XCTAssertEqual(header.value, "form-data")
+            XCTAssertEqual(header.parameters["name"], "multinamed[]")
+            XCTAssertEqual(header.parameters["filename"], "")
+            XCTAssertEqual(header.parameters["foo"], "bar")
+            XCTAssertEqual(header.parameters.count, 3)
+        }
     }
 
     static let allTests = [
