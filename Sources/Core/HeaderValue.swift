@@ -4,20 +4,61 @@
 ///
 /// - value: `"application/json"`
 /// - parameters: ["charset": "utf8"]
+///
+/// Simplified format:
+///
+///     headervalue := value *(";" parameter)
+///     ; Matching of media type and subtype
+///     ; is ALWAYS case-insensitive.
+///
+///     value := token
+///
+///     parameter := attribute "=" value
+///
+///     attribute := token
+///     ; Matching of attributes
+///     ; is ALWAYS case-insensitive.
+///
+///     token := 1*<any (US-ASCII) CHAR except SPACE, CTLs,
+///         or tspecials>
+///
+///     value := token
+///     ; token MAY be quoted
+///
+///     tspecials :=  "(" / ")" / "<" / ">" / "@" /
+///                   "," / ";" / ":" / "\" / <">
+///                   "/" / "[" / "]" / "?" / "="
+///     ; Must be in quoted-string,
+///     ; to use within parameter values
 public struct HeaderValue {
     /// The `HeaderValue`'s main value.
     ///
     /// In the `HeaderValue` `"application/json; charset=utf8"`:
     ///
     /// - value: `"application/json"`
-    public let value: String
+    public var value: String
 
     /// The `HeaderValue`'s metadata. Zero or more key/value pairs.
     ///
     /// In the `HeaderValue` `"application/json; charset=utf8"`:
     ///
     /// - parameters: ["charset": "utf8"]
-    public let parameters: [String: String]
+    public var parameters: [CaseInsensitiveString: String]
+
+    /// Creates a new `HeaderValue`.
+    public init(_ value: String, parameters: [CaseInsensitiveString: String] = [:]) {
+        self.value = value
+        self.parameters = parameters
+    }
+
+    /// Serializes this `HeaderValue` to a `String`.
+    public func serialize() -> String {
+        var string = "\(value)"
+        for (key, val) in parameters {
+            string += "; \(key)=\(val)"
+        }
+        return string
+    }
 
     /// Parse a `HeaderValue` from a `String`.
     ///
@@ -39,13 +80,13 @@ public struct HeaderValue {
         switch parts.count {
         case 1:
             /// no parameters, early exit
-            return HeaderValue(value: .init(value), parameters: [:])
+            return HeaderValue(.init(value), parameters: [:])
         case 2: remaining = parts[1]
         default: return nil
         }
 
         /// collect all of the parameters
-        var parameters: [String: String] = [:]
+        var parameters: [CaseInsensitiveString: String] = [:]
 
         /// loop over all parts after the value
         parse: while remaining.count > 0 {
@@ -56,7 +97,7 @@ public struct HeaderValue {
 
             switch parameterParts.count {
             case 1:
-                parameters[key] = ""
+                parameters[.init(key)] = ""
                 break parse
             case 2: break
             default:
@@ -115,7 +156,7 @@ public struct HeaderValue {
             parameters[.init(key)] = val
         }
 
-        return HeaderValue(value: .init(value), parameters: parameters)
+        return HeaderValue(.init(value), parameters: parameters)
     }
 }
 

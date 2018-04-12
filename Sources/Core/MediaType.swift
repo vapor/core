@@ -98,7 +98,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     /// - type: `"application"`
     /// - subtype: `"json"`
     /// - parameters: ["charset": "utf8"]
-    public let parameters: [String: String]
+    public let parameters: [CaseInsensitiveString: String]
 
     /// Converts this `MediaType` into its string representation.
     ///
@@ -126,7 +126,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     public let hashValue: Int
 
     /// Create a new `MediaType`.
-    public init(type: String, subType: String, parameters: [String: String] = [:]) {
+    public init(type: String, subType: String, parameters: [CaseInsensitiveString: String] = [:]) {
         self.type = type
         self.subType = subType
         self.parameters = parameters
