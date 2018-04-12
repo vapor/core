@@ -109,7 +109,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     /// - parameters: ["charset": "utf8"]
     ///
     /// Would be converted to `"application/json; charset=utf8"`.
-    public var string: String {
+    public func serialize() -> String {
         var string = "\(type)/\(subType)"
         for (key, val) in parameters {
             string += "; \(key)=\(val)"
@@ -119,7 +119,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
 
     /// See `CustomStringConvertible`.
     public var description: String {
-        return string
+        return serialize()
     }
 
     /// See `Hashable`.

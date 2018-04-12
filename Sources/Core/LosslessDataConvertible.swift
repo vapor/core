@@ -18,6 +18,8 @@ extension String: LosslessDataConvertible {
     /// - throws: Error if String is not UTF8 encoded.
     public static func convertFromData(_ data: Data) -> String {
         guard let string = String(data: data, encoding: .utf8) else {
+            /// FIXME: string convert _from_ data is not actually lossless.
+            /// this should really only conform to a `LosslessDataRepresentable` protocol.
             return ""
         }
         return string
