@@ -90,7 +90,9 @@ extension Byte {
     public static let underscore: Byte = 0x5F
 
     /// ~
+    @available (*, deprecated, renamed: "tilde")
     public static let tilda: Byte = 0x7E
+    public static let tilde: Byte = 0x7E
 
     /// {
     public static let leftCurlyBracket: Byte = 0x7B
@@ -105,7 +107,7 @@ extension Byte {
     public static let greaterThan: Byte = 0x3E
 
     /// |
-    public static let pipe: UInt8 = 0x7C
+    public static let pipe: Byte = 0x7C
 }
 
 extension Byte {
