@@ -97,82 +97,99 @@ public struct HeaderValue {
 
         /// loop over all parts after the value
         parse: while remaining.count > 0 {
-            /// parse the parameters by splitting on the `=`
-            let parameterParts = remaining.split(separator: .equals, maxSplits: 1)
+            let semicolon = remaining.index(of: .semicolon)
+            let equals = remaining.index(of: .equals)
 
-            let key = parameterParts[0]
+            let key: Data
             let val: Data
 
-            switch parameterParts.count {
-            case 1:
+            if equals == nil || (equals != nil && semicolon != nil && semicolon! < equals!) {
+                /// parsing a single flag, without =
+                key = remaining[remaining.startIndex..<(semicolon ?? remaining.endIndex)]
                 val = .init()
-                remaining = .init()
-            case 2:
-                let trailing = parameterParts[1]
+                if let s = semicolon {
+                    remaining = remaining[remaining.index(after: s)...]
+                } else {
+                    remaining = .init()
+                }
+            } else {
+                /// parsing a normal key=value pair.
+                /// parse the parameters by splitting on the `=`
+                let parameterParts = remaining.split(separator: .equals, maxSplits: 1)
 
-                if trailing.first == .quote {
-                    /// find first unescaped quote
-                    var quoteIndex: Data.Index?
-                    var escapedIndexes: [Data.Index] = []
-                    findQuote: for i in 1..<trailing.count {
-                        let prev = trailing.index(trailing.startIndex, offsetBy: i - 1)
-                        let curr = trailing.index(trailing.startIndex, offsetBy: i)
-                        if trailing[curr] == .quote {
-                            if trailing[prev] != .backSlash {
-                                quoteIndex = curr
-                                break findQuote
-                            } else {
-                                escapedIndexes.append(prev)
+                key = parameterParts[0]
+
+                switch parameterParts.count {
+                case 1:
+                    val = .init()
+                    remaining = .init()
+                case 2:
+                    let trailing = parameterParts[1]
+
+                    if trailing.first == .quote {
+                        /// find first unescaped quote
+                        var quoteIndex: Data.Index?
+                        var escapedIndexes: [Data.Index] = []
+                        findQuote: for i in 1..<trailing.count {
+                            let prev = trailing.index(trailing.startIndex, offsetBy: i - 1)
+                            let curr = trailing.index(trailing.startIndex, offsetBy: i)
+                            if trailing[curr] == .quote {
+                                if trailing[prev] != .backSlash {
+                                    quoteIndex = curr
+                                    break findQuote
+                                } else {
+                                    escapedIndexes.append(prev)
+                                }
                             }
                         }
-                    }
 
-                    guard let i = quoteIndex else {
-                        /// could never find a closing quote
-                        return nil
-                    }
+                        guard let i = quoteIndex else {
+                            /// could never find a closing quote
+                            return nil
+                        }
 
-                    var valpart = trailing[trailing.index(after: trailing.startIndex)..<i]
+                        var valpart = trailing[trailing.index(after: trailing.startIndex)..<i]
 
-                    if escapedIndexes.count > 0 {
-                        /// go reverse so that we can correctly remove multiple
-                        for escapeLoc in escapedIndexes.reversed() {
-                            valpart.remove(at: escapeLoc)
+                        if escapedIndexes.count > 0 {
+                            /// go reverse so that we can correctly remove multiple
+                            for escapeLoc in escapedIndexes.reversed() {
+                                valpart.remove(at: escapeLoc)
+                            }
+                        }
+
+                        val = valpart
+
+                        let rest = trailing[trailing.index(after: trailing.startIndex)...]
+                        if let nextSemicolon = rest.index(of: .semicolon) {
+                            remaining = rest[rest.index(after: nextSemicolon)...]
+                        } else {
+                            remaining = .init()
+                        }
+                    } else {
+                        /// find first semicolon
+                        var semicolonOffset: Data.Index?
+                        findSemicolon: for i in 0..<trailing.count {
+                            let curr = trailing.index(trailing.startIndex, offsetBy: i)
+                            if trailing[curr] == .semicolon {
+                                semicolonOffset = curr
+                                break findSemicolon
+                            }
+                        }
+
+                        if let i = semicolonOffset {
+                            /// cut to next semicolon
+                            val = trailing[trailing.startIndex..<i]
+                            remaining = trailing[trailing.index(after: i)...]
+                        } else {
+                            /// no more semicolons
+                            val = trailing
+                            remaining = .init()
                         }
                     }
-
-                    val = valpart
-
-                    let rest = trailing[trailing.index(after: trailing.startIndex)...]
-                    if let nextSemicolon = rest.index(of: .semicolon) {
-                        remaining = rest[rest.index(after: nextSemicolon)...]
-                    } else {
-                        remaining = .init()
-                    }
-                } else {
-                    /// find first semicolon
-                    var semicolonOffset: Data.Index?
-                    findSemicolon: for i in 0..<trailing.count {
-                        let curr = trailing.index(trailing.startIndex, offsetBy: i)
-                        if trailing[curr] == .semicolon {
-                            semicolonOffset = curr
-                            break findSemicolon
-                        }
-                    }
-
-                    if let i = semicolonOffset {
-                        /// cut to next semicolon
-                        val = trailing[trailing.startIndex..<i]
-                        remaining = trailing[trailing.index(after: i)...]
-                    } else {
-                        /// no more semicolons
-                        val = trailing
-                        remaining = .init()
-                    }
+                default:
+                    /// the parameter was not form `foo=bar`
+                    return nil
                 }
-            default:
-                /// the parameter was not form `foo=bar`
-                return nil
             }
 
             let trimmedKey = String(data: key, encoding: .utf8)?.trimmingCharacters(in: .whitespaces) ?? ""
