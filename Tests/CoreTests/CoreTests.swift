@@ -133,6 +133,19 @@ class CoreTests: XCTestCase {
             XCTAssertEqual(header.parameters["charset"], "u\"t\"f8")
             XCTAssertEqual(header.parameters.count, 1)
         }
+
+        // flag style
+        do {
+            let header = try parse("""
+            id=foo; HttpOnly; Secure; foo=bar; Hello
+            """)
+            XCTAssertEqual(header.value, "id=foo")
+            XCTAssertEqual(header.parameters["HTTPONLY"], "")
+            XCTAssertEqual(header.parameters["secure"], "")
+            XCTAssertEqual(header.parameters["foo"], "bar")
+            XCTAssertEqual(header.parameters["hello"], "")
+            XCTAssertEqual(header.parameters.count, 4)
+        }
     }
 
     static let allTests = [
