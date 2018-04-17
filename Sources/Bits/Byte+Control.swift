@@ -90,8 +90,6 @@ extension Byte {
     public static let underscore: Byte = 0x5F
 
     /// ~
-    @available (*, deprecated, renamed: "tilde")
-    public static let tilda: Byte = 0x7E
     public static let tilde: Byte = 0x7E
 
     /// {
