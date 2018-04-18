@@ -32,6 +32,9 @@ extension Byte {
     /// %
     public static let percent: Byte = 0x25
 
+    /// ^
+    public static let caret: Byte = 0x5E
+    
     /// &
     public static let ampersand: Byte = 0x26
 
@@ -89,6 +92,9 @@ extension Byte {
     /// _
     public static let underscore: Byte = 0x5F
 
+    /// `
+    public static let backtick: Byte = 0x60
+    
     /// ~
     public static let tilde: Byte = 0x7E
 
