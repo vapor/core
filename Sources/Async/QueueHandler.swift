@@ -27,7 +27,7 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     private let eventLoop: EventLoop
 
     /// A write-ready context waiting.
-    private var waitingCtx: ChannelHandlerContext?
+    private weak var waitingCtx: ChannelHandlerContext?
 
     /// Handles errors that happen when no input promise is waiting.
     private var errorHandler: (Error) -> ()
