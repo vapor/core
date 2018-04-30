@@ -111,6 +111,15 @@ extension UUID: ReflectionDecodable {
     }
 }
 
+extension Data: ReflectionDecodable {
+    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    public static func reflectDecoded() -> (Data, Data) {
+        let left = Data([0x00])
+        let right = Data([0x01])
+        return (left, right)
+    }
+}
+
 extension Date: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() -> (Date, Date) {
