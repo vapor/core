@@ -36,30 +36,37 @@ extension Collection where Element: FutureType {
     /// Flattens an array of futures into a future with an array of results.
     /// - note: the order of the results will match the order of the futures in the input array.
     public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
-        var elements: [Element.Expectation] = []
-
-        let promise = worker.eventLoop.newPromise([Element.Expectation].self)
-        guard count > 0 else {
-            promise.succeed(result: elements)
-            return promise.futureResult
+        // create an iterator
+        var iterator = makeIterator()
+        // get first element or return empty success
+        guard let first = iterator.next() else {
+            return worker.eventLoop.newSucceededFuture(result: [])
         }
 
+        // create promise and array of elements with reservation
+        let promise = worker.eventLoop.newPromise([Element.Expectation].self)
+        var elements: [Element.Expectation] = []
         elements.reserveCapacity(self.count)
 
-        for element in self {
-            element.addAwaiter { result in
-                switch result {
-                case .error(let error): promise.fail(error: error)
-                case .success(let expectation):
-                    elements.append(expectation)
-
-                    if elements.count == self.count {
+        // sub method for handling each future element.
+        // called recursively starting with the first element.
+        func handle(_ future: Element) {
+            future.addAwaiter { res in
+                switch res {
+                case .error(let e): promise.fail(error: e)
+                case .success(let el):
+                    elements.append(el)
+                    if let next = iterator.next() {
+                        handle(next)
+                    } else {
                         promise.succeed(result: elements)
                     }
                 }
             }
         }
 
+        // start handling the first element
+        handle(first)
         return promise.futureResult
     }
 }
