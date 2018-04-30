@@ -13,7 +13,7 @@ extension Future {
     ///     print(futureInt) // Future<Int>
     ///
     /// See `flatMap(to:_:)` for mapping `Future` results to other `Future` types.
-    public func map<T>(to type: T.Type, _ callback: @escaping (Expectation) throws -> T) -> Future<T> {
+    public func map<T>(to type: T.Type = T.self, _ callback: @escaping (Expectation) throws -> T) -> Future<T> {
         let promise = eventLoop.newPromise(T.self)
 
         self.do { expectation in
@@ -42,8 +42,8 @@ extension Future {
     ///     print(futureRes) // Future<Response>
     ///
     /// See `map(to:_:)` for mapping `Future` results to non-`Future` types.
-    public func flatMap<Wrapped>(to type: Wrapped.Type, _ callback: @escaping (Expectation) throws -> Future<Wrapped>) -> Future<Wrapped> {
-        let promise = eventLoop.newPromise(Wrapped.self)
+    public func flatMap<T>(to type: T.Type = T.self, _ callback: @escaping (Expectation) throws -> Future<T>) -> Future<T> {
+        let promise = eventLoop.newPromise(T.self)
 
         self.do { expectation in
             do {
