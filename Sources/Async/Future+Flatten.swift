@@ -36,37 +36,34 @@ extension Collection where Element: FutureType {
     /// Flattens an array of futures into a future with an array of results.
     /// - note: the order of the results will match the order of the futures in the input array.
     public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
-        // create an iterator
-        var iterator = makeIterator()
-        // get first element or return empty success
-        guard let first = iterator.next() else {
-            return worker.eventLoop.newSucceededFuture(result: [])
-        }
-
         // create promise and array of elements with reservation
         let promise = worker.eventLoop.newPromise([Element.Expectation].self)
-        var elements: [Element.Expectation] = []
-        elements.reserveCapacity(self.count)
 
-        // sub method for handling each future element.
-        // called recursively starting with the first element.
-        func handle(_ future: Element) {
-            future.addAwaiter { res in
+        // allocate results array
+        var results: [Element.Expectation?] = .init(repeating: nil, count: count)
+        // keep track of remaining results
+        var remaining = count
+
+        // await each element, placing in same index when done
+        for (i, el) in enumerated() {
+            el.addAwaiter { res in
+                remaining -= 1
                 switch res {
-                case .error(let e): promise.fail(error: e)
+                case .error(let e):
+                    // one of the elements failed, the whole flatten must fail
+                    promise.fail(error: e)
                 case .success(let el):
-                    elements.append(el)
-                    if let next = iterator.next() {
-                        handle(next)
-                    } else {
-                        promise.succeed(result: elements)
+                    // insert the element into its array index
+                    results[i] = el
+                    // zero remaining, succeed the promise
+                    if remaining == 0 {
+                        promise.succeed(result: results.compactMap { $0 })
                     }
                 }
             }
         }
 
-        // start handling the first element
-        handle(first)
+        // return future result
         return promise.futureResult
     }
 }
