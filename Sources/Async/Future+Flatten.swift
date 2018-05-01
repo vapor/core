@@ -36,6 +36,10 @@ extension Collection where Element: FutureType {
     /// Flattens an array of futures into a future with an array of results.
     /// - note: the order of the results will match the order of the futures in the input array.
     public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
+        if count == 0 {
+            return worker.eventLoop.newSucceededFuture(result: [])
+        }
+
         // create promise and array of elements with reservation
         let promise = worker.eventLoop.newPromise([Element.Expectation].self)
 
