@@ -23,7 +23,7 @@ final class AsyncTests: XCTestCase {
         try XCTAssertEqual(flat.wait(), ["a", "b"])
     }
 
-    func testFlattenStackOVerflow() throws {
+    func testFlattenStackOverflow() throws {
         let loop = EmbeddedEventLoop()
         var arr: [Future<Int>] = []
         let count = 1<<12
@@ -32,10 +32,23 @@ final class AsyncTests: XCTestCase {
         }
         try XCTAssertEqual(arr.flatten(on: loop).wait().count, count)
     }
+
+    func testFlattenFail() throws {
+        let loop = EmbeddedEventLoop()
+        let a = loop.newPromise(String.self)
+        let b = loop.newPromise(String.self)
+        let arr: [Future<String>] = [a.futureResult, b.futureResult]
+        a.succeed(result: "a")
+        b.fail(error: "b")
+        XCTAssertThrowsError(try arr.flatten(on: loop).wait()) { XCTAssert($0 is String) }
+    }
     
     static let allTests = [
         ("testVariadicMap", testVariadicMap),
         ("testFlatten", testFlatten),
-        ("testFlattenStackOVerflow", testFlattenStackOVerflow),
+        ("testFlattenStackOverflow", testFlattenStackOverflow),
+        ("testFlattenFail", testFlattenFail),
     ]
 }
+
+extension String: Error { }
