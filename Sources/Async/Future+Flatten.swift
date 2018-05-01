@@ -36,7 +36,9 @@ extension Collection where Element: FutureType {
     /// Flattens an array of futures into a future with an array of results.
     /// - note: the order of the results will match the order of the futures in the input array.
     public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
-        if count == 0 {
+        // algorithm won't work unless there is at least one element
+        guard count > 0 else {
+            // just return an empty array
             return worker.eventLoop.newSucceededFuture(result: [])
         }
 
