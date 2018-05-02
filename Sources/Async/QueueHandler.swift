@@ -81,8 +81,8 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
         VERBOSE("QueueHandler.channelRead(ctx: \(ctx), data: \(data))")
         let input = unwrapInboundIn(data)
         guard let current = inputQueue.last else {
-            if _isDebugAssertConfiguration() {
-                print("[Async] Warning: read triggered when input queue was empty, ignoring: \(input).")
+            debugOnly {
+                WARNING("[QueueHandler] Read triggered when input queue was empty, ignoring: \(input).")
             }
             return
         }
