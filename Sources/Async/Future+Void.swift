@@ -17,8 +17,6 @@ extension Future where T == Void {
 extension Future where T == Void {
     /// Convenience function for returning void inside a future
     public static var void: Void {
-        return _void
+        return ()
     }
 }
-
-private let _void: Void = {}()
