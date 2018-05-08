@@ -60,7 +60,7 @@ public struct HeaderValue {
     public func serialize() -> String {
         var string = "\(value)"
         for (key, val) in parameters {
-            string += "; \(key)=\(val)"
+            string += "; \(key)=\"\(val)\""
         }
         return string
     }
