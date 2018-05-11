@@ -1,7 +1,7 @@
 // MARK: Flatten
 
 /// A closure that returns a future.
-public typealias LazyFuture<T> = () -> (Future<T>)
+public typealias LazyFuture<T> = () throws -> Future<T>
 
 extension Collection where Element == LazyFuture<Void> {
     /// Flattens an array of lazy futures into a future with an array of results.
@@ -11,13 +11,17 @@ extension Collection where Element == LazyFuture<Void> {
 
         var iterator = makeIterator()
         func handle(_ future: LazyFuture<Void>) {
-            future().do { res in
-                if let next = iterator.next() {
-                    handle(next)
-                } else {
-                    promise.succeed()
+            do {
+                try future().do { res in
+                    if let next = iterator.next() {
+                        handle(next)
+                    } else {
+                        promise.succeed()
+                    }
+                }.catch { error in
+                    promise.fail(error: error)
                 }
-            }.catch { error in
+            } catch {
                 promise.fail(error: error)
             }
         }
