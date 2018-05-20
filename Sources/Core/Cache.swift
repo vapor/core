@@ -55,7 +55,11 @@ fileprivate struct OrderedDictionary<Key: Hashable, Value> {
     }
 
     fileprivate var items: [Value] {
+        #if swift(>=4.1)
+        return list.compactMap { backing[$0] }
+        #else
         return list.flatMap { backing[$0] }
+        #endif
     }
 
     // theoretically slightly faster
