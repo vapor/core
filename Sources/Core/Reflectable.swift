@@ -67,10 +67,9 @@ public protocol Reflectable {
     /// 	- depth: The level of nesting to use.
     ///              	If `0`, the top-most properties will be returned.
     ///                 If `1`, the first layer of nested properties, and so-on.
-    ///		- includeOptionals: Whether Optional properties should be included or not.
     /// - throws: Any error reflecting this type's properties.
     /// - returns: All `ReflectedProperty`s at the specified depth.
-    static func reflectProperties(depth: Int, includeOptionals: Bool) throws -> [ReflectedProperty]
+    static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
 
     /// Returns a `ReflectedProperty` for the supplied key path.
     ///
@@ -97,6 +96,8 @@ public protocol Reflectable {
 
 extension Reflectable {
     /// Reflects all of this type's `ReflectedProperty`s.
+    /// - parameters:
+    ///      - includeOptionals: Whether Optional properties should be included or not.
     public static func reflectProperties(includeOptionals: Bool = true) throws -> [ReflectedProperty] {
         if includeOptionals {
         	return try reflectProperties(depth: 0)
