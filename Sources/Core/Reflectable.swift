@@ -103,7 +103,7 @@ extension Reflectable {
         	return try reflectProperties(depth: 0)
     	} else {
     		return try reflectProperties(depth: 0)
-    			// remove optionals
+    			/// remove optionals
             	.filter({ !($0.type is AnyOptionalType.Type) })
     	}
     }
