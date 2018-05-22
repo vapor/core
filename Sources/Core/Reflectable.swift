@@ -63,12 +63,14 @@ public protocol Reflectable {
     ///     try User.reflectProperties(depth: 0) // [id: UUID?, name: String, pet: Pet]
     ///     try User.reflectProperties(depth: 1) // [pet.name: String, pet.age: Int]
     ///
-    /// - parameters: depth: The level of nesting to use.
-    ///                      If `0`, the top-most properties will be returned.
-    ///                      If `1`, the first layer of nested properties, and so-on.
+    /// - parameters:
+    /// 	- depth: The level of nesting to use.
+    ///              	If `0`, the top-most properties will be returned.
+    ///                 If `1`, the first layer of nested properties, and so-on.
+    ///		- includeOptionals: Whether Optional properties should be included or not.
     /// - throws: Any error reflecting this type's properties.
     /// - returns: All `ReflectedProperty`s at the specified depth.
-    static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
+    static func reflectProperties(depth: Int, includeOptionals: Bool) throws -> [ReflectedProperty]
 
     /// Returns a `ReflectedProperty` for the supplied key path.
     ///
@@ -95,8 +97,14 @@ public protocol Reflectable {
 
 extension Reflectable {
     /// Reflects all of this type's `ReflectedProperty`s.
-    public static func reflectProperties() throws -> [ReflectedProperty] {
-        return try reflectProperties(depth: 0)
+    public static func reflectProperties(includeOptionals: Bool = true) throws -> [ReflectedProperty] {
+        if includeOptionals {
+        	return try reflectProperties(depth: 0)
+    	} else {
+    		return try reflectProperties(depth: 0)
+    			// remove optionals
+            	.filter({ !($0.type is AnyOptionalType.Type) })
+    	}
     }
 }
 
