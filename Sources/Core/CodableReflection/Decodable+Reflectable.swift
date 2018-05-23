@@ -9,9 +9,9 @@ extension Reflectable where Self: Decodable {
 
     /// Default `Reflectable` implementation for types that are also `Decodable`.
     ///
-    /// See `Reflectable.reflectProperty(forKey:)`
-    public static func reflectProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty? {
-        return try decodeProperty(forKey: keyPath)
+    /// See `AnyReflectable`.
+    public static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+        return try anyDecodeProperty(valueType: valueType, keyPath: keyPath)
     }
 }
 
@@ -38,12 +38,24 @@ extension Decodable {
     /// This is used to provide a default implementation for `reflectProperty(forKey:)` on `Reflectable`.
     ///
     /// - parameters:
-    ///     - keyPath: KeyPath to decode a property for.
+    ///     - keyPath: `KeyPath` to decode a property for.
     /// - throws: Any error decoding this property.
     /// - returns: `ReflectedProperty` if one was found.
     public static func decodeProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty? {
-        guard T.self is AnyReflectionDecodable.Type else {
-            throw CoreError(identifier: "ReflectionDecodable", reason: "`\(T.self)` does not conform to `ReflectionDecodable`.")
+        return try anyDecodeProperty(valueType: T.self, keyPath: keyPath)
+    }
+
+    /// Decodes a `CodableProperty` for the supplied `KeyPath`. This requires that all propeties on this
+    /// type are `ReflectionDecodable`.
+    ///
+    /// This is used to provide a default implementation for `reflectProperty(forKey:)` on `Reflectable`.
+    ///
+    /// - parameters:
+    ///     - keyPath: `AnyKeyPath` to decode a property for.
+    /// - throws: Any error decoding this property.
+    public static func anyDecodeProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+        guard valueType is AnyReflectionDecodable.Type else {
+            throw CoreError(identifier: "ReflectionDecodable", reason: "`\(valueType)` does not conform to `ReflectionDecodable`.")
         }
 
         if let cached = ReflectedPropertyCache.storage[keyPath] {
@@ -70,12 +82,12 @@ extension Decodable {
                     break b
                 }
 
-                guard let t = T.self as? AnyReflectionDecodable.Type else {
+                guard let t = valueType as? AnyReflectionDecodable.Type, let left = decoded[keyPath: keyPath] else {
                     break b
                 }
 
-                if try t.anyReflectDecodedIsLeft(decoded[keyPath: keyPath]) {
-                    let property = ReflectedProperty(T.self, at: codingPath.map { $0.stringValue })
+                if try t.anyReflectDecodedIsLeft(left) {
+                    let property = ReflectedProperty(any: valueType, at: codingPath.map { $0.stringValue })
                     ReflectedPropertyCache.storage[keyPath] = property
                     return property
                 }
