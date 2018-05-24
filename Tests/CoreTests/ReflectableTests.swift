@@ -62,7 +62,7 @@ class ReflectableTests: XCTestCase {
             var osarr: [String]?
         }
 
-        let properties = try Foo.reflectProperties(includeOptionals: false)
+        let properties = try Foo.reflectProperties().optionalsRemoved()
         XCTAssertEqual(properties.description, "[bool: Bool, int: Int, sarr: Array<String>]")
 
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bool)?.path, ["bool"])
