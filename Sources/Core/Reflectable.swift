@@ -101,9 +101,10 @@ public protocol AnyReflectable {
     ///     try User.reflectProperties(depth: 0) // [id: UUID?, name: String, pet: Pet]
     ///     try User.reflectProperties(depth: 1) // [pet.name: String, pet.age: Int]
     ///
-    /// - parameters: depth: The level of nesting to use.
-    ///                      If `0`, the top-most properties will be returned.
-    ///                      If `1`, the first layer of nested properties, and so-on.
+    /// - parameters:
+    ///     - depth: The level of nesting to use.
+    ///              If `0`, the top-most properties will be returned.
+    ///              If `1`, the first layer of nested properties, and so-on.
     /// - throws: Any error reflecting this type's properties.
     /// - returns: All `ReflectedProperty`s at the specified depth.
     static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
@@ -155,6 +156,13 @@ public struct ReflectedProperty {
     public init(any type: Any.Type, at path: [String]) {
         self.type = type
         self.path = path
+    }
+}
+
+extension Collection where Element == ReflectedProperty {
+    /// Removes all optional properties from an array of `ReflectedProperty`.
+    public func optionalsRemoved() -> [ReflectedProperty] {
+         return filter { !($0.type is AnyOptionalType.Type) } 
     }
 }
 
