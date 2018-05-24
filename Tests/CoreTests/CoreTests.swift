@@ -6,6 +6,22 @@ class CoreTests: XCTestCase {
         try XCTAssertEqual(Process.execute("echo", "hi"), "hi")
     }
 
+    func testProcessAsyncExecute() throws {
+        var lastOutput: ProcessOutput?
+        let status = try Process.asyncExecute("echo", "hi", on: EmbeddedEventLoop()) { output in
+            lastOutput = output
+        }.wait()
+        XCTAssertEqual(status, 0)
+        if let output = lastOutput {
+            switch output {
+            case .stderr: XCTFail("stderr")
+            case .stdout(let data): XCTAssertEqual(String(data: data, encoding: .utf8), "hi\n")
+            }
+        } else {
+            XCTFail("no output")
+        }
+    }
+
     func testProcessExecuteMissing() throws {
         XCTAssertThrowsError(try Process.execute("foo", "hi"), "hi")
     }
@@ -150,6 +166,7 @@ class CoreTests: XCTestCase {
 
     static let allTests = [
         ("testProcessExecute", testProcessExecute),
+        ("testProcessAsyncExecute", testProcessAsyncExecute),
         ("testProcessExecuteMissing", testProcessExecuteMissing),
         ("testBase64", testBase64),
         ("testBase64URL", testBase64URL),

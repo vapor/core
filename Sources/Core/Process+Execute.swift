@@ -1,4 +1,14 @@
 #if !os(iOS)
+import NIO
+
+/// Different types of process output.
+public enum ProcessOutput {
+    /// Standard process output.
+    case stdout(Data)
+
+    /// Standard process error output.
+    case stderr(Data)
+}
 
 extension Process {
     /// Executes the supplied program in a new process, blocking until the process completes.
@@ -30,40 +40,121 @@ extension Process {
     ///                path will be resolved using `/bin/sh -c which ...`.
     ///     - arguments: An array of arguments to pass to the program.
     public static func execute(_ program: String, _ arguments: [String]) throws -> String {
-        if program.hasPrefix("/") {
-            return try launchAndWait(launchPath: program, arguments)
-        } else {
-            guard let resolvedPath = try? launchAndWait(launchPath: "/bin/sh", ["-c", "which \(program)"]) else {
-                throw CoreError(identifier: "executablePath", reason: "Could not find executable path for program: \(program).")
+        var stderr: String = ""
+        var stdout: String = ""
+        let status = try asyncExecute(program, arguments, on: EmbeddedEventLoop()) { output in
+            switch output {
+            case .stderr(let data): stderr += String(data: data, encoding: .utf8) ?? ""
+            case .stdout(let data): stdout += String(data: data, encoding: .utf8) ?? ""
             }
-            return try launchAndWait(launchPath: resolvedPath, arguments)
+        }.wait()
+        if status != 0 {
+            throw ProcessExecuteError(status: status, stderr: stderr, stdout: stdout)
+        }
+        return stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Asynchronously the supplied program in a new process. Stderr and stdout will be supplied to the output closure
+    /// as it is received. The returned future will finish when the process has terminated.
+    ///
+    ///     let status = try Process.asyncExecute("echo", "hi", on: ...) { output in
+    ///         print(output)
+    ///     }.wait()
+    ///     print(result) // 0
+    ///
+    /// - parameters:
+    ///     - program: The name of the program to execute. If it does not begin with a `/`, the full
+    ///                path will be resolved using `/bin/sh -c which ...`.
+    ///     - arguments: An array of arguments to pass to the program.
+    ///     - worker: Worker to perform async task on.
+    ///     - output: Handler for the process output.
+    /// - returns: A future containing the termination status of the process.
+    public static func asyncExecute(_ program: String, _ arguments: String..., on worker: Worker, _ output: @escaping (ProcessOutput) -> ()) -> Future<Int32> {
+        return asyncExecute(program, arguments, on: worker, output)
+    }
+
+    /// Asynchronously the supplied program in a new process. Stderr and stdout will be supplied to the output closure
+    /// as it is received. The returned future will finish when the process has terminated.
+    ///
+    ///     let status = try Process.asyncExecute("echo", ["hi"], on: ...) { output in
+    ///         print(output)
+    ///     }.wait()
+    ///     print(result) // 0
+    ///
+    /// - parameters:
+    ///     - program: The name of the program to execute. If it does not begin with a `/`, the full
+    ///                path will be resolved using `/bin/sh -c which ...`.
+    ///     - arguments: An array of arguments to pass to the program.
+    ///     - worker: Worker to perform async task on.
+    ///     - output: Handler for the process output.
+    /// - returns: A future containing the termination status of the process.
+    public static func asyncExecute(_ program: String, _ arguments: [String], on worker: Worker, _ output: @escaping (ProcessOutput) -> ()) -> Future<Int32> {
+        if program.hasPrefix("/") {
+            let stdout = Pipe()
+            let stderr = Pipe()
+
+            // will be set to false when the program is done
+            var running = true
+
+            #if os(Linux)
+            // readabilityHandler doesn't work on linux, so we are left with this hack
+            DispatchQueue.global().async {
+                while running {
+                    let stdout = stdout.fileHandleForReading.availableData
+                    let stderr = stderr.fileHandleForReading.availableData
+                    if !stdout.isEmpty {
+                        output(.stdout(stdout))
+                    }
+                    if !stderr.isEmpty {
+                        output(.stderr(stderr))
+                    }
+                    sleep(1)
+                }
+            }
+            #else
+            stdout.fileHandleForReading.readabilityHandler = { handle in
+                output(.stdout(handle.availableData))
+            }
+            stderr.fileHandleForReading.readabilityHandler = { handle in
+                output(.stderr(handle.availableData))
+            }
+            #endif
+
+            let promise = worker.eventLoop.newPromise(Int32.self)
+            DispatchQueue.global().async {
+                let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
+                process.waitUntilExit()
+                running = false
+                promise.succeed(result: process.terminationStatus)
+            }
+            return promise.futureResult
+        } else {
+            var resolvedPath: String?
+            return asyncExecute("/bin/sh", ["-c", "which \(program)"], on: worker) { o in
+                switch o {
+                case .stdout(let data): resolvedPath = String(data: data, encoding: .utf8)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                default: break
+                }
+            }.flatMap { status in
+                guard let path = resolvedPath else {
+                    throw CoreError(identifier: "executablePath", reason: "Could not find executable path for program: \(program).")
+                }
+                return asyncExecute(path, arguments, on: worker, output)
+            }
         }
     }
 
     /// Powers `Process.execute(_:_:)` methods. Separated so that `/bin/sh -c which` can run as a separate command.
-    private static func launchAndWait(launchPath: String, _ arguments: [String]) throws -> String {
-        let stdout = Pipe()
-        let stderr = Pipe()
-
+    private static func launchProcess(path: String, _ arguments: [String], stdout: Pipe, stderr: Pipe) -> Process {
         let process = Process()
         process.environment = ProcessInfo.processInfo.environment
-        process.launchPath = launchPath
+        process.launchPath = path
         process.arguments = arguments
         process.standardOutput = stdout
         process.standardError = stderr
-
         process.launch()
-        process.waitUntilExit()
-
-        guard process.terminationStatus == 0 else {
-            throw try ProcessExecuteError(
-                status: process.terminationStatus,
-                stderr: stderr.readString(),
-                stdout: stdout.readString()
-            )
-        }
-
-        return try stdout.readString()
+        return process
     }
 }
 
@@ -88,16 +179,6 @@ extension ProcessExecuteError: Debuggable {
     /// See `Debuggable.reason`
     public var reason: String {
         return stderr
-    }
-}
-
-extension Pipe {
-    /// Reads the contents of a pipe and converts to a `String`.
-    fileprivate func readString(encoding: String.Encoding = .utf8) throws -> String {
-        guard let string = String(data: fileHandleForReading.readDataToEndOfFile(), encoding: encoding) else {
-            return ""
-        }
-        return string.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
