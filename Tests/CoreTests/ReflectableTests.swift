@@ -64,14 +64,14 @@ class ReflectableTests: XCTestCase {
                 }
             }
 
-            static func reflectProperty<T>(forKey keyPath: KeyPath<User, T>) throws -> ReflectedProperty? {
+            static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
                 let key: String
                 switch keyPath {
                 case \User.firstName: key = "first_name"
                 case \User.lastName: key = "last_name"
                 default: return nil
                 }
-                return .init(T.self, at: [key])
+                return .init(any: valueType, at: [key])
             }
         }
 
