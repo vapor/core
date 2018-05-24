@@ -1,4 +1,5 @@
 #if !os(iOS)
+import NIO
 
 /// Different types of process output.
 public enum ProcessOutput {
@@ -92,17 +93,38 @@ extension Process {
             let stdout = Pipe()
             let stderr = Pipe()
 
+            // will be set to false when the program is done
+            var running = true
+
+            #if os(Linux)
+            // readabilityHandler doesn't work on linux, so we are left with this hack
+            DispatchQueue.global().async {
+                while running {
+                    let stdout = stdout.fileHandleForReading.availableData
+                    let stderr = stderr.fileHandleForReading.availableData
+                    if !stdout.isEmpty {
+                        output(.stdout(stdout))
+                    }
+                    if !stderr.isEmpty {
+                        output(.stderr(stderr))
+                    }
+                    sleep(1)
+                }
+            }
+            #else
             stdout.fileHandleForReading.readabilityHandler = { handle in
                 output(.stdout(handle.availableData))
             }
             stderr.fileHandleForReading.readabilityHandler = { handle in
                 output(.stderr(handle.availableData))
             }
+            #endif
 
             let promise = worker.eventLoop.newPromise(Int32.self)
             DispatchQueue.global().async {
                 let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
                 process.waitUntilExit()
+                running = false
                 promise.succeed(result: process.terminationStatus)
             }
             return promise.futureResult
