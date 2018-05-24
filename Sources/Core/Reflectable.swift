@@ -134,13 +134,6 @@ public protocol AnyReflectable {
     static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty?
 }
 
-extension Reflectable {
-    /// Reflects all of this type's `ReflectedProperty`s.
-    public static func reflectProperties() throws -> [ReflectedProperty] {
-        return try reflectProperties(depth: 0)
-    }
-}
-
 /// Represents a property on a type that has been reflected using the `Reflectable` protocol.
 ///
 ///     let property = try User.reflectProperty(forKey: \.pet.name)
