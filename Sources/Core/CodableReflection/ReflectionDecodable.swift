@@ -236,3 +236,35 @@ func forceCast<T>(_ type: T.Type) throws -> AnyReflectionDecodable.Type {
     }
     return casted
 }
+
+#if swift(>=4.2)
+extension ReflectionDecodable where Self: CaseIterable {
+
+    /// Default implementation of `ReflectionDecodable` for enums that are also `CaseIterable`.
+    ///
+    /// See `ReflectionDecodable.reflectDecoded(_:)` for more information.
+    public static func reflectDecoded() throws -> (Self, Self) {
+        /// enum must have at least 2 cases
+        guard !allCases.isEmpty, allCases.count > 1 else {
+            throw CoreError(
+                identifier: "ReflectionDecodable",
+                reason: "\(T.self) must have at least 2 cases",
+                suggestedFixes: [
+                    "Add at least 2 cases to the enum."
+                ]
+            )
+        }
+        /// cases should be different
+        guard let first = allCases.first, let last = allCases.last else {
+            throw CoreError(
+                identifier: "ReflectionDecodable",
+                reason: "\(T.self) must have at least 2 cases",
+                suggestedFixes: [
+                    "Add at least 2 cases to the enum."
+                ]
+            )
+        }
+        return (first, last)
+    }
+}
+#endif
