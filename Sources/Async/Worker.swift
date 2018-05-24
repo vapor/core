@@ -49,7 +49,7 @@ extension Worker {
     /// - parameters:
     ///     - value: The value that the future will wrap.
     /// - returns: The succeeded future.
-    func future<T>(_ value: T) -> Future<T> {
+    public func future<T>(_ value: T) -> Future<T> {
         return self.eventLoop.newSucceededFuture(result: value)
     }
     
@@ -60,7 +60,7 @@ extension Worker {
     /// - parameters:
     ///    - error: The error that the future will wrap.
     /// - returns: The failed future.
-    func future<T>(error: Error) -> Future<T> {
+    public func future<T>(error: Error) -> Future<T> {
         return self.eventLoop.newFailedFuture(error: error)
     }
 }
