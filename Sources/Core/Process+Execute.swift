@@ -1,3 +1,5 @@
+#if !os(iOS)
+
 extension Process {
     /// Executes the supplied program in a new process, blocking until the process completes.
     /// Any data piped to `stdout` during the process will be returned as a string.
@@ -98,3 +100,5 @@ extension Pipe {
         return string.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+
+#endif
