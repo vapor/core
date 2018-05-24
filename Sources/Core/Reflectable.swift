@@ -46,30 +46,7 @@
 ///
 /// Even if your type gets the default implementation for being `Decodable`, you can still override both
 /// the `reflectProperties(dpeth:)` and `reflectProperty(forKey:)` methods.
-public protocol Reflectable {
-    /// Reflects all of this type's `ReflectedProperty`s.
-    ///
-    ///     struct Pet: Decodable {
-    ///         var name: String
-    ///         var age: Int
-    ///     }
-    ///
-    ///     struct User: Reflectable, Decodable {
-    ///         var id: UUID?
-    ///         var name: String
-    ///         var pet: Pet
-    ///     }
-    ///
-    ///     try User.reflectProperties(depth: 0) // [id: UUID?, name: String, pet: Pet]
-    ///     try User.reflectProperties(depth: 1) // [pet.name: String, pet.age: Int]
-    ///
-    /// - parameters:
-    /// 	- depth: The level of nesting to use.
-    ///              	If `0`, the top-most properties will be returned.
-    ///                 If `1`, the first layer of nested properties, and so-on.
-    /// - throws: Any error reflecting this type's properties.
-    /// - returns: All `ReflectedProperty`s at the specified depth.
-    static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
+public protocol Reflectable: AnyReflectable {
 
     /// Returns a `ReflectedProperty` for the supplied key path.
     ///
@@ -96,16 +73,71 @@ public protocol Reflectable {
 
 extension Reflectable {
     /// Reflects all of this type's `ReflectedProperty`s.
+    public static func reflectProperties() throws -> [ReflectedProperty] {
+        return try reflectProperties(depth: 0)
+    }
+
+    /// See `Reflectable`.
+    public static func reflectProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty? {
+        return try anyReflectProperty(valueType: T.self, keyPath: keyPath)
+    }
+}
+
+/// Type-erased `Reflectable`.
+public protocol AnyReflectable {
+    /// Reflects all of this type's `ReflectedProperty`s.
+    ///
+    ///     struct Pet: Decodable {
+    ///         var name: String
+    ///         var age: Int
+    ///     }
+    ///
+    ///     struct User: Reflectable, Decodable {
+    ///         var id: UUID?
+    ///         var name: String
+    ///         var pet: Pet
+    ///     }
+    ///
+    ///     try User.reflectProperties(depth: 0) // [id: UUID?, name: String, pet: Pet]
+    ///     try User.reflectProperties(depth: 1) // [pet.name: String, pet.age: Int]
+    ///
     /// - parameters:
-    ///      - includeOptionals: Whether Optional properties should be included or not.
-    public static func reflectProperties(includeOptionals: Bool = true) throws -> [ReflectedProperty] {
-        if includeOptionals {
-        	return try reflectProperties(depth: 0)
-    	} else {
-    		return try reflectProperties(depth: 0)
-    			/// remove optionals
-            	.filter({ !($0.type is AnyOptionalType.Type) })
-    	}
+    /// 	- depth: The level of nesting to use.
+    ///              	If `0`, the top-most properties will be returned.
+    ///                 If `1`, the first layer of nested properties, and so-on.
+    /// - throws: Any error reflecting this type's properties.
+    /// - returns: All `ReflectedProperty`s at the specified depth.
+    static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
+
+    /// Returns a `ReflectedProperty` for the supplied key path. Use the non-type erased version on
+    /// `Reflectable` wherever possible.
+    ///
+    ///     struct Pet: Decodable {
+    ///         var name: String
+    ///         var age: Int
+    ///     }
+    ///
+    ///     struct User: Reflectable, Decodable {
+    ///         var id: UUID?
+    ///         var name: String
+    ///         var pet: Pet
+    ///     }
+    ///
+    ///     try User.anyReflectProperty(valueType: String.self, keyPath: \User.name) // ["name"] String
+    ///     try User.anyReflectProperty(valueType: String.self, keyPath: \User.pet.name) // ["pet", "name"] String
+    ///
+    /// - parameters:
+    ///     - valueType: Value type of the key path.
+    ///     - keyPath: `AnyKeyPath` to reflect a property for.
+    /// - throws: Any error reflecting this property.
+    /// - returns: `ReflectedProperty` if one was found.
+    static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty?
+}
+
+extension Reflectable {
+    /// Reflects all of this type's `ReflectedProperty`s.
+    public static func reflectProperties() throws -> [ReflectedProperty] {
+        return try reflectProperties(depth: 0)
     }
 }
 
@@ -131,6 +163,13 @@ public struct ReflectedProperty {
     public init(any type: Any.Type, at path: [String]) {
         self.type = type
         self.path = path
+    }
+}
+
+extension Collection where Element == ReflectedProperty {
+    /// Removes all optional properties from an array of `ReflectedProperty`.
+    public func optionalsRemoved() -> [ReflectedProperty] {
+         return filter { !($0.type is AnyOptionalType.Type) } 
     }
 }
 
