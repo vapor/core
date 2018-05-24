@@ -103,8 +103,8 @@ public protocol AnyReflectable {
     ///
     /// - parameters:
     /// 	- depth: The level of nesting to use.
-    ///              	If `0`, the top-most properties will be returned.
-    ///                 If `1`, the first layer of nested properties, and so-on.
+    ///              If `0`, the top-most properties will be returned.
+    ///              If `1`, the first layer of nested properties, and so-on.
     /// - throws: Any error reflecting this type's properties.
     /// - returns: All `ReflectedProperty`s at the specified depth.
     static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
