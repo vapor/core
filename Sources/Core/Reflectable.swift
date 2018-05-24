@@ -102,7 +102,7 @@ public protocol AnyReflectable {
     ///     try User.reflectProperties(depth: 1) // [pet.name: String, pet.age: Int]
     ///
     /// - parameters:
-    /// 	- depth: The level of nesting to use.
+    ///     - depth: The level of nesting to use.
     ///              If `0`, the top-most properties will be returned.
     ///              If `1`, the first layer of nested properties, and so-on.
     /// - throws: Any error reflecting this type's properties.
