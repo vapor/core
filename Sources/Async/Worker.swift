@@ -44,18 +44,22 @@ extension Worker {
     
     /// Creates a new, succeeded `Future` from the worker's event loop.
     ///
-    /// - Parameter value: The value that the future will wrap.
+    ///    let a: Future<String> = req.future("hello")
     ///
-    /// - Returns: The succeeded future.
+    /// - parameters:
+    ///     - value: The value that the future will wrap.
+    /// - returns: The succeeded future.
     func future<T>(_ value: T) -> Future<T> {
         return self.eventLoop.newSucceededFuture(result: value)
     }
     
     /// Creates a new, failed `Future` from the worker's event loop.
     ///
-    /// - Parameter error: The error that the future will wrap.
+    ///    let b: Future<String> = req.future(error: Abort(...))
     ///
-    /// - Returns: The failed future.
+    /// - parameters:
+    ///    - error: The error that the future will wrap.
+    /// - returns: The failed future.
     func future<T>(error: Error) -> Future<T> {
         return self.eventLoop.newFailedFuture(error: error)
     }
