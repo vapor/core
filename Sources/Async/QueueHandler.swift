@@ -49,6 +49,12 @@ public final class QueueHandler<In, Out>: ChannelInboundHandler {
     ///                The callback will continue to be called until you return `true` or an error is thrown.
     /// - returns: A future signal. Will be completed when `onInput` returns `true` or throws an error.
     public func enqueue(_ output: [OutboundOut], onInput: @escaping (InboundIn) throws -> Bool) -> Future<Void> {
+        guard eventLoop.inEventLoop else {
+            return eventLoop
+                .submit { }
+                .flatMap(to: Void.self) { self.enqueue(output, onInput: onInput) }
+        }
+
         VERBOSE("QueueHandler.enqueue(\(output.count))")
         outputQueue.insert(output, at: 0)
         let promise = eventLoop.newPromise(Void.self)
