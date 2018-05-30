@@ -54,6 +54,11 @@ class ReflectableTests: XCTestCase {
 
     func testCaseIterableExtension() throws {
         #if swift(>=4.2)
+        // Should throw since there's only 1 case
+        enum FakePet: String, CaseIterable, ReflectionDecodable, Decodable {
+            case dragon
+        }
+
         enum Pet: String, CaseIterable, ReflectionDecodable, Decodable {
             case cat, dog
         }
@@ -75,6 +80,8 @@ class ReflectableTests: XCTestCase {
         #else
         XCTAssertTrue(true)
         #endif
+
+        try XCTAssertThrowsError(FakePet.reflectDecoded(), "FakePet should throw")
     }
 
     func testNonOptionalsOnly() throws {
