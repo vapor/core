@@ -55,7 +55,7 @@ class ReflectableTests: XCTestCase {
     func testCaseIterableExtension() throws {
         #if swift(>=4.2)
         enum Pet: String, CaseIterable, ReflectionDecodable, Decodable {
-            case cat
+            case cat, dog
         }
 
         struct Foo: Reflectable, Decodable {
