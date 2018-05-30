@@ -244,25 +244,16 @@ extension ReflectionDecodable where Self: CaseIterable {
     ///
     /// See `ReflectionDecodable.reflectDecoded(_:)` for more information.
     public static func reflectDecoded() throws -> (Self, Self) {
-        /// enum must have at least 2 cases
-        guard !allCases.isEmpty, allCases.count > 1 else {
-            throw CoreError(
-                identifier: "ReflectionDecodable",
-                reason: "\(T.self) must have at least 2 cases",
-                suggestedFixes: [
-                    "Add at least 2 cases to the enum."
-                ]
-            )
-        }
-        /// cases should be different
-        guard let first = allCases.first, let last = allCases.last else {
-            throw CoreError(
-                identifier: "ReflectionDecodable",
-                reason: "\(T.self) must have at least 2 cases",
-                suggestedFixes: [
-                    "Add at least 2 cases to the enum."
-                ]
-            )
+        /// enum must have at least 2 unique cases
+        guard !allCases.isEmpty, allCases.count > 1,
+            let first = allCases.first, let last = allCases.last else {
+                throw CoreError(
+                    identifier: "ReflectionDecodable",
+                    reason: "\(T.self) must have at least 2 cases",
+                    suggestedFixes: [
+                        "Add at least 2 cases to the enum."
+                    ]
+                )
         }
         return (first, last)
     }
