@@ -245,7 +245,7 @@ extension ReflectionDecodable where Self: CaseIterable {
     /// See `ReflectionDecodable.reflectDecoded(_:)` for more information.
     public static func reflectDecoded() throws -> (Self, Self) {
         /// enum must have at least 2 unique cases
-        guard !allCases.isEmpty, allCases.count > 1,
+        guard allCases.count > 1,
             let first = allCases.first, let last = allCases.suffix(1).first else {
                 throw CoreError(
                     identifier: "ReflectionDecodable",
