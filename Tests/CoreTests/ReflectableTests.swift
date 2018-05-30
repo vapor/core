@@ -52,6 +52,31 @@ class ReflectableTests: XCTestCase {
         try XCTAssert(Foo.reflectProperty(forKey: \.odir)?.type is Direction?.Type)
     }
 
+    func testCaseIterableExtension() throws {
+        #if swift(>=4.2)
+        enum Pet: String, CaseIterable, ReflectionDecodable, Decodable {
+            case cat
+        }
+
+        struct Foo: Reflectable, Decodable {
+            var bool: Bool
+            var pet: Pet
+        }
+
+        let properties = try Foo.reflectProperties()
+        XCTAssertEqual(properties.description, """
+        [bool: Bool, pet: Pet]
+        """)
+
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bool)?.path, ["bool"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.bool)?.type is Bool.Type)
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.pet)?.path, ["pet"])
+        try XCTAssert(Foo.reflectProperty(forKey: \.pet)?.type is Pet.Type)
+        #else
+        XCTAssertTrue(true)
+        #endif
+    }
+
     func testNonOptionalsOnly() throws {
         struct Foo: Reflectable, Decodable {
             var bool: Bool
@@ -286,6 +311,7 @@ class ReflectableTests: XCTestCase {
 
     static let allTests = [
         ("testStruct", testStruct),
+        ("testCaseIterableExtension", testCaseIterableExtension),
         ("testNonOptionalsOnly", testNonOptionalsOnly),
         ("testStructCustomProperties", testStructCustomProperties),
         ("testNestedStruct", testNestedStruct),
