@@ -7,8 +7,9 @@ class CoreTests: XCTestCase {
     }
 
     func testProcessAsyncExecute() throws {
+        let eventLoop = MultiThreadedEventLoopGroup(numThreads: 1)
         var lastOutput: ProcessOutput?
-        let status = try Process.asyncExecute("echo", "hi", on: EmbeddedEventLoop()) { output in
+        let status = try Process.asyncExecute("echo", "hi", on: eventLoop) { output in
             lastOutput = output
         }.wait()
         XCTAssertEqual(status, 0)
