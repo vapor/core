@@ -77,11 +77,10 @@ class ReflectableTests: XCTestCase {
         try XCTAssert(Foo.reflectProperty(forKey: \.bool)?.type is Bool.Type)
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.pet)?.path, ["pet"])
         try XCTAssert(Foo.reflectProperty(forKey: \.pet)?.type is Pet.Type)
+        try XCTAssertThrowsError(FakePet.reflectDecoded(), "FakePet should throw")
         #else
         XCTAssertTrue(true)
         #endif
-
-        try XCTAssertThrowsError(FakePet.reflectDecoded(), "FakePet should throw")
     }
 
     func testNonOptionalsOnly() throws {

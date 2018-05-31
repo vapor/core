@@ -113,10 +113,18 @@ extension Process {
             }
             #else
             stdout.fileHandleForReading.readabilityHandler = { handle in
-                output(.stdout(handle.availableData))
+                let data = handle.availableData
+                guard !data.isEmpty else {
+                    return
+                }
+                output(.stdout(data))
             }
             stderr.fileHandleForReading.readabilityHandler = { handle in
-                output(.stderr(handle.availableData))
+                let data = handle.availableData
+                guard !data.isEmpty else {
+                    return
+                }
+                output(.stderr(data))
             }
             #endif
 
@@ -137,7 +145,7 @@ extension Process {
                 default: break
                 }
             }.flatMap { status in
-                guard let path = resolvedPath else {
+                guard let path = resolvedPath, path.hasPrefix("/") else {
                     throw CoreError(identifier: "executablePath", reason: "Could not find executable path for program: \(program).")
                 }
                 return asyncExecute(path, arguments, on: worker, output)
