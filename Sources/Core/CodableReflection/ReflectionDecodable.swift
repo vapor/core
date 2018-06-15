@@ -99,6 +99,11 @@ extension BinaryFloatingPoint {
     public static func reflectDecoded() -> (Self, Self) { return (0, 1) }
 }
 
+extension Decimal: ReflectionDecodable {
+    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    public static func reflectDecoded() -> (Decimal, Decimal) { return (0, 1) }
+}
+
 extension Float: ReflectionDecodable { }
 extension Double: ReflectionDecodable { }
 
