@@ -175,22 +175,6 @@ extension Dictionary: ReflectionDecodable {
     }
 }
 
-extension RawRepresentable where RawValue: FixedWidthInteger {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> (Self, Self) {
-        let reflected = RawValue.reflectDecoded()
-        guard let left = self.init(rawValue: reflected.0), let right = self.init(rawValue: reflected.1) else {
-            throw CoreError(
-                identifier: "reflectRawValue",
-                reason: "Could not create `\(Self.self)` from default values.",
-                possibleCauses: ["This enum is using custom raw values (using = to declare value for enum cases."],
-                suggestedFixes: ["Implement `static func reflectDecoded()` manually."]
-            )
-        }
-        return (left, right)
-    }
-}
-
 // MARK: Type Erased
 
 /// Type-erased version of `ReflectionDecodable`
@@ -238,8 +222,13 @@ func forceCast<T>(_ type: T.Type) throws -> AnyReflectionDecodable.Type {
 }
 
 #if swift(>=4.2)
-extension ReflectionDecodable where Self: CaseIterable {
+#else
+public protocol CaseIterable {
+    static var allCases: [Self] { get }
+}
+#endif
 
+extension ReflectionDecodable where Self: CaseIterable {
     /// Default implementation of `ReflectionDecodable` for enums that are also `CaseIterable`.
     ///
     /// See `ReflectionDecodable.reflectDecoded(_:)` for more information.
@@ -258,4 +247,3 @@ extension ReflectionDecodable where Self: CaseIterable {
         return (first, last)
     }
 }
-#endif
