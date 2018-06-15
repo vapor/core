@@ -42,6 +42,15 @@ extension Worker {
         return next()
     }
     
+    /// Creates a new, succeeded `Future` from the worker's event loop with a `Void` value.
+    ///
+    ///    let a: Future<Void> = req.future()
+    ///
+    /// - returns: The succeeded future.
+    public func future() -> Future<Void> {
+        return self.eventLoop.newSucceededFuture(result: ())
+    }
+    
     /// Creates a new, succeeded `Future` from the worker's event loop.
     ///
     ///    let a: Future<String> = req.future("hello")
