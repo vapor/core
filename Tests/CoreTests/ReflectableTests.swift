@@ -8,7 +8,8 @@ class ReflectableTests: XCTestCase {
             case cat, dog
         }
 
-        enum Direction: UInt8, ReflectionDecodable, Decodable {
+        enum Direction: UInt8, ReflectionDecodable, Decodable, CaseIterable {
+            static let allCases: [Direction] = [.left, .right]
             case left, right
         }
 
