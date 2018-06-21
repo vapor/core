@@ -7,7 +7,7 @@ class CoreTests: XCTestCase {
     }
 
     func testProcessAsyncExecute() throws {
-        let eventLoop = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         var lastOutput: ProcessOutput?
         let status = try Process.asyncExecute("echo", "hi", on: eventLoop) { output in
             lastOutput = output
