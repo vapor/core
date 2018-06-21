@@ -8,7 +8,6 @@ jobs:
       - checkout
       - run: swift build
       - run: swift test
-
   linux:
     docker:
       - image: codevapor/swift:4.1
@@ -29,8 +28,6 @@ jobs:
       - run: 
           name: Compile code with optimizations
           command: swift build -c release
-
-
   linux-vapor:
     docker:
       - image: codevapor/swift:4.1
@@ -47,8 +44,6 @@ jobs:
           name: Run Vapor unit tests
           command: swift test
           working_directory: ~/vapor
-
-
   linux-fluent-sqlite:
     docker:
       - image: codevapor/swift:4.1
@@ -65,7 +60,6 @@ jobs:
           name: Run Fluent SQLite unit tests
           command: swift test
           working_directory: ~/fluent-sqlite
-
   linux-fluent-mysql:
     docker:
       - image: codevapor/swift:4.1
@@ -89,14 +83,15 @@ jobs:
           name: Run Fluent MySQL unit tests
           command: swift test
           working_directory: ~/fluent-mysql
-
   linux-fluent-postgresql:
     docker:
       - image: codevapor/swift:4.1
       - image: circleci/postgres:latest
+        name: psql
         environment:
           POSTGRES_USER: vapor_username
           POSTGRES_DB: vapor_database
+          POSTGRES_PASSWORD: vapor_password
     steps:
       - run:
           name: Clone Fluent PostgreSQL
@@ -110,7 +105,6 @@ jobs:
           name: Run Fluent PostgreSQL unit tests
           command: swift test
           working_directory: ~/fluent-postgresql
-
   linux-redis:
     docker:
       - image: codevapor/swift:4.1
@@ -128,7 +122,6 @@ jobs:
           name: Run Redis unit tests
           command: swift test
           working_directory: ~/redis
-
   linux-jwt:
     docker:
       - image: codevapor/swift:4.1
@@ -145,7 +138,6 @@ jobs:
           name: Run JWT unit tests
           command: swift test
           working_directory: ~/jwt
-
   linux-leaf:
     docker:
       - image: codevapor/swift:4.1
@@ -162,7 +154,6 @@ jobs:
           name: Run Leaf unit tests
           command: swift test
           working_directory: ~/leaf
-
 workflows:
   version: 2
   tests:
@@ -176,8 +167,6 @@ workflows:
       - linux-jwt
       - linux-leaf
       - linux-release
-#      - macos
-
   nightly:
     triggers:
       - schedule:
@@ -188,5 +177,3 @@ workflows:
                 - master
     jobs:
       - linux
-#      - macos
-      
