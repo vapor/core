@@ -3,13 +3,13 @@ import XCTest
 
 class CoreTests: XCTestCase {
     func testProcessExecute() throws {
-        try XCTAssertEqual(Process.execute("echo", "hi"), "hi")
+        try XCTAssertEqual(Process.execute("/bin/echo", "hi"), "hi")
     }
 
     func testProcessAsyncExecute() throws {
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         var lastOutput: ProcessOutput?
-        let status = try Process.asyncExecute("echo", "hi", on: eventLoop) { output in
+        let status = try Process.asyncExecute("/bin/echo", "hi", on: eventLoop) { output in
             lastOutput = output
         }.wait()
         XCTAssertEqual(status, 0)
