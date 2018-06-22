@@ -226,7 +226,7 @@ func forceCast<T>(_ type: T.Type) throws -> AnyReflectionDecodable.Type {
     return casted
 }
 
-#if swift(>=4.2)
+#if swift(>=4.1.50)
 #else
 public protocol CaseIterable {
     static var allCases: [Self] { get }
