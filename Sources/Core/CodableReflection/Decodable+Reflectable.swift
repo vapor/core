@@ -1,21 +1,23 @@
 /// Default `Reflectable` implementation for types that are also `Decodable`.
-extension Reflectable where Self: Decodable {
+extension Reflectable where Self: Decodable & Encodable {
     /// Default `Reflectable` implementation for types that are also `Decodable`.
     ///
-    /// See `Reflectable.reflectProperties(depth:)`
+    /// See `Reflectable`.
     public static func reflectProperties(depth: Int) throws -> [ReflectedProperty] {
         return try decodeProperties(depth: depth)
     }
 
     /// Default `Reflectable` implementation for types that are also `Decodable`.
     ///
-    /// See `AnyReflectable`.
-    public static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
-        return try anyDecodeProperty(valueType: valueType, keyPath: keyPath)
+    /// See `Reflectable`.
+    public static func reflectProperty<T>(forKey keyPath: WritableKeyPath<Self, T>) throws -> ReflectedProperty?
+        where T: Decodable
+    {
+        return try decodeProperty(forKey: keyPath)
     }
 }
 
-extension Decodable {
+extension Decodable where Self: Encodable {
     /// Decodes all `CodableProperty`s for this type. This requires that all propeties on this type are `ReflectionDecodable`.
     ///
     /// This is used to provide a default implementation for `reflectProperties(depth:)` on `Reflectable`.
@@ -26,10 +28,9 @@ extension Decodable {
     /// - throws: Any error decoding this type's properties.
     /// - returns: All `ReflectedProperty`s at the specified depth.
     public static func decodeProperties(depth: Int) throws -> [ReflectedProperty] {
-        let context = ReflectionDecoderContext(activeOffset: 0, maxDepth: 42)
-        let decoder = ReflectionDecoder(codingPath: [], context: context)
+        let decoder = HiLoDecoder(signal: .lo)
         _ = try Self(from: decoder)
-        return context.properties.filter { $0.path.count == depth + 1 }
+        return decoder.properties.filter { $0.path.count == depth + 1 }
     }
 
     /// Decodes a `CodableProperty` for the supplied `KeyPath`. This requires that all propeties on this
@@ -41,58 +42,21 @@ extension Decodable {
     ///     - keyPath: `KeyPath` to decode a property for.
     /// - throws: Any error decoding this property.
     /// - returns: `ReflectedProperty` if one was found.
-    public static func decodeProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty? {
-        return try anyDecodeProperty(valueType: T.self, keyPath: keyPath)
-    }
-
-    /// Decodes a `CodableProperty` for the supplied `KeyPath`. This requires that all propeties on this
-    /// type are `ReflectionDecodable`.
-    ///
-    /// This is used to provide a default implementation for `reflectProperty(forKey:)` on `Reflectable`.
-    ///
-    /// - parameters:
-    ///     - keyPath: `AnyKeyPath` to decode a property for.
-    /// - throws: Any error decoding this property.
-    public static func anyDecodeProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
-        guard valueType is AnyReflectionDecodable.Type else {
-            throw CoreError(identifier: "ReflectionDecodable", reason: "`\(valueType)` does not conform to `ReflectionDecodable`.")
-        }
-
+    public static func decodeProperty<T>(forKey keyPath: WritableKeyPath<Self, T>) throws -> ReflectedProperty?
+        where T: Decodable
+    {
         if let cached = ReflectedPropertyCache.storage[keyPath] {
             return cached
         }
-
-        var maxDepth = 0
-        a: while true {
-            defer { maxDepth += 1 }
-            var activeOffset = 0
-
-            if maxDepth > 42 {
-                return nil
-            }
-
-            b: while true {
-                defer { activeOffset += 1 }
-                let context = ReflectionDecoderContext(activeOffset: activeOffset, maxDepth: maxDepth)
-                let decoder = ReflectionDecoder(codingPath: [], context: context)
-
-                let decoded = try Self(from: decoder)
-                guard let codingPath = context.activeCodingPath else {
-                    // no more values are being set at this depth
-                    break b
-                }
-
-                guard let t = valueType as? AnyReflectionDecodable.Type, let left = decoded[keyPath: keyPath] else {
-                    break b
-                }
-
-                if try t.anyReflectDecodedIsLeft(left) {
-                    let property = ReflectedProperty(any: valueType, at: codingPath.map { $0.stringValue })
-                    ReflectedPropertyCache.storage[keyPath] = property
-                    return property
-                }
-            }
+        
+        var lo = try Self(from: HiLoDecoder(signal: .lo))
+        lo[keyPath: keyPath] = try T(from: HiLoDecoder(signal: .hi))
+        let e = HiEncoder()
+        try lo.encode(to: e)
+        guard let hi = e.hi else {
+            return nil
         }
+        return .init(T.self, at: hi.map { $0.stringValue })
     }
 }
 

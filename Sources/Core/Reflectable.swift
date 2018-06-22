@@ -46,45 +46,7 @@
 ///
 /// Even if your type gets the default implementation for being `Decodable`, you can still override both
 /// the `reflectProperties(dpeth:)` and `reflectProperty(forKey:)` methods.
-public protocol Reflectable: AnyReflectable {
-
-    /// Returns a `ReflectedProperty` for the supplied key path.
-    ///
-    ///     struct Pet: Decodable {
-    ///         var name: String
-    ///         var age: Int
-    ///     }
-    ///
-    ///     struct User: Reflectable, Decodable {
-    ///         var id: UUID?
-    ///         var name: String
-    ///         var pet: Pet
-    ///     }
-    ///
-    ///     try User.reflectProperty(forKey: \.name) // ["name"] String
-    ///     try User.reflectProperty(forKey: \.pet.name) // ["pet", "name"] String
-    ///
-    /// - parameters:
-    ///     - keyPath: `KeyPath` to reflect a property for.
-    /// - throws: Any error reflecting this property.
-    /// - returns: `ReflectedProperty` if one was found.
-    static func reflectProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty?
-}
-
-extension Reflectable {
-    /// Reflects all of this type's `ReflectedProperty`s.
-    public static func reflectProperties() throws -> [ReflectedProperty] {
-        return try reflectProperties(depth: 0)
-    }
-
-    /// See `Reflectable`.
-    public static func reflectProperty<T>(forKey keyPath: KeyPath<Self, T>) throws -> ReflectedProperty? {
-        return try anyReflectProperty(valueType: T.self, keyPath: keyPath)
-    }
-}
-
-/// Type-erased `Reflectable`.
-public protocol AnyReflectable {
+public protocol Reflectable {
     /// Reflects all of this type's `ReflectedProperty`s.
     ///
     ///     struct Pet: Decodable {
@@ -109,8 +71,7 @@ public protocol AnyReflectable {
     /// - returns: All `ReflectedProperty`s at the specified depth.
     static func reflectProperties(depth: Int) throws -> [ReflectedProperty]
 
-    /// Returns a `ReflectedProperty` for the supplied key path. Use the non-type erased version on
-    /// `Reflectable` wherever possible.
+    /// Returns a `ReflectedProperty` for the supplied key path.
     ///
     ///     struct Pet: Decodable {
     ///         var name: String
@@ -123,15 +84,22 @@ public protocol AnyReflectable {
     ///         var pet: Pet
     ///     }
     ///
-    ///     try User.anyReflectProperty(valueType: String.self, keyPath: \User.name) // ["name"] String
-    ///     try User.anyReflectProperty(valueType: String.self, keyPath: \User.pet.name) // ["pet", "name"] String
+    ///     try User.reflectProperty(forKey: \.name) // ["name"] String
+    ///     try User.reflectProperty(forKey: \.pet.name) // ["pet", "name"] String
     ///
     /// - parameters:
-    ///     - valueType: Value type of the key path.
-    ///     - keyPath: `AnyKeyPath` to reflect a property for.
+    ///     - keyPath: `KeyPath` to reflect a property for.
     /// - throws: Any error reflecting this property.
     /// - returns: `ReflectedProperty` if one was found.
-    static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty?
+    static func reflectProperty<T>(forKey keyPath: WritableKeyPath<Self, T>) throws -> ReflectedProperty?
+        where T: Decodable
+}
+
+extension Reflectable {
+    /// Reflects all of this type's `ReflectedProperty`s.
+    public static func reflectProperties() throws -> [ReflectedProperty] {
+        return try reflectProperties(depth: 0)
+    }
 }
 
 /// Represents a property on a type that has been reflected using the `Reflectable` protocol.

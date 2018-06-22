@@ -150,35 +150,35 @@ extension Optional: ReflectionDecodable {
     }
 }
 
-extension Array: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> ([Element], [Element]) {
-        let reflected = try forceCast(Element.self).anyReflectDecoded()
-        return ([reflected.0 as! Element], [reflected.1 as! Element])
-    }
-
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: [Element]) throws -> Bool {
-        return try forceCast(Element.self).anyReflectDecodedIsLeft(item[0])
-    }
-}
-
-extension Dictionary: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> ([Key: Value], [Key: Value]) {
-        let reflectedValue = try forceCast(Value.self).anyReflectDecoded()
-        let reflectedKey = try forceCast(Key.self).anyReflectDecoded()
-        let key = reflectedKey.0 as! Key
-        return ([key: reflectedValue.0 as! Value], [key: reflectedValue.1 as! Value])
-    }
-
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: [Key: Value]) throws -> Bool {
-        let reflectedKey = try forceCast(Key.self).anyReflectDecoded()
-        let key = reflectedKey.0 as! Key
-        return try forceCast(Value.self).anyReflectDecodedIsLeft(item[key]!)
-    }
-}
+//extension Array: ReflectionDecodable {
+//    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+//    public static func reflectDecoded() throws -> ([Element], [Element]) {
+//        let reflected = try forceCast(Element.self).anyReflectDecoded()
+//        return ([reflected.0 as! Element], [reflected.1 as! Element])
+//    }
+//
+//    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
+//    public static func reflectDecodedIsLeft(_ item: [Element]) throws -> Bool {
+//        return try forceCast(Element.self).anyReflectDecodedIsLeft(item[0])
+//    }
+//}
+//
+//extension Dictionary: ReflectionDecodable {
+//    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+//    public static func reflectDecoded() throws -> ([Key: Value], [Key: Value]) {
+//        let reflectedValue = try forceCast(Value.self).anyReflectDecoded()
+//        let reflectedKey = try forceCast(Key.self).anyReflectDecoded()
+//        let key = reflectedKey.0 as! Key
+//        return ([key: reflectedValue.0 as! Value], [key: reflectedValue.1 as! Value])
+//    }
+//
+//    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
+//    public static func reflectDecodedIsLeft(_ item: [Key: Value]) throws -> Bool {
+//        let reflectedKey = try forceCast(Key.self).anyReflectDecoded()
+//        let key = reflectedKey.0 as! Key
+//        return try forceCast(Value.self).anyReflectDecodedIsLeft(item[key]!)
+//    }
+//}
 
 // MARK: Type Erased
 

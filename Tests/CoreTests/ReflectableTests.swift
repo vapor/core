@@ -3,17 +3,17 @@ import XCTest
 
 class ReflectableTests: XCTestCase {
     func testStruct() throws {
-        enum Pet: String, ReflectionDecodable, Decodable {
+        enum Pet: String, ReflectionDecodable, Codable {
             static func reflectDecoded() -> (Pet, Pet) { return (.cat, .dog) }
             case cat, dog
         }
 
-        enum Direction: UInt8, ReflectionDecodable, Decodable, CaseIterable {
+        enum Direction: UInt8, ReflectionDecodable, Codable, CaseIterable {
             static let allCases: [Direction] = [.left, .right]
             case left, right
         }
 
-        struct Foo: Reflectable, Decodable {
+        struct Foo: Reflectable, Codable {
             var bool: Bool
             var obool: Bool?
             var int: Int
@@ -85,7 +85,7 @@ class ReflectableTests: XCTestCase {
     }
 
     func testNonOptionalsOnly() throws {
-        struct Foo: Reflectable, Decodable {
+        struct Foo: Reflectable, Codable {
             var bool: Bool
             var obool: Bool?
             var int: Int
@@ -117,14 +117,16 @@ class ReflectableTests: XCTestCase {
                 }
             }
 
-            static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+            static func reflectProperty<T>(forKey keyPath: WritableKeyPath<User, T>) throws -> ReflectedProperty?
+                where T: Decodable
+            {
                 let key: String
                 switch keyPath {
                 case \User.firstName: key = "first_name"
                 case \User.lastName: key = "last_name"
                 default: return nil
                 }
-                return .init(any: valueType, at: [key])
+                return .init(T.self, at: [key])
             }
         }
 
@@ -137,14 +139,14 @@ class ReflectableTests: XCTestCase {
     }
 
     func testNestedStruct() throws {
-        struct Foo: Reflectable, Decodable {
+        struct Foo: Reflectable, Codable {
             var name: String
             var age: Double
             var luckyNumber: Int
             var bar: Bar
         }
 
-        struct Bar: Decodable {
+        struct Bar: Codable {
             var name: String
             var age: Double
             var luckyNumbers: [Int]
@@ -162,7 +164,7 @@ class ReflectableTests: XCTestCase {
     }
 
     func testProperties() throws {
-        struct User: Reflectable, Decodable {
+        struct User: Reflectable, Codable {
             var int: Int
             var oint: Int?
             var int8: Int8
@@ -213,12 +215,12 @@ class ReflectableTests: XCTestCase {
     }
 
     func testPropertyDepth() throws {
-        struct Pet: Decodable {
+        struct Pet: Codable {
             var name: String
             var age: Int
         }
         
-        struct User: Reflectable, Decodable {
+        struct User: Reflectable, Codable {
             var id: UUID?
             var pet: Pet
             var name: String
@@ -231,7 +233,7 @@ class ReflectableTests: XCTestCase {
     }
 
     func testPropertyA() throws {
-        final class A: Reflectable, Decodable {
+        final class A: Reflectable, Codable {
             public var id: UUID?
             public var date: Date
             public var length: Double
@@ -242,7 +244,7 @@ class ReflectableTests: XCTestCase {
 
     func testGH112() throws {
         /// A single entry of a Todo list.
-        final class Todo: FooModel, Decodable {
+        final class Todo: FooModel, Codable {
             /// The unique identifier for this `Todo`.
             var id: Int?
 
@@ -264,7 +266,7 @@ class ReflectableTests: XCTestCase {
     }
 
     func testCustomCodingKeys() throws {
-        final class Team: Reflectable, Decodable {
+        final class Team: Reflectable, Codable {
             var id: Int?
             var name: String
             enum CodingKeys: String, CodingKey {
@@ -279,7 +281,7 @@ class ReflectableTests: XCTestCase {
     }
 
     func testCache() throws {
-        final class A: Reflectable, Decodable {
+        final class A: Reflectable, Codable {
             public var b: String
         }
 
@@ -314,6 +316,26 @@ class ReflectableTests: XCTestCase {
             var type: PetType
         }
         try XCTAssertEqual(Pet.reflectProperties().description, "[name: String, type: Int]")
+        try XCTAssertEqual(Pet.reflectProperty(forKey: \.name)?.description ?? "n/a", "name: String")
+        try XCTAssertEqual(Pet.reflectProperty(forKey: \.type)?.description ?? "n/a", "type: PetType")
+    }
+    
+    /// https://github.com/vapor/core/issues/161
+    func testGH161() throws {
+        struct User: Reflectable, Codable {
+            var email: String
+            var active: Bool
+            
+            init(from decoder: Decoder)throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.email = try container.decode(String.self, forKey: .email)
+                self.active = try container.decodeIfPresent(Bool.self, forKey: .active) ?? false
+            }
+        }
+
+        try XCTAssertEqual(User.reflectProperties().description, "[email: String, active: Optional<Bool>]")
+        try XCTAssertEqual(User.reflectProperty(forKey: \.email)?.description ?? "n/a", "email: String")
+        try XCTAssertEqual(User.reflectProperty(forKey: \.active)?.description ?? "n/a", "active: Bool")
     }
 
     static let allTests = [
@@ -330,6 +352,7 @@ class ReflectableTests: XCTestCase {
         ("testCache", testCache),
         ("testArrayNested", testArrayNested),
         ("testGH119", testGH119),
+        ("testGH161", testGH161),
     ]
 }
 
