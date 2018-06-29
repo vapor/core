@@ -166,7 +166,7 @@ public func map<A, B, C, D, E, Result>(
 ///         // ...
 ///     }
 ///
-public func flatMap<A, B, D, C, E, Result>(
+public func flatMap<A, B, C, D, E, Result>(
     to result: Result.Type,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
