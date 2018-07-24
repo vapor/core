@@ -45,7 +45,7 @@
 ///     }
 ///
 /// Even if your type gets the default implementation for being `Decodable`, you can still override both
-/// the `reflectProperties(dpeth:)` and `reflectProperty(forKey:)` methods.
+/// the `reflectProperties(depth:)` and `reflectProperty(forKey:)` methods.
 public protocol Reflectable: AnyReflectable {
 
     /// Returns a `ReflectedProperty` for the supplied key path.
