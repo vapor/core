@@ -8,7 +8,7 @@ public struct File: Codable {
 
     /// Associated `MediaType` for this file's extension, if it has one.
     public var contentType: MediaType? {
-        return ext.flatMap { MediaType.fileExtension($0) }
+        return ext.flatMap { MediaType.fileExtension($0.lowercased()) }
     }
 
     /// The file extension, if it has one.
