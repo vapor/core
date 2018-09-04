@@ -7,7 +7,7 @@
 ///     }
 ///
 public func map<A, B, Result>(
-    to result: Result.Type,
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ callback: @escaping (A, B) throws -> (Result)
@@ -26,7 +26,7 @@ public func map<A, B, Result>(
 ///     }
 ///
 public func flatMap<A, B, Result>(
-    to result: Result.Type,
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ callback: @escaping (A, B) throws -> Future<Result>
@@ -45,7 +45,7 @@ public func flatMap<A, B, Result>(
 ///     }
 ///
 public func map<A, B, C, Result>(
-    to result: Result.Type,
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ futureC: Future<C>,
@@ -67,7 +67,7 @@ public func map<A, B, C, Result>(
 ///     }
 ///
 public func flatMap<A, B, C, Result>(
-    to result: Result.Type,
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ futureC: Future<C>,
@@ -89,7 +89,7 @@ public func flatMap<A, B, C, Result>(
 ///     }
 ///
 public func map<A, B, C, D, Result>(
-    to result: Result.Type,
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ futureC: Future<C>,
@@ -113,8 +113,8 @@ public func map<A, B, C, D, Result>(
 ///         // ...
 ///     }
 ///
-public func flatMap<A, B, D, C, Result>(
-    to result: Result.Type,
+public func flatMap<A, B, C, D, Result>(
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ futureC: Future<C>,
@@ -139,7 +139,7 @@ public func flatMap<A, B, D, C, Result>(
 ///     }
 ///
 public func map<A, B, C, D, E, Result>(
-    to result: Result.Type,
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ futureC: Future<C>,
@@ -166,8 +166,8 @@ public func map<A, B, C, D, E, Result>(
 ///         // ...
 ///     }
 ///
-public func flatMap<A, B, D, C, E, Result>(
-    to result: Result.Type,
+public func flatMap<A, B, C, D, E, Result>(
+    to result: Result.Type = Result.self,
     _ futureA: Future<A>,
     _ futureB: Future<B>,
     _ futureC: Future<C>,
