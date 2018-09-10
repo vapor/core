@@ -44,8 +44,10 @@ extension Process {
         var stdout: String = ""
         let status = try asyncExecute(program, arguments, on: EmbeddedEventLoop()) { output in
             switch output {
-            case .stderr(let data): stderr += String(data: data, encoding: .utf8) ?? ""
-            case .stdout(let data): stdout += String(data: data, encoding: .utf8) ?? ""
+            case .stderr(let data):
+                stderr += String(data: data, encoding: .utf8) ?? ""
+            case .stdout(let data):
+                stdout += String(data: data, encoding: .utf8) ?? ""
             }
         }.wait()
         if status != 0 {
@@ -95,38 +97,39 @@ extension Process {
 
             // will be set to false when the program is done
             var running = true
-
-            #if os(Linux)
+            
             // readabilityHandler doesn't work on linux, so we are left with this hack
             DispatchQueue.global().async {
                 while running {
                     let stdout = stdout.fileHandleForReading.availableData
-                    let stderr = stderr.fileHandleForReading.availableData
                     if !stdout.isEmpty {
                         output(.stdout(stdout))
                     }
+                }
+            }
+            DispatchQueue.global().async {
+                while running {
+                    let stderr = stderr.fileHandleForReading.availableData
                     if !stderr.isEmpty {
                         output(.stderr(stderr))
                     }
-                    sleep(1)
                 }
             }
-            #else
-            stdout.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                guard !data.isEmpty else {
-                    return
-                }
-                output(.stdout(data))
-            }
-            stderr.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                guard !data.isEmpty else {
-                    return
-                }
-                output(.stderr(data))
-            }
-            #endif
+
+            // stdout.fileHandleForReading.readabilityHandler = { handle in
+            //     let data = handle.availableData
+            //     guard !data.isEmpty else {
+            //         return
+            //     }
+            //     output(.stdout(data))
+            // }
+            // stderr.fileHandleForReading.readabilityHandler = { handle in
+            //     let data = handle.availableData
+            //     guard !data.isEmpty else {
+            //         return
+            //     }
+            //     output(.stderr(data))
+            // }
 
             let promise = worker.eventLoop.newPromise(Int32.self)
             DispatchQueue.global().async {
