@@ -42,18 +42,13 @@ extension NestedData {
     public func get(at path: [CodingKey]) -> Self? {
         var child = self
         for seg in path {
-            var c: Self?
-            if let dictionary = child.dictionary {
-                c = dictionary[seg.stringValue]
+            if let dictionary = child.dictionary, let c = dictionary[seg.stringValue] {
+                child = c
             } else if let array = child.array, let index = seg.intValue {
-                c = array[index]
-            }
-
-            guard let someC = c else {
+                child = array[index]
+            } else {
                 return nil
             }
-
-            child = someC
         }
         return child
     }
