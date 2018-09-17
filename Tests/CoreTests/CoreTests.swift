@@ -5,6 +5,11 @@ class CoreTests: XCTestCase {
     func testProcessExecute() throws {
         try XCTAssertEqual(Process.execute("/bin/echo", "hi"), "hi")
     }
+    
+    func testProcessExecuteCurl() throws {
+        let res = try Process.execute("/usr/bin/curl", "--verbose", "vapor.codes")
+        XCTAssertEqual(res.contains("<title>Vapor"), true)
+    }
 
     func testProcessAsyncExecute() throws {
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
