@@ -180,6 +180,15 @@ extension Dictionary: ReflectionDecodable {
     }
 }
 
+extension URL: ReflectionDecodable {
+    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    public static func reflectDecoded() throws -> (URL, URL) {
+        let left = URL(string: "https://left.fake.url")!
+        let right = URL(string: "https://right.fake.url")!
+        return (left, right)
+    }
+}
+
 // MARK: Type Erased
 
 /// Type-erased version of `ReflectionDecodable`
