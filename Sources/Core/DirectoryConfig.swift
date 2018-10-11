@@ -21,40 +21,23 @@ public struct DirectoryConfig {
     ///
     /// - returns: The derived `DirectoryConfig` if it could be created, otherwise just "./".
     public static func detect() -> DirectoryConfig {
-        let fileBasedWorkDir: String?
+        var workDir: String
 
-        #if Xcode
-        // attempt to find working directory through #file
-        let file = #file
-
-        if file.contains(".build") {
-            // most dependencies are in `./.build/`
-            fileBasedWorkDir = file.components(separatedBy: "/.build").first
-        } else if file.contains("Packages") {
-            // when editing a dependency, it is in `./Packages/`
-            fileBasedWorkDir = file.components(separatedBy: "/Packages").first
-        } else {
-            // when dealing with current repository, file is in `./Sources/`
-            fileBasedWorkDir = file.components(separatedBy: "/Sources").first
+        let cwd = getcwd(nil, Int(PATH_MAX))
+        defer {
+            free(cwd)
         }
-        #else
-        fileBasedWorkDir = nil
-        #endif
-
-        let workDir: String
-        if let fileBasedWorkDir = fileBasedWorkDir {
-            workDir = fileBasedWorkDir
+        if let cwd = cwd, let string = String(validatingUTF8: cwd) {
+            workDir = string
         } else {
-            // get actual working directory
-            let cwd = getcwd(nil, Int(PATH_MAX))
-            defer {
-                free(cwd)
-            }
+            workDir = "./"
+        }
 
-            if let cwd = cwd, let string = String(validatingUTF8: cwd) {
-                workDir = string
-            } else {
-                workDir = "./"
+        let standardPaths = [".build", "Packages", "Sources"]
+        for path in standardPaths {
+            if workDir.contains(path){
+                workDir = workDir.components(separatedBy:"/\(path)").first!
+                break
             }
         }
 
