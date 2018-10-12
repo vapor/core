@@ -49,6 +49,26 @@ final class AsyncTests: XCTestCase {
         try XCTAssertEqual(arr.flatten(on: loop).wait().count, 0)
     }
     
+    func testTransform() throws {
+        let future = Future.map(on: worker) { 1 }
+        let transformed = future.transform(to: "a")
+        try XCTAssertEqual("a", transformed.wait())
+    }
+    
+    func testTransformAlways() throws {
+        let loop = EmbeddedEventLoop()
+        let a = loop.newPromise(String.self)
+        let b = loop.newPromise(String.self)
+        let futureA = a.futureResult
+        let futureB = b.futureResult
+        a.succeed(result: "a")
+        b.fail(error: "b")
+        let transformSucceed = try futureA.transformAlways(to: 1).wait()
+        let transformFail = try futureB.transformAlways(to: 1).wait()
+        XCTAssertEqual(transformSucceed, transformFail)
+        XCTAssertEqual(transformSucceed, 1)
+    }
+    
     static let allTests = [
         ("testVariadicMap", testVariadicMap),
         ("testFlatten", testFlatten),
