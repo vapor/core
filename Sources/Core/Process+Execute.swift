@@ -92,41 +92,42 @@ extension Process {
     /// - returns: A future containing the termination status of the process.
     public static func asyncExecute(_ program: String, _ arguments: [String], on worker: Worker, _ output: @escaping (ProcessOutput) -> ()) -> Future<Int32> {
         if program.hasPrefix("/") {
-            // create queue for async work
+            // generic dispatch io config code for stdout/stderr
+            func setupDispatchIO(for pipe: Pipe, onData: @escaping (Data) -> ()) -> (Future<Void>, DispatchIO) {
+                // create new promise to signal IO is done
+                let promise = worker.eventLoop.newPromise(Void.self)
+                
+                // create dispatch io stream on read handle of pipe
+                let io = DispatchIO(type: .stream, fileDescriptor: pipe.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
+                    // close pipe once stream is cancelled
+                    close(pipe.fileHandleForReading.fileDescriptor)
+                }
+                
+                // start async read on stream
+                io.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
+                    if done {
+                        // signal IO is done
+                        promise.succeed(result: ())
+                    } else if err != 0 {
+                        // signal IO failure
+                        promise.fail(error: ProcessIOError(code: err))
+                    } else if let data = data, !data.isEmpty {
+                        // convert DispatchData to Data and pass to callback
+                        onData(Data(data))
+                    }
+                }
+                
+                // return created future and IO stream
+                return (promise.futureResult, io)
+            }
             
             // create process data pipes
             let stdout = Pipe()
             let stderr = Pipe()
 
-            // setup dispatch io for stdout
-            let stdoutPromise = worker.eventLoop.newPromise(Void.self)
-            let stdoutIO = DispatchIO(type: .stream, fileDescriptor: stdout.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
-                close(stdout.fileHandleForReading.fileDescriptor)
-            }
-            stdoutIO.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
-                if done {
-                    stdoutPromise.succeed(result: ())
-                } else if err != 0 {
-                    stdoutPromise.fail(error: ProcessIOError(code: err))
-                } else if let data = data, !data.isEmpty {
-                    output(.stdout(Data(data)))
-                }
-            }
-            
-            // setup dispatch io for stderr
-            let stderrPromise = worker.eventLoop.newPromise(Void.self)
-            let stderrIO = DispatchIO(type: .stream, fileDescriptor: stderr.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
-                close(stderr.fileHandleForReading.fileDescriptor)
-            }
-            stderrIO.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
-                if done {
-                    stderrPromise.succeed(result: ())
-                } else if err != 0 {
-                    stderrPromise.fail(error: ProcessIOError(code: err))
-                } else if let data = data, !data.isEmpty {
-                    output(.stderr(Data(data)))
-                }
-            }
+            // setup dispatch IO on each pipe
+            let (stdoutFuture, stdoutIO) = setupDispatchIO(for: stdout) { output(.stdout($0)) }
+            let (stderrFuture, stderrIO) = setupDispatchIO(for: stderr) { output(.stderr($0)) }
 
             // launch and run the process
             let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
@@ -134,11 +135,16 @@ extension Process {
             // create a new promise for the termination status and set callback
             let processPromise = worker.eventLoop.newPromise(Int32.self)
             process.terminationHandler = { process in
+                // close dispatch IO
+                stdoutIO.close()
+                stderrIO.close()
+                
                 // complete the promise
                 processPromise.succeed(result: process.terminationStatus)
             }
 
-            return stdoutPromise.futureResult.and(stderrPromise.futureResult)
+            // combine stdout/err and process result futures
+            return stdoutFuture.and(stderrFuture)
                 .transform(to: processPromise.futureResult)
         } else {
             var resolvedPath: String?
