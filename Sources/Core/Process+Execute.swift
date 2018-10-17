@@ -92,49 +92,54 @@ extension Process {
     /// - returns: A future containing the termination status of the process.
     public static func asyncExecute(_ program: String, _ arguments: [String], on worker: Worker, _ output: @escaping (ProcessOutput) -> ()) -> Future<Int32> {
         if program.hasPrefix("/") {
+            // create queue for async work
+            
             // create process data pipes
             let stdout = Pipe()
             let stderr = Pipe()
-            
-            // create dispatch sources for the pipes
-            let stdoutsource = DispatchSource.makeReadSource(fileDescriptor: stdout.fileHandleForReading.fileDescriptor)
-            let stderrsource = DispatchSource.makeReadSource(fileDescriptor: stderr.fileHandleForReading.fileDescriptor)
-            
-            // setup read handlers for the output sources
-            stdoutsource.setEventHandler {
-                 let data = stdout.fileHandleForReading.availableData
-                 guard !data.isEmpty else {
-                     return
-                 }
-                 output(.stdout(data))
+
+            // setup dispatch io for stdout
+            let stdoutPromise = worker.eventLoop.newPromise(Void.self)
+            let stdoutIO = DispatchIO(type: .stream, fileDescriptor: stdout.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
+                close(stdout.fileHandleForReading.fileDescriptor)
             }
-            stderrsource.setEventHandler {
-                let data = stderr.fileHandleForReading.availableData
-                guard !data.isEmpty else {
-                    return
+            stdoutIO.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
+                if done {
+                    stdoutPromise.succeed(result: ())
+                } else if err != 0 {
+                    stdoutPromise.fail(error: ProcessIOError(code: err))
+                } else if let data = data, !data.isEmpty {
+                    output(.stdout(Data(data)))
                 }
-                output(.stderr(data))
             }
-        
-            // start the output sources
-            stdoutsource.resume()
-            stderrsource.resume()
             
-            // launch and run the process
-            let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
-            
-            // succeed with the termination status
-            let promise = worker.eventLoop.newPromise(Int32.self)
-            process.terminationHandler = { process in
-                // cleanup output sources
-                stdoutsource.cancel()
-                stderrsource.cancel()
-                
-                // complete the promise
-                promise.succeed(result: process.terminationStatus)
+            // setup dispatch io for stderr
+            let stderrPromise = worker.eventLoop.newPromise(Void.self)
+            let stderrIO = DispatchIO(type: .stream, fileDescriptor: stderr.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
+                close(stderr.fileHandleForReading.fileDescriptor)
+            }
+            stderrIO.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
+                if done {
+                    stderrPromise.succeed(result: ())
+                } else if err != 0 {
+                    stderrPromise.fail(error: ProcessIOError(code: err))
+                } else if let data = data, !data.isEmpty {
+                    output(.stderr(Data(data)))
+                }
             }
 
-            return promise.futureResult
+            // launch and run the process
+            let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
+
+            // create a new promise for the termination status and set callback
+            let processPromise = worker.eventLoop.newPromise(Int32.self)
+            process.terminationHandler = { process in
+                // complete the promise
+                processPromise.succeed(result: process.terminationStatus)
+            }
+
+            return stdoutPromise.futureResult.and(stderrPromise.futureResult)
+                .transform(to: processPromise.futureResult)
         } else {
             var resolvedPath: String?
             return asyncExecute("/bin/sh", ["-c", "which \(program)"], on: worker) { o in
@@ -177,6 +182,10 @@ public struct ProcessExecuteError: Error {
     public var stdout: String
 }
 
+private struct ProcessIOError: Error {
+    var code: Int32
+}
+
 extension ProcessExecuteError: Debuggable {
     /// See `Debuggable.identifier`.
     public var identifier: String {
@@ -188,5 +197,7 @@ extension ProcessExecuteError: Debuggable {
         return stderr
     }
 }
+
+private let executeQueue = DispatchQueue(label: "codes.vapor.core.async.execute")
 
 #endif
