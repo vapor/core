@@ -92,32 +92,28 @@ extension Process {
     /// - returns: A future containing the termination status of the process.
     public static func asyncExecute(_ program: String, _ arguments: [String], on worker: Worker, _ output: @escaping (ProcessOutput) -> ()) -> Future<Int32> {
         if program.hasPrefix("/") {
+            // create process data pipes
             let stdout = Pipe()
             let stderr = Pipe()
             
-            let threadPool = BlockingIOThreadPool(numberOfThreads: 3)
-            threadPool.start()
-            let file = NonBlockingFileIO(threadPool: threadPool)
-            let allocator = ByteBufferAllocator()
+            // create dispatch sources for the pipes
+            let stdoutsource = DispatchSource.makeReadSource(fileDescriptor: stdout.fileHandleForReading.fileDescriptor)
+            let stderrsource = DispatchSource.makeReadSource(fileDescriptor: stderr.fileHandleForReading.fileDescriptor)
             
-            let outfile = FileHandle(descriptor: stdout.fileHandleForReading.fileDescriptor)
-            _ = file.readChunked(fileHandle: outfile, byteCount: .max, allocator: allocator, eventLoop: worker.eventLoop) { chunk in
-                if chunk.readableBytes > 0 {
-                    var chunk = chunk
-                    let data = chunk.readData(length: chunk.readableBytes)!
-                    output(.stdout(data))
-                }
-                return worker.future()
+            // setup read handlers for the output sources
+            stdoutsource.setEventHandler {
+                 let data = stdout.fileHandleForReading.availableData
+                 guard !data.isEmpty else {
+                     return
+                 }
+                 output(.stdout(data))
             }
-            
-            let errfile = FileHandle(descriptor: stderr.fileHandleForReading.fileDescriptor)
-            _ = file.readChunked(fileHandle: errfile, byteCount: .max, allocator: allocator, eventLoop: worker.eventLoop) { chunk in
-                if chunk.readableBytes > 0 {
-                    var chunk = chunk
-                    let data = chunk.readData(length: chunk.readableBytes)!
-                    output(.stderr(data))
+            stderrsource.setEventHandler {
+                let data = stderr.fileHandleForReading.availableData
+                guard !data.isEmpty else {
+                    return
                 }
-                return worker.future()
+                output(.stderr(data))
             }
 
             // stdout.fileHandleForReading.readabilityHandler = { handle in
@@ -135,19 +131,24 @@ extension Process {
             //     output(.stderr(data))
             // }
         
-            let res = threadPool.runIfActive(eventLoop: worker.eventLoop) { () -> Int32 in
+            let promise = worker.eventLoop.newPromise(Int32.self)
+            DispatchQueue.global().async {
+                // start the output sources
+                stdoutsource.resume()
+                stderrsource.resume()
+                
+                // launch and run the process
                 let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
                 process.waitUntilExit()
-                return process.terminationStatus
+                
+                // cleanup output sources
+                stdoutsource.cancel()
+                stderrsource.cancel()
+                
+                // succeed with the termination status
+                promise.succeed(result: process.terminationStatus)
             }
-            
-            res.always {
-                try? errfile.close()
-                try? outfile.close()
-                threadPool.shutdownGracefully { _ in }
-            }
-            
-            return res
+            return promise.futureResult
         } else {
             var resolvedPath: String?
             return asyncExecute("/bin/sh", ["-c", "which \(program)"], on: worker) { o in
