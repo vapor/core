@@ -99,12 +99,16 @@ extension Process {
                 
                 // create dispatch io stream on read handle of pipe
                 let io = DispatchIO(type: .stream, fileDescriptor: pipe.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
+                    print("[EVENT] \(pipe.fileHandleForReading.fileDescriptor) cancel")
                     // close pipe once stream is cancelled
                     close(pipe.fileHandleForReading.fileDescriptor)
                 }
                 
+                io.setLimit(lowWater: 0)
+                
                 // start async read on stream
                 io.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
+                    print("[EVENT] \(pipe.fileHandleForReading.fileDescriptor) \(done)")
                     if done {
                         // signal IO is done
                         promise.succeed(result: ())
@@ -116,6 +120,7 @@ extension Process {
                         onData(Data(data))
                     }
                 }
+                io.resume()
                 
                 // return created future and IO stream
                 return (promise.futureResult, io)
@@ -124,14 +129,16 @@ extension Process {
             // create process data pipes
             let stdout = Pipe()
             let stderr = Pipe()
-
-            // setup dispatch IO on each pipe
-            let (stdoutFuture, stdoutIO) = setupDispatchIO(for: stdout) { output(.stdout($0)) }
-            let (stderrFuture, stderrIO) = setupDispatchIO(for: stderr) { output(.stderr($0)) }
-
+            print("stdout: \(stdout.fileHandleForReading.fileDescriptor)")
+            print("stderr: \(stderr.fileHandleForReading.fileDescriptor)")
+            
             // launch and run the process
             let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
-
+            
+            // setup dispatch IO on each pipe
+            let (stderrFuture, stderrIO) = setupDispatchIO(for: stderr) { output(.stderr($0)) }
+            let (stdoutFuture, stdoutIO) = setupDispatchIO(for: stdout) { output(.stdout($0)) }
+            
             // create a new promise for the termination status and set callback
             let processPromise = worker.eventLoop.newPromise(Int32.self)
             process.terminationHandler = { process in
@@ -139,10 +146,13 @@ extension Process {
                 stdoutIO.close()
                 stderrIO.close()
                 
+                print("process complete: \(process.terminationStatus)")
+                
                 // complete the promise
                 processPromise.succeed(result: process.terminationStatus)
             }
-
+            process.launch()
+            
             // combine stdout/err and process result futures
             return stdoutFuture.and(stderrFuture)
                 .transform(to: processPromise.futureResult)
@@ -171,7 +181,6 @@ extension Process {
         process.arguments = arguments
         process.standardOutput = stdout
         process.standardError = stderr
-        process.launch()
         return process
     }
 }
@@ -205,5 +214,6 @@ extension ProcessExecuteError: Debuggable {
 }
 
 private let executeQueue = DispatchQueue(label: "codes.vapor.core.async.execute")
+private let executeQueue2 = DispatchQueue(label: "codes.vapor.core.async.execute2")
 
 #endif
