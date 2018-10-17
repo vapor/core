@@ -115,39 +115,25 @@ extension Process {
                 }
                 output(.stderr(data))
             }
-
-            // stdout.fileHandleForReading.readabilityHandler = { handle in
-            //     let data = handle.availableData
-            //     guard !data.isEmpty else {
-            //         return
-            //     }
-            //     output(.stdout(data))
-            // }
-            // stderr.fileHandleForReading.readabilityHandler = { handle in
-            //     let data = handle.availableData
-            //     guard !data.isEmpty else {
-            //         return
-            //     }
-            //     output(.stderr(data))
-            // }
         
+            // start the output sources
+            stdoutsource.resume()
+            stderrsource.resume()
+            
+            // launch and run the process
+            let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
+            
+            // succeed with the termination status
             let promise = worker.eventLoop.newPromise(Int32.self)
-            DispatchQueue.global().async {
-                // start the output sources
-                stdoutsource.resume()
-                stderrsource.resume()
-                
-                // launch and run the process
-                let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
-                process.waitUntilExit()
-                
+            process.terminationHandler = { process in
                 // cleanup output sources
                 stdoutsource.cancel()
                 stderrsource.cancel()
                 
-                // succeed with the termination status
+                // complete the promise
                 promise.succeed(result: process.terminationStatus)
             }
+
             return promise.futureResult
         } else {
             var resolvedPath: String?
