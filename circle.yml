@@ -3,14 +3,14 @@ version: 2
 jobs:
   macos:
     macos:
-      xcode: "9.3"
+      xcode: "10.1.0"
     steps:
       - checkout
       - run: swift build
       - run: swift test
   linux:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
     steps:
       - checkout
       - run: 
@@ -19,10 +19,20 @@ jobs:
       - run: 
           name: Run unit tests
           command: swift test
-
+  linux5:
+    docker:
+      - image: codevapor/swift:5.0
+    steps:
+      - checkout
+      - run: 
+          name: Compile code
+          command: swift build
+      - run: 
+          name: Run unit tests
+          command: swift test
   linux-release:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
     steps:
       - checkout
       - run: 
@@ -30,7 +40,7 @@ jobs:
           command: swift build -c release
   linux-vapor:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
     steps:
       - run:
           name: Clone Vapor
@@ -46,7 +56,7 @@ jobs:
           working_directory: ~/vapor
   linux-fluent-sqlite:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
     steps:
       - run:
           name: Clone Fluent SQLite
@@ -62,7 +72,7 @@ jobs:
           working_directory: ~/fluent-sqlite
   linux-fluent-mysql:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
       - image: mysql:5.7
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
@@ -85,7 +95,7 @@ jobs:
           working_directory: ~/fluent-mysql
   linux-fluent-postgresql:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
       - image: circleci/postgres:latest
         name: psql
         environment:
@@ -107,7 +117,7 @@ jobs:
           working_directory: ~/fluent-postgresql
   linux-redis:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
       - image: redis:3.2
     steps:
       - run:
@@ -124,7 +134,7 @@ jobs:
           working_directory: ~/redis
   linux-jwt:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
     steps:
       - run:
           name: Clone JWT
@@ -140,7 +150,7 @@ jobs:
           working_directory: ~/jwt
   linux-leaf:
     docker:
-      - image: codevapor/swift:4.1
+      - image: swift:4.2
     steps:
       - run:
           name: Clone Leaf
@@ -159,6 +169,7 @@ workflows:
   tests:
     jobs:
       - linux
+      - linux5
       - linux-vapor
       - linux-fluent-sqlite
       - linux-fluent-mysql
