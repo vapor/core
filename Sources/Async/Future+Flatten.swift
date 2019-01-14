@@ -61,12 +61,12 @@ extension Collection where Element: FutureType {
             }
         }
         let futures = promises.map { $0.futureResult }
-        return Future<[Element.Expectation]>.reduce(into: [],
-                                             futures,
-                                             eventLoop: eventLoop) { partialResult, nextElement in
+        return Future<[Element.Expectation]>.reduce(
+                                                    into: [],
+                                                    futures,
+                                                    eventLoop: eventLoop) { partialResult, nextElement in
             return partialResult.append(nextElement)
         }
-        
     }
 }
 
