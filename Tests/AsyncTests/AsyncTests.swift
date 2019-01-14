@@ -16,11 +16,13 @@ final class AsyncTests: XCTestCase {
         let loop = EmbeddedEventLoop()
         let a = loop.newPromise(String.self)
         let b = loop.newPromise(String.self)
-        let arr: [Future<String>] = [a.futureResult, b.futureResult]
+        let c = loop.newPromise(String.self)
+        let arr: [Future<String>] = [a.futureResult, b.futureResult, c.futureResult]
         let flat = arr.flatten(on: loop)
-        a.succeed(result: "a")
         b.succeed(result: "b")
-        try XCTAssertEqual(flat.wait(), ["a", "b"])
+        a.succeed(result: "a")
+        c.succeed(result: "c")
+        try XCTAssertEqual(flat.wait(), ["a", "b", "c"])
     }
 
     func testFlattenStackOverflow() throws {
