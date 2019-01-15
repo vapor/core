@@ -25,40 +25,38 @@ final class AsyncTests: XCTestCase {
         try XCTAssertEqual(flat.wait(), ["a", "b", "c"])
     }
     
+    /// Stress test flatten
+    /// If this test fails, this might indicate a threading issue
     func testFlattenStress() throws {
         let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        for _ in 1...20 {
-            let futureCount = 5000 * System.coreCount
-            var promises = [EventLoopPromise<Void>]()
+        let futureCount = 1000 * System.coreCount
+        let expectedResult = (0..<futureCount).map { $0 }
+        
+        for _ in 0..<10 {
+            var promises = [EventLoopPromise<Int>]()
             for _ in 0..<futureCount {
-                promises.append(loopGroup.next().newPromise(of: Void.self))
+                promises.append(loopGroup.next().newPromise(of: Int.self))
             }
             let futures = promises.map { $0.futureResult }
-            let flattener = loopGroup.next()
+            let flattened = futures.flatten(on: loopGroup.next())
             
-            let sema = DispatchSemaphore(value: 0)
-            
-            var allCompleted = false
-            
-            futures.flatten(on: flattener).whenSuccess { _ in
-                XCTAssert(allCompleted, "This shouldn't be called as long as all futures haven't been fullfiled")
-                sema.signal()
+            loopGroup.next().execute {
+                for (index,promise) in promises.enumerated() {
+                    promise.succeed(result: index)
+                }
             }
             
-            for promise in promises.dropLast() {
-                promise.succeed()
+            let timeoutTask = loopGroup.next().scheduleTask(
+                in: TimeAmount.seconds(5)
+            ) {
+                XCTFail("Timed out")
             }
             
-            allCompleted = true
-            promises.last?.succeed()
-            
-            
-            
-            sema.wait()
-            
-            
+            try XCTAssertEqual(flattened.wait(), expectedResult)
+            timeoutTask.cancel()
             
         }
+        
     }
 
     func testFlattenStackOverflow() throws {
