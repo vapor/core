@@ -64,7 +64,8 @@ extension Collection where Element: FutureType {
         return Future<[Element.Expectation]>.reduce(
             into: [],
             futures,
-            eventLoop: eventLoop) { partialResult, nextElement in
+            eventLoop: eventLoop
+        ) { partialResult, nextElement in
             return partialResult.append(nextElement)
         }
     }
