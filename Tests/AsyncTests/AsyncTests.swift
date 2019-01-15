@@ -29,6 +29,7 @@ final class AsyncTests: XCTestCase {
     /// If this test fails, this might indicate a threading issue
     func testFlattenStress() throws {
         let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        let timeoutLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let futureCount = 1000 * System.coreCount
         let expectedResult = (0..<futureCount).map { $0 }
         
@@ -40,19 +41,25 @@ final class AsyncTests: XCTestCase {
             let futures = promises.map { $0.futureResult }
             let flattened = futures.flatten(on: loopGroup.next())
             
-            loopGroup.next().execute {
-                for (index,promise) in promises.enumerated() {
-                    promise.succeed(result: index)
-                }
+            for (index,promise) in promises.enumerated() {
+                promise.succeed(result: index)
             }
             
-            let timeoutTask = loopGroup.next().scheduleTask(
+            let resultPromise = loopGroup.eventLoop.newPromise(of: [Int].self)
+            
+            let timeoutTask = timeoutLoop.eventLoop.scheduleTask(
                 in: TimeAmount.seconds(5)
             ) {
-                XCTFail("Timed out")
+                resultPromise.fail(error: "Timed out")
             }
             
-            try XCTAssertEqual(flattened.wait(), expectedResult)
+            flattened.do {
+                resultPromise.succeed(result: $0)
+                }.catch {
+                    resultPromise.fail(error: $0)
+            }
+            
+            try XCTAssertEqual(resultPromise.futureResult.wait(), expectedResult)
             timeoutTask.cancel()
             
         }
