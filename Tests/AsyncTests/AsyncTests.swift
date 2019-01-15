@@ -55,8 +55,8 @@ final class AsyncTests: XCTestCase {
             
             flattened.do {
                 resultPromise.succeed(result: $0)
-                }.catch {
-                    resultPromise.fail(error: $0)
+            }.catch {
+                resultPromise.fail(error: $0)
             }
             
             try XCTAssertEqual(resultPromise.futureResult.wait(), expectedResult)
