@@ -24,6 +24,42 @@ final class AsyncTests: XCTestCase {
         c.succeed(result: "c")
         try XCTAssertEqual(flat.wait(), ["a", "b", "c"])
     }
+    
+    func testFlattenStress() throws {
+        let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        for _ in 1...20 {
+            let futureCount = 5000 * System.coreCount
+            var promises = [EventLoopPromise<Void>]()
+            for _ in 0..<futureCount {
+                promises.append(loopGroup.next().newPromise(of: Void.self))
+            }
+            let futures = promises.map { $0.futureResult }
+            let flattener = loopGroup.next()
+            
+            let sema = DispatchSemaphore(value: 0)
+            
+            var allCompleted = false
+            
+            futures.flatten(on: flattener).whenSuccess { _ in
+                XCTAssert(allCompleted, "This shouldn't be called as long as all futures haven't been fullfiled")
+                sema.signal()
+            }
+            
+            for promise in promises.dropLast() {
+                promise.succeed()
+            }
+            
+            allCompleted = true
+            promises.last?.succeed()
+            
+            
+            
+            sema.wait()
+            
+            
+            
+        }
+    }
 
     func testFlattenStackOverflow() throws {
         let loop = EmbeddedEventLoop()
