@@ -32,7 +32,7 @@ extension DataDecoder {
     ///     - from: `LosslessDataConvertible` to decode a `D` from.
     /// - returns: An instance of the `Decodable` type (`D`).
     /// - throws: Any error that may occur while attempting to decode the specified type.
-    public func decode<D>(_ decodable: D.Type, from data: LosslessDataConvertible) throws -> D where D: Decodable {
+    public func decode<D>(_ decodable: D.Type, from data: CustomDataConvertible) throws -> D where D: Decodable {
         return try decode(D.self, from: data.convertToData())
     }
 }

@@ -137,7 +137,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     ///
     ///     guard let mediaType = MediaType.parse("application/json; charset=utf8") else { ... }
     ///
-    public static func parse(_ data: LosslessDataConvertible) -> MediaType? {
+    public static func parse(_ data: CustomDataConvertible) -> MediaType? {
         guard let headerValue = HeaderValue.parse(data) else {
             /// not a valid header value
             return nil

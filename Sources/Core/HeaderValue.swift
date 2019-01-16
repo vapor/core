@@ -51,7 +51,7 @@ public struct HeaderValue {
     public var parameters: [CaseInsensitiveString: String]
 
     /// Creates a new `HeaderValue`.
-    public init(_ value: LosslessDataConvertible, parameters: [CaseInsensitiveString: String] = [:]) {
+    public init(_ value: CustomDataConvertible, parameters: [CaseInsensitiveString: String] = [:]) {
         self._value = value.convertToData()
         self.parameters = parameters
     }
@@ -69,7 +69,7 @@ public struct HeaderValue {
     ///
     ///     guard let headerValue = HeaderValue.parse("application/json; charset=utf8") else { ... }
     ///
-    public static func parse(_ data: LosslessDataConvertible) -> HeaderValue? {
+    public static func parse(_ data: CustomDataConvertible) -> HeaderValue? {
         let data = data.convertToData()
 
         /// separate the zero or more parameters

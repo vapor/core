@@ -1,10 +1,12 @@
 /// A type that can be represented as `Data` in a lossless, unambiguous way.
 public protocol LosslessDataConvertible {
+    /// Losslessly converts `Data` to this type.
+    init?(_ data: Data)
+}
+
+public protocol CustomDataConvertible {
     /// Losslessly converts this type to `Data`.
     func convertToData() -> Data
-
-    /// Losslessly converts `Data` to this type.
-    static func convertFromData(_ data: Data) -> Self
 }
 
 extension Data {
@@ -16,12 +18,12 @@ extension Data {
     /// - parameters:
     ///     - type: The `LosslessDataConvertible` to convert to.
     /// - returns: Instance of the `LosslessDataConvertible` type.
-    public func convert<T>(to type: T.Type = T.self) -> T where T: LosslessDataConvertible {
-        return T.convertFromData(self)
+    public func convert<T>(to type: T.Type = T.self) -> T? where T: LosslessDataConvertible {
+        return T.init(self)
     }
 }
 
-extension String: LosslessDataConvertible {
+extension String: LosslessDataConvertible, CustomDataConvertible {
     /// Converts this `String` to data using `.utf8`.
     public func convertToData() -> Data {
         return Data(utf8)
@@ -30,36 +32,36 @@ extension String: LosslessDataConvertible {
     /// Converts `Data` to a `utf8` encoded String.
     ///
     /// - throws: Error if String is not UTF8 encoded.
-    public static func convertFromData(_ data: Data) -> String {
+    public init?(_ data: Data) {
         guard let string = String(data: data, encoding: .utf8) else {
             /// FIXME: string convert _from_ data is not actually lossless.
             /// this should really only conform to a `LosslessDataRepresentable` protocol.
-            return ""
+            return nil
         }
-        return string
+        self = string
     }
 }
 
-extension Array: LosslessDataConvertible where Element == UInt8 {
+extension Array: LosslessDataConvertible, CustomDataConvertible where Element == UInt8 {
     /// Converts this `[UInt8]` to `Data`.
     public func convertToData() -> Data {
         return Data(bytes: self)
     }
 
     /// Converts `Data` to `[UInt8]`.
-    public static func convertFromData(_ data: Data) -> Array<UInt8> {
-        return .init(data)
+    public init?(_ data: Data) {
+        self = .init(data)
     }
 }
 
-extension Data: LosslessDataConvertible {
+extension Data: LosslessDataConvertible, CustomDataConvertible {
     /// `LosslessDataConvertible` conformance.
     public func convertToData() -> Data {
         return self
     }
 
     /// `LosslessDataConvertible` conformance.
-    public static func convertFromData(_ data: Data) -> Data {
-        return data
+    public init?(_ data: Data) {
+        self = data
     }
 }

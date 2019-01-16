@@ -23,7 +23,7 @@ public struct File: Codable {
     /// - parameters:
     ///     - data: The file's contents.
     ///     - filename: The name of the file, not including path.
-    public init(data: LosslessDataConvertible, filename: String) {
+    public init(data: CustomDataConvertible, filename: String) {
         self.data = data.convertToData()
         self.filename = filename
     }
