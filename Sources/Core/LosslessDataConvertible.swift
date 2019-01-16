@@ -1,9 +1,10 @@
-/// A type that can be represented as `Data` in a lossless, unambiguous way.
+/// A type that can be created from `Data` in a lossless, unambiguous way.
 public protocol LosslessDataConvertible {
     /// Losslessly converts `Data` to this type.
     init?(_ data: Data)
 }
 
+/// A type that can be converted to `Data`
 public protocol CustomDataConvertible {
     /// Losslessly converts this type to `Data`.
     func convertToData() -> Data
