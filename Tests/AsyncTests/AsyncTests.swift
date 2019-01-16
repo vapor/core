@@ -45,7 +45,7 @@ final class AsyncTests: XCTestCase {
                 promise.succeed(result: index)
             }
             
-            let resultPromise = loopGroup.eventLoop.newPromise(of: [Int].self)
+            let resultPromise = timeoutLoop.eventLoop.newPromise(of: [Int].self)
             
             let timeoutTask = timeoutLoop.eventLoop.scheduleTask(
                 in: TimeAmount.seconds(5)
