@@ -180,6 +180,19 @@ extension Dictionary: ReflectionDecodable {
     }
 }
 
+extension Set: ReflectionDecodable {
+    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    public static func reflectDecoded() throws -> (Set<Element>, Set<Element>) {
+        let reflected = try forceCast(Element.self).anyReflectDecoded()
+        return ([reflected.0 as! Element], [reflected.1 as! Element])
+    }
+
+    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
+    public static func reflectDecodedIsLeft(_ item: Set<Element>) throws -> Bool {
+        return try forceCast(Element.self).anyReflectDecodedIsLeft(item.first!)
+    }
+}
+
 extension URL: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() throws -> (URL, URL) {
