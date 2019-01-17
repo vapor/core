@@ -7,7 +7,7 @@ We'll take a look as soon as we can.
 Thanks!
 
 ### NOTE:
-During the development of Vapor 4, this package will be split up into multiple smaller ones. For example [codable-kit]() and [nio-kit](). If you create a PR/issue here, please be so kind to also open it in the "new" repo.
+During the development of Vapor 4, this package will be split up into multiple smaller ones. For example [codable-kit](https://github.com/vapor-community/codable-kit) and [nio-kit](https://github.com/vapor-community/nio-kit). If you create a PR/issue here, please be so kind to also open it in the "new" repo.
 Current list of existing repos Core will be split into:
 - [codable-kit](https://github.com/vapor-community/codable-kit) (Parts of Core & Bits)
 - [nio-kit](https://github.com/vapor-community/nio-kit) (Async module)
