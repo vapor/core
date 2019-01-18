@@ -149,6 +149,7 @@ class ReflectableTests: XCTestCase {
             var age: Double
             var luckyNumbers: [Int]
             var dict: [String: String]
+            var set: Set<String>
         }
 
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.name)?.path, ["name"])
@@ -159,6 +160,7 @@ class ReflectableTests: XCTestCase {
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.age)?.path, ["bar", "age"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.luckyNumbers)?.path, ["bar", "luckyNumbers"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.dict)?.path, ["bar", "dict"])
+        try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.set)?.path, ["bar", "set"])
     }
 
     func testProperties() throws {
@@ -206,13 +208,16 @@ class ReflectableTests: XCTestCase {
 
             var dict: [String: String]
             var odict: [String: String]?
+
+            var set: Set<String>
+            var oset: Set<String>?
             
             var url: URL
             var ourl: URL?
         }
 
         let properties = try User.reflectProperties()
-        XCTAssertEqual(properties.description, "[int: Int, oint: Optional<Int>, int8: Int8, oint8: Optional<Int8>, int16: Int16, oint16: Optional<Int16>, int32: Int32, oint32: Optional<Int32>, int64: Int64, oint64: Optional<Int64>, uint: UInt, uoint: Optional<UInt>, uint8: UInt8, uoint8: Optional<UInt8>, uint16: UInt16, uoint16: Optional<UInt16>, uint32: UInt32, uoint32: Optional<UInt32>, uint64: UInt64, uoint64: Optional<UInt64>, uuid: UUID, ouuid: Optional<UUID>, date: Date, odate: Optional<Date>, float: Float, ofloat: Optional<Float>, double: Double, odouble: Optional<Double>, string: String, ostring: Optional<String>, bool: Bool, obool: Optional<Bool>, array: Array<String>, oarray: Optional<Array<String>>, dict: Dictionary<String, String>, odict: Optional<Dictionary<String, String>>, url: URL, ourl: Optional<URL>]")
+        XCTAssertEqual(properties.description, "[int: Int, oint: Optional<Int>, int8: Int8, oint8: Optional<Int8>, int16: Int16, oint16: Optional<Int16>, int32: Int32, oint32: Optional<Int32>, int64: Int64, oint64: Optional<Int64>, uint: UInt, uoint: Optional<UInt>, uint8: UInt8, uoint8: Optional<UInt8>, uint16: UInt16, uoint16: Optional<UInt16>, uint32: UInt32, uoint32: Optional<UInt32>, uint64: UInt64, uoint64: Optional<UInt64>, uuid: UUID, ouuid: Optional<UUID>, date: Date, odate: Optional<Date>, float: Float, ofloat: Optional<Float>, double: Double, odouble: Optional<Double>, string: String, ostring: Optional<String>, bool: Bool, obool: Optional<Bool>, array: Array<String>, oarray: Optional<Array<String>>, dict: Dictionary<String, String>, odict: Optional<Dictionary<String, String>>, set: Set<String>, oset: Optional<Set<String>>, url: URL, ourl: Optional<URL>]")
     }
 
     func testPropertyDepth() throws {
