@@ -1,3 +1,5 @@
+import Foundation
+
 /// Types conforming to this protocol can be created dynamically for use in reflecting the structure of a `Decodable` type.
 ///
 /// `ReflectionDecodable` requires that a type declare two _distinct_ representations of itself. It also requires that the type
@@ -39,7 +41,7 @@ public protocol ReflectionDecodable: AnyReflectionDecodable {
     ///
     /// - throws: Any errors deriving these distinct instances.
     /// - returns: Two distinct instances of this type.
-    static func reflectDecoded() throws -> (Self, Self)
+    static func reflectDecoded() -> (Self, Self)
 
     /// Returns `true` if the supplied instance of this type is equal to the _left_ instance returned
     /// by `reflectDecoded()`.
@@ -53,27 +55,54 @@ public protocol ReflectionDecodable: AnyReflectionDecodable {
     ///
     /// - throws: Any errors comparing instances.
     /// - returns: `true` if supplied instance equals left side of `reflectDecoded()`.
-    static func reflectDecodedIsLeft(_ item: Self) throws -> Bool
+    static func reflectDecodedIsLeft(_ item: Self) -> Bool
+}
+
+/// Type-erased ReflectionDecodable. Do not rely on this protocol.
+public protocol AnyReflectionDecodable {
+    /// Type-erased `reflectedDecoded()`.
+    static func anyReflectDecoded() -> (Any, Any)
+    
+    /// Type-erased `reflectDecodedIsLeft()`.
+    static func anyReflectDecodedIsLeft(_ item: Any) -> Bool
+
+    static var isBaseType: Bool { get }
+}
+
+extension AnyReflectionDecodable where Self: ReflectionDecodable {
+    /// See `AnyReflectionDecodable`.
+    public static func anyReflectDecoded() -> (Any, Any) {
+        let (left, right) = reflectDecoded()
+        return (left, right)
+    }
+    
+    /// See `AnyReflectionDecodable`.
+    public static func anyReflectDecodedIsLeft(_ item: Any) -> Bool {
+        return reflectDecodedIsLeft(item as! Self)
+    }
+
+    /// Indicates if the value contains any subvalues
+    public static var isBaseType: Bool { return true }
 }
 
 extension ReflectionDecodable where Self: Equatable {
     /// Default implememntation for `ReflectionDecodable` that are also `Equatable`.
     ///
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: Self) throws -> Bool {
-        return try Self.reflectDecoded().0 == item
+    /// See `ReflectionDecodable`.
+    public static func reflectDecodedIsLeft(_ item: Self) -> Bool {
+        return Self.reflectDecoded().0 == item
     }
 }
 
 // MARK: Types
 
 extension String: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (String, String) { return ("0", "1") }
 }
 
 extension FixedWidthInteger {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (Self, Self) { return (0, 1) }
 }
 
@@ -90,17 +119,17 @@ extension Int32: ReflectionDecodable { }
 extension Int64: ReflectionDecodable { }
 
 extension Bool: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (Bool, Bool) { return (false, true) }
 }
 
 extension BinaryFloatingPoint {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (Self, Self) { return (0, 1) }
 }
 
 extension Decimal: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (Decimal, Decimal) { return (0, 1) }
 }
 
@@ -108,7 +137,7 @@ extension Float: ReflectionDecodable { }
 extension Double: ReflectionDecodable { }
 
 extension UUID: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (UUID, UUID) {
         let left = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
         let right = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2))
@@ -117,7 +146,7 @@ extension UUID: ReflectionDecodable {
 }
 
 extension Data: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (Data, Data) {
         let left = Data([0x00])
         let right = Data([0x01])
@@ -126,7 +155,7 @@ extension Data: ReflectionDecodable {
 }
 
 extension Date: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    /// See `ReflectionDecodable`.
     public static func reflectDecoded() -> (Date, Date) {
         let left = Date(timeIntervalSince1970: 1)
         let right = Date(timeIntervalSince1970: 0)
@@ -134,142 +163,58 @@ extension Date: ReflectionDecodable {
     }
 }
 
-extension Optional: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> (Wrapped?, Wrapped?) {
-        let reflected = try forceCast(Wrapped.self).anyReflectDecoded()
-        return (reflected.0 as? Wrapped, reflected.1 as? Wrapped)
+extension Array: ReflectionDecodable, AnyReflectionDecodable where Element: ReflectionDecodable {
+    /// See `ReflectionDecodable`.
+    public static func reflectDecoded() -> ([Element], [Element]) {
+        let (left, right) = Element.reflectDecoded()
+        return ([left], [right])
+    }
+    
+    /// See `ReflectionDecodable`.
+    public static func reflectDecodedIsLeft(_ item: Array<Element>) -> Bool {
+        return Element.reflectDecodedIsLeft(item[0])
+    }
+}
+
+extension Dictionary: ReflectionDecodable, AnyReflectionDecodable where Key: ReflectionDecodable, Value: ReflectionDecodable {
+    /// See `ReflectionDecodable`.
+    public static func reflectDecoded() -> ([Key: Value], [Key: Value]) {
+        let (key, _) = Key.reflectDecoded()
+        let (left, right) = Value.reflectDecoded()
+        return ([key: left], [key: right])
+    }
+    
+    /// See `ReflectionDecodable`.
+    public static func reflectDecodedIsLeft(_ item: [Key: Value]) -> Bool {
+        let (key, _) = Key.reflectDecoded()
+        return Value.reflectDecodedIsLeft(item[key]!)
+    }
+}
+
+extension Optional: ReflectionDecodable, AnyReflectionDecodable where Wrapped: ReflectionDecodable {
+    /// See `ReflectionDecodable`.
+    public static func reflectDecoded() -> (Wrapped?, Wrapped?) {
+        let (left, right) = Wrapped.reflectDecoded()
+        return (left, right)
     }
 
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: Wrapped?) throws -> Bool {
+    /// See `ReflectionDecodable`.
+    public static func reflectDecodedIsLeft(_ item: Wrapped?) -> Bool {
         guard let wrapped = item else {
             return false
         }
-        return try forceCast(Wrapped.self).anyReflectDecodedIsLeft(wrapped)
+        return Wrapped.reflectDecodedIsLeft(wrapped)
     }
 }
-
-extension Array: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> ([Element], [Element]) {
-        let reflected = try forceCast(Element.self).anyReflectDecoded()
-        return ([reflected.0 as! Element], [reflected.1 as! Element])
-    }
-
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: [Element]) throws -> Bool {
-        return try forceCast(Element.self).anyReflectDecodedIsLeft(item[0])
-    }
-}
-
-extension Dictionary: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> ([Key: Value], [Key: Value]) {
-        let reflectedValue = try forceCast(Value.self).anyReflectDecoded()
-        let reflectedKey = try forceCast(Key.self).anyReflectDecoded()
-        let key = reflectedKey.0 as! Key
-        return ([key: reflectedValue.0 as! Value], [key: reflectedValue.1 as! Value])
-    }
-
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: [Key: Value]) throws -> Bool {
-        let reflectedKey = try forceCast(Key.self).anyReflectDecoded()
-        let key = reflectedKey.0 as! Key
-        return try forceCast(Value.self).anyReflectDecodedIsLeft(item[key]!)
-    }
-}
-
-extension Set: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> (Set<Element>, Set<Element>) {
-        let reflected = try forceCast(Element.self).anyReflectDecoded()
-        return ([reflected.0 as! Element], [reflected.1 as! Element])
-    }
-
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func reflectDecodedIsLeft(_ item: Set<Element>) throws -> Bool {
-        return try forceCast(Element.self).anyReflectDecodedIsLeft(item.first!)
-    }
-}
-
-extension URL: ReflectionDecodable {
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func reflectDecoded() throws -> (URL, URL) {
-        let left = URL(string: "https://left.fake.url")!
-        let right = URL(string: "https://right.fake.url")!
-        return (left, right)
-    }
-}
-
-// MARK: Type Erased
-
-/// Type-erased version of `ReflectionDecodable`
-public protocol AnyReflectionDecodable {
-    /// Type-erased version of `ReflectionDecodable.reflectDecoded()`.
-    ///
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    static func anyReflectDecoded() throws -> (Any, Any)
-
-    /// Type-erased version of `ReflectionDecodable.reflectDecodedIsLeft(_:)`.
-    ///
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    static func anyReflectDecodedIsLeft(_ any: Any) throws -> Bool
-}
-
-extension ReflectionDecodable {
-    /// Type-erased version of `ReflectionDecodable.reflectDecoded()`.
-    ///
-    /// See `ReflectionDecodable.reflectDecoded()` for more information.
-    public static func anyReflectDecoded() throws -> (Any, Any) {
-        let reflected = try reflectDecoded()
-        return (reflected.0, reflected.1)
-    }
-
-    /// Type-erased version of `ReflectionDecodable.reflectDecodedIsLeft(_:)`.
-    ///
-    /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
-    public static func anyReflectDecodedIsLeft(_ any: Any) throws -> Bool {
-        return try reflectDecodedIsLeft(any as! Self)
-    }
-}
-
-/// Trys to cast a type to `AnyReflectionDecodable.Type`. This can be removed when conditional conformance supports runtime querying.
-func forceCast<T>(_ type: T.Type) throws -> AnyReflectionDecodable.Type {
-    guard let casted = T.self as? AnyReflectionDecodable.Type else {
-        throw CoreError(
-            identifier: "ReflectionDecodable",
-            reason: "\(T.self) is not `ReflectionDecodable`",
-            suggestedFixes: [
-                "Conform `\(T.self)` to `ReflectionDecodable`: `extension \(T.self): ReflectionDecodable { }`."
-            ]
-        )
-    }
-    return casted
-}
-
-#if swift(>=4.1.50)
-#else
-public protocol CaseIterable {
-    static var allCases: [Self] { get }
-}
-#endif
 
 extension ReflectionDecodable where Self: CaseIterable {
     /// Default implementation of `ReflectionDecodable` for enums that are also `CaseIterable`.
     ///
-    /// See `ReflectionDecodable.reflectDecoded(_:)` for more information.
-    public static func reflectDecoded() throws -> (Self, Self) {
+    /// See `ReflectionDecodable`.
+    public static func reflectDecoded() -> (Self, Self) {
         /// enum must have at least 2 unique cases
-        guard allCases.count > 1,
-            let first = allCases.first, let last = allCases.suffix(1).first else {
-                throw CoreError(
-                    identifier: "ReflectionDecodable",
-                    reason: "\(Self.self) enum must have at least 2 cases",
-                    suggestedFixes: [
-                        "Add at least 2 cases to the enum."
-                    ]
-                )
+        guard allCases.count > 1, let first = allCases.first, let last = allCases.suffix(1).first else {
+            fatalError("\(Self.self) enum must have at least 2 cases")
         }
         return (first, last)
     }
