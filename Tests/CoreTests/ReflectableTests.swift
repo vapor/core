@@ -117,7 +117,7 @@ class ReflectableTests: XCTestCase {
                 }
             }
 
-            static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+            static func anyReflectProperty<T>(valueType: T.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
                 let key: String
                 switch keyPath {
                 case \User.firstName: key = "first_name"
@@ -159,7 +159,7 @@ class ReflectableTests: XCTestCase {
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.name)?.path, ["name"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.age)?.path, ["age"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.luckyNumber)?.path, ["luckyNumber"])
-        XCTAssertThrowsError(try Foo.reflectProperty(forKey: \.bar))
+        XCTAssertNil(try Foo.reflectProperty(forKey: \.bar))
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.name)?.path, ["bar", "name"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.age)?.path, ["bar", "age"])
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bar.luckyNumbers)?.path, ["bar", "luckyNumbers"])

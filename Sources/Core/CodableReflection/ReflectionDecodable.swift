@@ -70,28 +70,62 @@ extension ReflectionDecodable where Self: Equatable {
 extension String: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() -> (String, String) { return ("0", "1") }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension FixedWidthInteger {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() -> (Self, Self) { return (0, 1) }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
-extension UInt: ReflectionDecodable { }
-extension UInt8: ReflectionDecodable { }
-extension UInt16: ReflectionDecodable { }
-extension UInt32: ReflectionDecodable { }
-extension UInt64: ReflectionDecodable { }
+extension UInt: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
 
-extension Int: ReflectionDecodable { }
-extension Int8: ReflectionDecodable { }
-extension Int16: ReflectionDecodable { }
-extension Int32: ReflectionDecodable { }
-extension Int64: ReflectionDecodable { }
+extension UInt8: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension UInt16: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension UInt32: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension UInt64: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension Int: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension Int8: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension Int16: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension Int32: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension Int64: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
 
 extension Bool: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() -> (Bool, Bool) { return (false, true) }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension BinaryFloatingPoint {
@@ -102,10 +136,17 @@ extension BinaryFloatingPoint {
 extension Decimal: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() -> (Decimal, Decimal) { return (0, 1) }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
-extension Float: ReflectionDecodable { }
-extension Double: ReflectionDecodable { }
+extension Float: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
+
+extension Double: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return true }
+}
 
 extension UUID: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
@@ -114,6 +155,8 @@ extension UUID: ReflectionDecodable {
         let right = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2))
         return (left, right)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension Data: ReflectionDecodable {
@@ -123,6 +166,8 @@ extension Data: ReflectionDecodable {
         let right = Data([0x01])
         return (left, right)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension Date: ReflectionDecodable {
@@ -132,6 +177,8 @@ extension Date: ReflectionDecodable {
         let right = Date(timeIntervalSince1970: 0)
         return (left, right)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension Optional: ReflectionDecodable {
@@ -148,6 +195,8 @@ extension Optional: ReflectionDecodable {
         }
         return try forceCast(Wrapped.self).anyReflectDecodedIsLeft(wrapped)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension Array: ReflectionDecodable {
@@ -161,6 +210,8 @@ extension Array: ReflectionDecodable {
     public static func reflectDecodedIsLeft(_ item: [Element]) throws -> Bool {
         return try forceCast(Element.self).anyReflectDecodedIsLeft(item[0])
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension Dictionary: ReflectionDecodable {
@@ -178,6 +229,8 @@ extension Dictionary: ReflectionDecodable {
         let key = reflectedKey.0 as! Key
         return try forceCast(Value.self).anyReflectDecodedIsLeft(item[key]!)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension Set: ReflectionDecodable {
@@ -191,6 +244,8 @@ extension Set: ReflectionDecodable {
     public static func reflectDecodedIsLeft(_ item: Set<Element>) throws -> Bool {
         return try forceCast(Element.self).anyReflectDecodedIsLeft(item.first!)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 extension URL: ReflectionDecodable {
@@ -200,6 +255,8 @@ extension URL: ReflectionDecodable {
         let right = URL(string: "https://right.fake.url")!
         return (left, right)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }
 
 // MARK: Type Erased
@@ -216,7 +273,12 @@ public protocol AnyReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
     static func anyReflectDecodedIsLeft(_ any: Any) throws -> Bool
 
-    static var isBaseType: Bool { get }
+    /// Indicates if the value contains any subvalues
+    static var isPrimitiveType: Bool { get }
+}
+
+extension AnyReflectionDecodable where Self: ReflectionDecodable {
+    public static var isPrimitiveType: Bool { return false }
 }
 
 extension ReflectionDecodable {
@@ -234,9 +296,6 @@ extension ReflectionDecodable {
     public static func anyReflectDecodedIsLeft(_ any: Any) throws -> Bool {
         return try reflectDecodedIsLeft(any as! Self)
     }
-
-    /// Indicates if the value contains any subvalues
-    public static var isBaseType: Bool { return true }
 }
 
 /// Trys to cast a type to `AnyReflectionDecodable.Type`. This can be removed when conditional conformance supports runtime querying.
@@ -278,4 +337,6 @@ extension ReflectionDecodable where Self: CaseIterable {
         }
         return (first, last)
     }
+
+    public static var isPrimitiveType: Bool { return true }
 }

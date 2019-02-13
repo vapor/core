@@ -88,7 +88,7 @@ struct ReflectionDecoder<Root, Value>: Decoder {
 
         func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
             context.addProperty(type: T.self, at: codingPath)
-            if let custom = T.self as? AnyReflectionDecodable.Type, custom.isBaseType || type is Value {
+            if let custom = T.self as? AnyReflectionDecodable.Type, custom.isPrimitiveType || type is Value {
                 let reflected = try custom.anyReflectDecoded()
                 if context.isActive {
                     context.activeCodingPath = codingPath
@@ -151,7 +151,9 @@ struct ReflectionDecoder<Root, Value>: Decoder {
             } else {
                 context.addProperty(type: T.self, at: codingPath + [key])
             }
-            if let type = T.self as? AnyReflectionDecodable.Type, let reflected = try? type.anyReflectDecoded() {
+
+            if let custom = T.self as? AnyReflectionDecodable.Type, custom.isPrimitiveType || type is Value {
+                let reflected = try custom.anyReflectDecoded()
                 if context.isActive {
                     context.activeCodingPath = codingPath + [key]
                     return reflected.0 as! T
@@ -194,7 +196,8 @@ struct ReflectionDecoder<Root, Value>: Decoder {
         mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
             context.addProperty(type: [T].self, at: codingPath)
             isAtEnd = true
-            if let type = T.self as? AnyReflectionDecodable.Type, let reflected = try? type.anyReflectDecoded() {
+            if let custom = T.self as? AnyReflectionDecodable.Type, custom.isPrimitiveType || type is Value {
+                let reflected = try custom.anyReflectDecoded()
                 return reflected.0 as! T
             } else {
                 let decoder = ReflectionDecoder(codingPath: codingPath, context: context)

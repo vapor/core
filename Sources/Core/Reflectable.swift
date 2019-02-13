@@ -131,7 +131,7 @@ public protocol AnyReflectable {
     ///     - keyPath: `AnyKeyPath` to reflect a property for.
     /// - throws: Any error reflecting this property.
     /// - returns: `ReflectedProperty` if one was found.
-    static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty?
+    static func anyReflectProperty<T>(valueType: T.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty?
 }
 
 /// Represents a property on a type that has been reflected using the `Reflectable` protocol.

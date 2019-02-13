@@ -10,7 +10,7 @@ extension Reflectable where Self: Decodable {
     /// Default `Reflectable` implementation for types that are also `Decodable`.
     ///
     /// See `AnyReflectable`.
-    public static func anyReflectProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+    public static func anyReflectProperty<T>(valueType: T.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
         return try anyDecodeProperty(valueType: valueType, keyPath: keyPath)
     }
 }
@@ -55,7 +55,7 @@ extension Decodable {
     /// - parameters:
     ///     - keyPath: `AnyKeyPath` to decode a property for.
     /// - throws: Any error decoding this property.
-    public static func anyDecodeProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+    public static func anyDecodeProperty<T>(valueType: T.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
         guard valueType is AnyReflectionDecodable.Type else {
             throw CoreError(identifier: "ReflectionDecodable", reason: "`\(valueType)` does not conform to `ReflectionDecodable`.")
         }
