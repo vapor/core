@@ -144,12 +144,16 @@ class ReflectableTests: XCTestCase {
             var bar: Bar
         }
 
-        struct Bar: Decodable {
+        struct Bar: Decodable, ReflectionDecodable, Equatable {
             var name: String
             var age: Double
             var luckyNumbers: [Int]
             var dict: [String: String]
             var set: Set<String>
+
+            static func reflectDecoded() -> (Bar, Bar) {
+                return (Bar(name: "0", age: 0.0, luckyNumbers: [0], dict: ["0": "0"], set: ["0"]), Bar(name: "1", age: 1.0, luckyNumbers: [1], dict: ["0": "1"], set: ["1"]))
+            }
         }
 
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.name)?.path, ["name"])

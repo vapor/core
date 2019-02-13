@@ -27,7 +27,9 @@ extension Decodable {
     /// - returns: All `ReflectedProperty`s at the specified depth.
     public static func decodeProperties(depth: Int) throws -> [ReflectedProperty] {
         let context = ReflectionDecoderContext(activeOffset: 0, maxDepth: 42)
-        let decoder = ReflectionDecoder(codingPath: [], context: context)
+        // Using Void as the generic type in order to not return true when comparing types
+        // T.Type is Value (If it is Any, will it allways return true and may cause a bug)
+        let decoder = ReflectionDecoder<Void, Void>(codingPath: [], context: context)
         _ = try Self(from: decoder)
         return context.properties.filter { $0.path.count == depth + 1 }
     }
@@ -53,7 +55,7 @@ extension Decodable {
     /// - parameters:
     ///     - keyPath: `AnyKeyPath` to decode a property for.
     /// - throws: Any error decoding this property.
-    public static func anyDecodeProperty(valueType: Any.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
+    public static func anyDecodeProperty<T>(valueType: T.Type, keyPath: AnyKeyPath) throws -> ReflectedProperty? {
         guard valueType is AnyReflectionDecodable.Type else {
             throw CoreError(identifier: "ReflectionDecodable", reason: "`\(valueType)` does not conform to `ReflectionDecodable`.")
         }
@@ -74,7 +76,7 @@ extension Decodable {
             b: while true {
                 defer { activeOffset += 1 }
                 let context = ReflectionDecoderContext(activeOffset: activeOffset, maxDepth: maxDepth)
-                let decoder = ReflectionDecoder(codingPath: [], context: context)
+                let decoder = ReflectionDecoder<Self, T>(codingPath: [], context: context)
 
                 let decoded = try Self(from: decoder)
                 guard let codingPath = context.activeCodingPath else {

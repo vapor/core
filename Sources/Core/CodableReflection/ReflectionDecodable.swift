@@ -215,6 +215,8 @@ public protocol AnyReflectionDecodable {
     ///
     /// See `ReflectionDecodable.reflectDecodedIsLeft(_:)` for more information.
     static func anyReflectDecodedIsLeft(_ any: Any) throws -> Bool
+
+    static var isBaseType: Bool { get }
 }
 
 extension ReflectionDecodable {
@@ -232,6 +234,9 @@ extension ReflectionDecodable {
     public static func anyReflectDecodedIsLeft(_ any: Any) throws -> Bool {
         return try reflectDecodedIsLeft(any as! Self)
     }
+
+    /// Indicates if the value contains any subvalues
+    public static var isBaseType: Bool { return true }
 }
 
 /// Trys to cast a type to `AnyReflectionDecodable.Type`. This can be removed when conditional conformance supports runtime querying.
