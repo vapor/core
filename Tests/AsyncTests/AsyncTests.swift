@@ -98,6 +98,7 @@ final class AsyncTests: XCTestCase {
         ("testFlattenStackOverflow", testFlattenStackOverflow),
         ("testFlattenFail", testFlattenFail),
         ("testFlattenEmpty", testFlattenEmpty),
+        ("testFlattenStress", testFlattenStress)
     ]
 }
 
