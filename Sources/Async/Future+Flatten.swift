@@ -53,41 +53,34 @@ extension Collection where Element: FutureType {
     /// Flattens an array of futures into a future with an array of results.
     /// - note: the order of the results will match the order of the futures in the input array.
     public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
-        // algorithm won't work unless there is at least one element
+        let eventLoop = worker.eventLoop
+        
+        // Avoid unnecessary work
         guard count > 0 else {
-            // just return an empty array
-            return worker.eventLoop.newSucceededFuture(result: [])
+            return eventLoop.newSucceededFuture(result: [])
         }
-
-        // create promise and array of elements with reservation
-        let promise = worker.eventLoop.newPromise([Element.Expectation].self)
-
-        // allocate results array
-        var results: [Element.Expectation?] = .init(repeating: nil, count: count)
-        // keep track of remaining results
-        var remaining = count
-
-        // await each element, placing in same index when done
-        for (i, el) in enumerated() {
-            el.addAwaiter { res in
-                remaining -= 1
-                switch res {
-                case .error(let e):
-                    // one of the elements failed, the whole flatten must fail
-                    promise.fail(error: e)
-                case .success(let el):
-                    // insert the element into its array index
-                    results[i] = el
-                    // zero remaining, succeed the promise
-                    if remaining == 0 {
-                        promise.succeed(result: results.compactMap { $0 })
-                    }
+        
+        var promises = [EventLoopPromise<Element.Expectation>]()
+        for future in self {
+            let promise = eventLoop.newPromise(of: Element.Expectation.self)
+            promises.append(promise)
+            future.addAwaiter { result in
+                switch result {
+                case .success(let value):
+                    promise.succeed(result: value)
+                case .error(let error):
+                    promise.fail(error: error)
                 }
             }
         }
-
-        // return future result
-        return promise.futureResult
+        let futures = promises.map { $0.futureResult }
+        return Future<[Element.Expectation]>.reduce(
+            into: [],
+            futures,
+            eventLoop: eventLoop
+        ) { partialResult, nextElement in
+            return partialResult.append(nextElement)
+        }
     }
 }
 

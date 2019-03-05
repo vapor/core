@@ -16,11 +16,54 @@ final class AsyncTests: XCTestCase {
         let loop = EmbeddedEventLoop()
         let a = loop.newPromise(String.self)
         let b = loop.newPromise(String.self)
-        let arr: [Future<String>] = [a.futureResult, b.futureResult]
+        let c = loop.newPromise(String.self)
+        let arr: [Future<String>] = [a.futureResult, b.futureResult, c.futureResult]
         let flat = arr.flatten(on: loop)
-        a.succeed(result: "a")
         b.succeed(result: "b")
-        try XCTAssertEqual(flat.wait(), ["a", "b"])
+        a.succeed(result: "a")
+        c.succeed(result: "c")
+        try XCTAssertEqual(flat.wait(), ["a", "b", "c"])
+    }
+    
+    /// Stress test flatten
+    /// If this test fails, this might indicate a threading issue
+    func testFlattenStress() throws {
+        let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        let timeoutLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let futureCount = 1000 * System.coreCount
+        let expectedResult = (0..<futureCount).map { $0 }
+        
+        for _ in 0..<10 {
+            var promises = [EventLoopPromise<Int>]()
+            for _ in 0..<futureCount {
+                promises.append(loopGroup.next().newPromise(of: Int.self))
+            }
+            let futures = promises.map { $0.futureResult }
+            let flattened = futures.flatten(on: loopGroup.next())
+            
+            for (index,promise) in promises.enumerated() {
+                promise.succeed(result: index)
+            }
+            
+            let resultPromise = timeoutLoop.eventLoop.newPromise(of: [Int].self)
+            
+            let timeoutTask = timeoutLoop.eventLoop.scheduleTask(
+                in: TimeAmount.seconds(5)
+            ) {
+                resultPromise.fail(error: "Timed out")
+            }
+            
+            flattened.do {
+                resultPromise.succeed(result: $0)
+            }.catch {
+                resultPromise.fail(error: $0)
+            }
+            
+            try XCTAssertEqual(resultPromise.futureResult.wait(), expectedResult)
+            timeoutTask.cancel()
+            
+        }
+        
     }
     
     func testSyncFlatten() throws {
@@ -88,6 +131,7 @@ final class AsyncTests: XCTestCase {
         ("testFlattenStackOverflow", testFlattenStackOverflow),
         ("testFlattenFail", testFlattenFail),
         ("testFlattenEmpty", testFlattenEmpty),
+        ("testFlattenStress", testFlattenStress)
     ]
 }
 
