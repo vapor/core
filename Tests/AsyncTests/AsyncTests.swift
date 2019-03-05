@@ -22,6 +22,38 @@ final class AsyncTests: XCTestCase {
         b.succeed(result: "b")
         try XCTAssertEqual(flat.wait(), ["a", "b"])
     }
+    
+    func testSyncFlatten() throws {
+        let loop = EmbeddedEventLoop()
+        var lazyFutures = [LazyFuture<Int>]()
+        let n = 10
+        
+        var completedOrder = [Int]()
+        let completionQueue = DispatchQueue(label: "testSyncFlattenQueue")
+        
+        for i in 0..<n {
+            lazyFutures.append({
+                let promise = loop.newPromise(Int.self)
+                // delay promises so that each promise completes faster than the one before it
+                let delay = TimeInterval(Double((n - i)) / 100)
+                completionQueue.asyncAfter(deadline: .now() + delay) {
+                    promise.succeed(result: i)
+                    completedOrder.append(i)
+                }
+                return promise.futureResult
+            })
+        }
+        
+        let future = lazyFutures.syncFlatten(on: loop)
+        let results = try future.wait()
+        
+        XCTAssertTrue(results.count == n)
+        XCTAssertEqual(completedOrder, results)
+        
+        for (lhs, rhs) in results.enumerated() {
+            XCTAssertEqual(lhs, rhs)
+        }
+    }
 
     func testFlattenStackOverflow() throws {
         let loop = EmbeddedEventLoop()
@@ -52,6 +84,7 @@ final class AsyncTests: XCTestCase {
     static let allTests = [
         ("testVariadicMap", testVariadicMap),
         ("testFlatten", testFlatten),
+        ("testSyncFlatten", testSyncFlatten),
         ("testFlattenStackOverflow", testFlattenStackOverflow),
         ("testFlattenFail", testFlattenFail),
         ("testFlattenEmpty", testFlattenEmpty),
