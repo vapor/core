@@ -5,9 +5,9 @@ extension Future {
     ///
     ///     user.save(on: req).transform(to: HTTPStatus.created)
     ///
-    public func transform<T>(to instance: T) -> Future<T> {
+    public func transform<T>(to instance: @escaping @autoclosure () -> T) -> Future<T> {
         return self.map(to: T.self) { _ in
-            instance
+            instance()
         }
     }
     
