@@ -123,26 +123,14 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     }
 
     /// See `Hashable`.
-    private let _hashValue: Int
-    
-    #if compiler(>=5)
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(self._hashValue)
-    }
-    #else
-    /// See `Hashable`.
-    public var hashValue: Int {
-        self._hashValue
-    }
-    #endif
-
+    public let hashValue: Int
 
     /// Create a new `MediaType`.
     public init(type: String, subType: String, parameters: [CaseInsensitiveString: String] = [:]) {
         self.type = type
         self.subType = subType
         self.parameters = parameters
-        self._hashValue = type.hashValue &+ subType.hashValue
+        self.hashValue = type.hashValue &+ subType.hashValue
     }
 
     /// Parse a `MediaType` from a `String`.
