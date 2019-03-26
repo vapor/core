@@ -168,7 +168,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     }
 }
 
-public extension MediaType {
+extension MediaType {
     /// Any media type (*/*).
     public static let any = MediaType(type: "*", subType: "*")
     /// Plain text media type.

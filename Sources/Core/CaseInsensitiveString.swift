@@ -16,10 +16,10 @@ public struct CaseInsensitiveString: ExpressibleByStringLiteral, Comparable, Equ
 
     /// Internal `String` storage.
     private let storage: String
-
+    
     /// See `Hashable`.
     public var hashValue: Int {
-        return storage.lowercased().hashValue
+        return self.storage.lowercased().hashValue
     }
 
     /// See `CustomStringConvertible`.
