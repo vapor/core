@@ -7,7 +7,7 @@ class CoreTests: XCTestCase {
     }
     
     func testProcessExecuteCurl() throws {
-        let res = try Process.execute("/usr/bin/curl", "--verbose", "vapor.codes")
+        let res = try Process.execute("/usr/bin/curl", "--verbose", "https://vapor.codes")
         XCTAssertEqual(res.contains("<title>Vapor"), true)
     }
 

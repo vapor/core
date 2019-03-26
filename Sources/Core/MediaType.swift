@@ -123,14 +123,18 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     }
 
     /// See `Hashable`.
-    public let hashValue: Int
+    private let _hashValue: Int
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self._hashValue)
+    }
 
     /// Create a new `MediaType`.
     public init(type: String, subType: String, parameters: [CaseInsensitiveString: String] = [:]) {
         self.type = type
         self.subType = subType
         self.parameters = parameters
-        self.hashValue = type.hashValue &+ subType.hashValue
+        self._hashValue = type.hashValue &+ subType.hashValue
     }
 
     /// Parse a `MediaType` from a `String`.
@@ -168,7 +172,7 @@ public struct MediaType: Hashable, CustomStringConvertible, Equatable {
     }
 }
 
-public extension MediaType {
+extension MediaType {
     /// Any media type (*/*).
     public static let any = MediaType(type: "*", subType: "*")
     /// Plain text media type.
