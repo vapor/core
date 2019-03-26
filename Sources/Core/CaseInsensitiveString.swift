@@ -16,11 +16,18 @@ public struct CaseInsensitiveString: ExpressibleByStringLiteral, Comparable, Equ
 
     /// Internal `String` storage.
     private let storage: String
-
+    
+    #if compiler(>=5)
     /// See `Hashable`.
     public func hash(into hasher: inout Hasher) {
         return hasher.combine(self.storage.lowercased())
     }
+    #else
+    /// See `Hashable`.
+    public var hashValue: Int {
+        return self.storage.lowercased()
+    }
+    #endif
 
     /// See `CustomStringConvertible`.
     public var description: String {
