@@ -27,9 +27,16 @@ class ReflectableTests: XCTestCase {
         }
 
         let properties = try Foo.reflectProperties()
+        
+        #if swift(>=4.1.50)
         XCTAssertEqual(properties.description, """
         [bool: Bool, obool: Optional<Bool>, int: Int, oint: Optional<Int>, sarr: Array<String>, osarr: Optional<Array<String>>, pet: Pet, opet: Optional<Pet>, dir: Direction, odir: Optional<Direction>]
         """)
+        #else
+        XCTAssertEqual(properties.description, """
+        [bool: Bool, obool: Optional<Bool>, int: Int, oint: Optional<Int>, sarr: Array<String>, osarr: Optional<Array<String>>, pet: Pet #1, opet: Optional<Pet #1>, dir: Direction #1, odir: Optional<Direction #1>]
+        """)
+        #endif
 
         try XCTAssertEqual(Foo.reflectProperty(forKey: \.bool)?.path, ["bool"])
         try XCTAssert(Foo.reflectProperty(forKey: \.bool)?.type is Bool.Type)
@@ -233,7 +240,11 @@ class ReflectableTests: XCTestCase {
             var age: Int
         }
 
+        #if swift(>=4.1.50)
         try XCTAssertEqual(User.reflectProperties(depth: 0).description, "[id: Optional<UUID>, pet: Pet, name: String, age: Int]")
+        #else
+        try XCTAssertEqual(User.reflectProperties(depth: 0).description, "[id: Optional<UUID>, pet: Pet #1, name: String, age: Int]")
+        #endif
         try XCTAssertEqual(User.reflectProperties(depth: 1).description, "[pet.name: String, pet.age: Int]")
         try XCTAssertEqual(User.reflectProperties(depth: 2).description, "[]")
     }
@@ -308,7 +319,11 @@ class ReflectableTests: XCTestCase {
             var pets: [Pet]
         }
 
+        #if swift(>=4.1.50)
         try XCTAssertEqual(Person.reflectProperties().description, "[id: Optional<Int>, title: String, pets: Array<Pet>]")
+        #else
+        try XCTAssertEqual(Person.reflectProperties().description, "[id: Optional<Int>, title: String, pets: Array<Pet #1>]")
+        #endif
         XCTAssertThrowsError(try Person.reflectProperty(forKey: \.pets))
     }
 
