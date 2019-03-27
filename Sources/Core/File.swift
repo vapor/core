@@ -13,7 +13,13 @@ public struct File: Codable {
 
     /// The file extension, if it has one.
     public var ext: String? {
-        return filename.split(separator: ".").last.map(String.init)
+        let splitted = filename.split(separator: ".")
+
+        if splitted.count > 1 {
+            return splitted.last.map(String.init)
+        } else {
+            return nil
+        }
     }
 
     /// Creates a new `File`.
