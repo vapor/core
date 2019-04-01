@@ -63,7 +63,17 @@ final class AsyncTests: XCTestCase {
             timeoutTask.cancel()
             
         }
-        
+    }
+
+    func testFlattenPerformance() throws {
+        let loop = EmbeddedEventLoop()
+        let expected = Array(0..<200_000)
+        let futures = expected.map { loop.newSucceededFuture(result: $0) }
+        var futureResult: [Int] = []
+        measure {
+            futureResult = try! futures.flatten(on: loop).wait()
+        }
+        XCTAssertEqual(futureResult, expected)
     }
     
     func testSyncFlatten() throws {
@@ -131,7 +141,8 @@ final class AsyncTests: XCTestCase {
         ("testFlattenStackOverflow", testFlattenStackOverflow),
         ("testFlattenFail", testFlattenFail),
         ("testFlattenEmpty", testFlattenEmpty),
-        ("testFlattenStress", testFlattenStress)
+        ("testFlattenStress", testFlattenStress),
+        ("testFlattenPerformance", testFlattenPerformance)
     ]
 }
 
