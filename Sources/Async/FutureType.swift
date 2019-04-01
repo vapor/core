@@ -10,6 +10,9 @@ public protocol FutureType {
     /// This future's result type.
     typealias Result = FutureResult<Expectation>
 
+    /// The event loop this future is fulfilled on.
+    var eventLoop: EventLoop { get }
+
     /// Adds a new awaiter to this `Future` that will be called when the result is ready.
     func addAwaiter(callback: @escaping FutureResultCallback<Expectation>)
 }
