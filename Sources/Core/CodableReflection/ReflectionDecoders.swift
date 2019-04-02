@@ -93,9 +93,9 @@ struct ReflectionSingleValueDecoder: SingleValueDecodingContainer {
         let reflected = try type.anyReflectDecoded()
         if context.isActive {
             context.activeCodingPath = codingPath
-            return reflected.0 as! T
+            return reflected.1 as! T
         }
-        return reflected.1 as! T
+        return reflected.0 as! T
     }
 }
 
@@ -151,9 +151,9 @@ final class ReflectionKeyedDecoder<K>: KeyedDecodingContainerProtocol where K: C
         if let type = T.self as? AnyReflectionDecodable.Type, let reflected = try? type.anyReflectDecoded() {
             if context.isActive {
                 context.activeCodingPath = codingPath + [key]
-                return reflected.0 as! T
+                return reflected.1 as! T
             }
-            return reflected.1 as! T
+            return reflected.0 as! T
         } else {
             let decoder = ReflectionDecoder(codingPath: codingPath + [key], context: context)
             return try T(from: decoder)
