@@ -13,10 +13,10 @@ public struct File: Codable {
 
     /// The file extension, if it has one.
     public var ext: String? {
-        let splitted = filename.split(separator: ".")
+        let parts = filename.split(separator: ".")
 
-        if splitted.count > 1 {
-            return splitted.last.map(String.init)
+        if parts.count > 1 {
+            return parts.last.map(String.init)
         } else {
             return nil
         }
