@@ -198,6 +198,8 @@ extension MediaType {
     public static let multipart = MediaType(type: "multipart", subType: "mixed")
     /// JSON media type.
     public static let json = MediaType(type: "application", subType: "json", parameters: ["charset": "utf-8"])
+    /// JSON API media type (see https://jsonapi.org/format/).
+    public static let jsonAPI = MediaType(type: "application", subType: "vnd.api+json", parameters: ["charset": "utf-8"])
     /// XML media type.
     public static let xml = MediaType(type: "application", subType: "xml", parameters: ["charset": "utf-8"])
     /// DTD media type.

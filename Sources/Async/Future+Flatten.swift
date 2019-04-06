@@ -60,27 +60,40 @@ extension Collection where Element: FutureType {
             return eventLoop.newSucceededFuture(result: [])
         }
         
-        var promises = [EventLoopPromise<Element.Expectation>]()
-        for future in self {
-            let promise = eventLoop.newPromise(of: Element.Expectation.self)
-            promises.append(promise)
+        let resultPromise: EventLoopPromise<[Element.Expectation]> = eventLoop.newPromise()
+        var promiseFulfilled = false
+        
+        let expectedCount = self.count
+        var fulfilledCount = 0
+        var results = Array<Element.Expectation?>(repeating: nil, count: expectedCount)
+        for (index, future) in self.enumerated() {
             future.addAwaiter { result in
-                switch result {
-                case .success(let value):
-                    promise.succeed(result: value)
-                case .error(let error):
-                    promise.fail(error: error)
+                let work: () -> Void = {
+                    guard !promiseFulfilled else { return }
+                    switch result {
+                    case .success(let result):
+                        results[index] = result
+                        fulfilledCount += 1
+                        
+                        if fulfilledCount == expectedCount {
+                            promiseFulfilled = true
+                            // Forcibly unwrapping is okay here, because we know that each result has been filled.
+                            resultPromise.succeed(result: results.map { $0! })
+                        }
+                    case .error(let error):
+                        promiseFulfilled = true
+                        resultPromise.fail(error: error)
+                    }
+                }
+                
+                if future.eventLoop === eventLoop {
+                    work()
+                } else {
+                    eventLoop.execute(work)
                 }
             }
         }
-        let futures = promises.map { $0.futureResult }
-        return Future<[Element.Expectation]>.reduce(
-            into: [],
-            futures,
-            eventLoop: eventLoop
-        ) { partialResult, nextElement in
-            return partialResult.append(nextElement)
-        }
+        return resultPromise.futureResult
     }
 }
 
