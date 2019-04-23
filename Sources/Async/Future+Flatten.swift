@@ -49,58 +49,17 @@ extension Collection where Element == LazyFuture<Void> {
     }
 }
 
-extension Collection where Element: FutureType {
+extension Collection {
     /// Flattens an array of futures into a future with an array of results.
     /// - note: the order of the results will match the order of the futures in the input array.
-    public func flatten(on worker: Worker) -> Future<[Element.Expectation]> {
-        let eventLoop = worker.eventLoop
-        
-        // Avoid unnecessary work
-        guard count > 0 else {
-            return eventLoop.newSucceededFuture(result: [])
-        }
-        
-        let resultPromise: EventLoopPromise<[Element.Expectation]> = eventLoop.newPromise()
-        var promiseFulfilled = false
-        
-        let expectedCount = self.count
-        var fulfilledCount = 0
-        var results = Array<Element.Expectation?>(repeating: nil, count: expectedCount)
-        for (index, future) in self.enumerated() {
-            future.addAwaiter { result in
-                let work: () -> Void = {
-                    guard !promiseFulfilled else { return }
-                    switch result {
-                    case .success(let result):
-                        results[index] = result
-                        fulfilledCount += 1
-                        
-                        if fulfilledCount == expectedCount {
-                            promiseFulfilled = true
-                            // Forcibly unwrapping is okay here, because we know that each result has been filled.
-                            resultPromise.succeed(result: results.map { $0! })
-                        }
-                    case .error(let error):
-                        promiseFulfilled = true
-                        resultPromise.fail(error: error)
-                    }
-                }
-                
-                if future.eventLoop === eventLoop {
-                    work()
-                } else {
-                    eventLoop.execute(work)
-                }
-            }
-        }
-        return resultPromise.futureResult
+    public func flatten<T>(on worker: Worker) -> Future<[T]> where Element == Future<T> {
+        return Future.whenAll(Array(self), eventLoop: worker.eventLoop)
     }
 }
 
 extension Collection where Element == Future<Void> {
     /// Flattens an array of void futures into a single one.
     public func flatten(on worker: Worker) -> Future<Void> {
-        let flatten: Future<[Void]> = self.flatten(on: worker)
-        return flatten.map(to: Void.self) { _ in return }
+        return Future.andAll(Array(self), eventLoop: worker.eventLoop)
     }
 }

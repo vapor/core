@@ -48,7 +48,7 @@ extension Future {
     }
 }
 
-extension Collection where Element: FutureType {
+extension Collection {
     /// Adds a callback for handling this `[Future]`'s result when it becomes available.
     ///
     ///     futureStrings.do { strings in
@@ -58,7 +58,7 @@ extension Collection where Element: FutureType {
     ///     }
     ///
     /// - warning: Don't forget to use `catch` to handle the error case.
-    public func `do`(on worker: Worker, _ callback: @escaping ([Element.Expectation]) -> ()) -> Future<[Element.Expectation]> {
+    public func `do`<T>(on worker: Worker, _ callback: @escaping ([T]) -> ()) -> Future<[T]> where Element == Future<T> {
         return self.flatten(on: worker).do(callback)
     }
 
@@ -72,7 +72,7 @@ extension Collection where Element: FutureType {
     ///
     /// - note: Will *only* be executed if an error occurs. Successful results will not call this handler.
     @discardableResult
-    public func `catch`(on worker: Worker,_ callback: @escaping (Error) -> ()) -> Future<[Element.Expectation]> {
+    public func `catch`<T>(on worker: Worker,_ callback: @escaping (Error) -> ()) -> Future<[T]> where Element == Future<T> {
         return self.flatten(on: worker).catch(callback)
     }
 
@@ -89,7 +89,7 @@ extension Collection where Element: FutureType {
     ///
     /// - note: Will be executed on both success and failure, but will not receive any input.
     @discardableResult
-    public func always(on worker: Worker,_ callback: @escaping () -> ()) -> Future<[Element.Expectation]> {
+    public func always<T>(on worker: Worker,_ callback: @escaping () -> ()) -> Future<[T]> where Element == Future<T> {
         return self.flatten(on: worker).always(callback)
     }
 }

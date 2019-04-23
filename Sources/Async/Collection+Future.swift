@@ -1,15 +1,15 @@
-extension Collection where Element: FutureType {
+extension Collection {
     /// Maps a collection of same-type `Future`s.
     ///
     /// See `Future.map`
-    public func map<T>(to type: T.Type, on worker: Worker, _ callback: @escaping ([Element.Expectation]) throws -> T) -> Future<T> {
+    public func map<S, T>(to type: T.Type, on worker: Worker, _ callback: @escaping ([S]) throws -> T) -> Future<T> where Element == Future<S> {
         return flatten(on: worker).map(to: T.self, callback)
     }
 
     /// Maps a collection of same-type `Future`s.
     ///
     /// See `Future.flatMap`
-    public func flatMap<T>(to type: T.Type, on worker: Worker, _ callback: @escaping ([Element.Expectation]) throws -> Future<T>) -> Future<T> {
+    public func flatMap<S, T>(to type: T.Type, on worker: Worker, _ callback: @escaping ([S]) throws -> Future<T>) -> Future<T> where Element == Future<S> {
         return flatten(on: worker).flatMap(to: T.self, callback)
     }
 }
