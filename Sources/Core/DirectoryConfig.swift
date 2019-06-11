@@ -21,24 +21,24 @@ public struct DirectoryConfig {
     ///
     /// - returns: The derived `DirectoryConfig` if it could be created, otherwise just "./".
     public static func detect() -> DirectoryConfig {
-        let fileBasedWorkDir: String?
+        var fileBasedWorkDir: String? = nil
 
         #if Xcode
-        // attempt to find working directory through #file
-        let file = #file
-
-        if file.contains(".build") {
-            // most dependencies are in `./.build/`
-            fileBasedWorkDir = file.components(separatedBy: "/.build").first
-        } else if file.contains("Packages") {
-            // when editing a dependency, it is in `./Packages/`
-            fileBasedWorkDir = file.components(separatedBy: "/Packages").first
-        } else {
-            // when dealing with current repository, file is in `./Sources/`
-            fileBasedWorkDir = file.components(separatedBy: "/Sources").first
+        // check if we are in Xcode via SPM integration
+        if !#file.contains("SourcePackages/checkouts") {
+            // we are NOT in Xcode via SPM integration
+            // use #file hacks to determine working directory automatically
+            if #file.contains(".build") {
+                // most dependencies are in `./.build/`
+                fileBasedWorkDir = #file.components(separatedBy: "/.build").first
+            } else if #file.contains("Packages") {
+                // when editing a dependency, it is in `./Packages/`
+                fileBasedWorkDir = #file.components(separatedBy: "/Packages").first
+            } else {
+                // when dealing with current repository, file is in `./Sources/`
+                fileBasedWorkDir = #file.components(separatedBy: "/Sources").first
+            }
         }
-        #else
-        fileBasedWorkDir = nil
         #endif
 
         let workDir: String

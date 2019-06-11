@@ -170,6 +170,14 @@ class CoreTests: XCTestCase {
         }
     }
 
+    func testDirectoryConfig() throws {
+        let config = DirectoryConfig.detect()
+        let license = config.workDir + "LICENSE"
+        if !FileManager.default.fileExists(atPath: license) {
+            XCTFail("could not find license using directory config")
+        }
+    }
+
     static let allTests = [
         ("testProcessExecute", testProcessExecute),
         ("testProcessAsyncExecute", testProcessAsyncExecute),
@@ -179,5 +187,6 @@ class CoreTests: XCTestCase {
         ("testBase64URLEscaping", testBase64URLEscaping),
         ("testHexEncodedString", testHexEncodedString),
         ("testHeaderValue", testHeaderValue),
+        ("testDirectoryConfig", testDirectoryConfig),
     ]
 }
