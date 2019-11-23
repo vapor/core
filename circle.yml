@@ -112,7 +112,7 @@ jobs:
     steps:
       - run:
           name: Clone Redis
-          command: git clone -b master https://github.com/vapor/redis.git
+          command: git clone -b support-3 https://github.com/vapor/redis.git
           working_directory: ~/
       - run:
           name: Switch Redis to this Core revision
