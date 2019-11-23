@@ -14,20 +14,7 @@ extension Future {
     ///
     /// See `flatMap(to:_:)` for mapping `Future` results to other `Future` types.
     public func map<T>(to type: T.Type = T.self, _ callback: @escaping (Expectation) throws -> T) -> Future<T> {
-        let promise = eventLoop.newPromise(T.self)
-
-        self.do { expectation in
-            do {
-                let mapped = try callback(expectation)
-                promise.succeed(result: mapped)
-            } catch {
-                promise.fail(error: error)
-            }
-            }.catch { error in
-                promise.fail(error: error)
-        }
-
-        return promise.futureResult
+        return self.thenThrowing(callback)
     }
 
     /// Maps a `Future` to a `Future` of a different type.
@@ -43,20 +30,13 @@ extension Future {
     ///
     /// See `map(to:_:)` for mapping `Future` results to non-`Future` types.
     public func flatMap<T>(to type: T.Type = T.self, _ callback: @escaping (Expectation) throws -> Future<T>) -> Future<T> {
-        let promise = eventLoop.newPromise(T.self)
-
-        self.do { expectation in
+        return self.then { input in
             do {
-                let mapped = try callback(expectation)
-                mapped.cascade(promise: promise)
+                return try callback(input)
             } catch {
-                promise.fail(error: error)
+                return self.eventLoop.newFailedFuture(error: error)
             }
-        }.catch { error in
-            promise.fail(error: error)
         }
-
-        return promise.futureResult
     }
     
     /// Calls the supplied closure if the chained Future resolves to an Error.
@@ -66,19 +46,7 @@ extension Future {
     ///
     /// The callback expects a non-Future return (if not throwing instead). See `catchFlatMap` for a Future return.
     public func catchMap(_ callback: @escaping (Error) throws -> (Expectation)) -> Future<Expectation> {
-        let promise = eventLoop.newPromise(T.self)
-        addAwaiter { result in
-            switch result {
-            case .error(let error):
-                do {
-                    try promise.succeed(result: callback(error))
-                } catch {
-                    promise.fail(error: error)
-                }
-            case .success(let e): promise.succeed(result: e)
-            }
-        }
-        return promise.futureResult
+        return self.thenIfErrorThrowing(callback)
     }
 
 
@@ -100,18 +68,12 @@ extension Future {
     ///      }
     ///
     public func catchFlatMap(_ callback: @escaping (Error) throws -> (Future<Expectation>)) -> Future<Expectation> {
-        let promise = eventLoop.newPromise(T.self)
-        addAwaiter { result in
-            switch result {
-            case .error(let error):
-                do {
-                    try callback(error).cascade(promise: promise)
-                } catch {
-                    promise.fail(error: error)
-                }
-            case .success(let e): promise.succeed(result: e)
+        return self.thenIfError { inputError in
+            do {
+                return try callback(inputError)
+            } catch {
+                return self.eventLoop.newFailedFuture(error: error)
             }
         }
-        return promise.futureResult
     }
 }

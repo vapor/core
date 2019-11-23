@@ -133,6 +133,32 @@ final class AsyncTests: XCTestCase {
         let arr: [Future<String>] = []
         try XCTAssertEqual(arr.flatten(on: loop).wait().count, 0)
     }
+
+    func doRecursive(n: Int, eventLoop: EventLoop) -> EventLoopFuture<Void> {
+        guard n != 0 else {
+            return eventLoop.newSucceededFuture(result: ())
+        }
+        return eventLoop.submit { }
+            .flatMap {
+                self.doRecursive(n: n - 1, eventLoop: eventLoop)
+        }
+    }
+
+    func testFlatMapDoesNotCauseStackOverflowWhenFinishing() throws {
+        let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        try doRecursive(n: 10_000, eventLoop: loopGroup.next()).wait()
+        try loopGroup.syncShutdownGracefully()
+    }
+
+    func testFlatMapPerformance() throws {
+        let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        measure {
+            for _ in 0..<1000 {
+                try! doRecursive(n: 100, eventLoop: loopGroup.next()).wait()
+            }
+        }
+        try loopGroup.syncShutdownGracefully()
+    }
     
     static let allTests = [
         ("testVariadicMap", testVariadicMap),
@@ -142,7 +168,9 @@ final class AsyncTests: XCTestCase {
         ("testFlattenFail", testFlattenFail),
         ("testFlattenEmpty", testFlattenEmpty),
         ("testFlattenStress", testFlattenStress),
-        ("testFlattenPerformance", testFlattenPerformance)
+        ("testFlattenPerformance", testFlattenPerformance),
+        ("testFlatMapPerformance", testFlatMapPerformance),
+        ("testFlatMapDoesNotCauseStackOverflowWhenFinishing", testFlatMapDoesNotCauseStackOverflowWhenFinishing)
     ]
 }
 
