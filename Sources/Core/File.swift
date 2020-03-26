@@ -34,3 +34,11 @@ public struct File: Codable {
         self.filename = filename
     }
 }
+
+extension File: Equatable {
+    public static func ==(lhs: File, rhs: File) -> Bool {
+       return 
+        lhs.data == rhs.data && 
+        lhs.filename == rhs.filename
+    }
+}
