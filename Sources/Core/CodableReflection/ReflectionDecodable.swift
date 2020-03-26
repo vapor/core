@@ -125,6 +125,16 @@ extension Data: ReflectionDecodable {
     }
 }
 
+extension File: ReflectionDecodable {
+    /// See `ReflectionDecodable.reflectDecoded()` for more information.
+    public static func reflectDecoded() -> (File, File) {
+        return (
+            File(data: Data(count: 1), filename: "foo.pdf"),
+            File(data: Data(count: 2), filename: "bar.pdf")
+        )
+    }
+}
+
 extension Date: ReflectionDecodable {
     /// See `ReflectionDecodable.reflectDecoded()` for more information.
     public static func reflectDecoded() -> (Date, Date) {
