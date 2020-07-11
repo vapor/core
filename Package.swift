@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         /// Event-driven network application framework for high performance protocol servers & clients, non-blocking.
-        .package(url: "https://github.com/apple/swift-nio.git", from: "1.14.1"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
     ],
     targets: [
         .target(name: "Async", dependencies: ["NIO"]),
