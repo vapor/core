@@ -92,53 +92,70 @@ extension Process {
     /// - returns: A future containing the termination status of the process.
     public static func asyncExecute(_ program: String, _ arguments: [String], on worker: Worker, _ output: @escaping (ProcessOutput) -> ()) -> Future<Int32> {
         if program.hasPrefix("/") {
+            // generic dispatch io config code for stdout/stderr
+            func setupDispatchIO(for pipe: Pipe, onData: @escaping (Data) -> ()) -> (Future<Void>, DispatchIO) {
+                // create new promise to signal IO is done
+                let promise = worker.eventLoop.newPromise(Void.self)
+                
+                // create dispatch io stream on read handle of pipe
+                let io = DispatchIO(type: .stream, fileDescriptor: pipe.fileHandleForReading.fileDescriptor, queue: executeQueue) { _ in
+                    print("[EVENT] \(pipe.fileHandleForReading.fileDescriptor) cancel")
+                    // close pipe once stream is cancelled
+                    close(pipe.fileHandleForReading.fileDescriptor)
+                }
+                
+                io.setLimit(lowWater: 0)
+                
+                // start async read on stream
+                io.read(offset: 0, length: .max, queue: executeQueue) { done, data, err in
+                    print("[EVENT] \(pipe.fileHandleForReading.fileDescriptor) \(done)")
+                    if done {
+                        // signal IO is done
+                        promise.succeed(result: ())
+                    } else if err != 0 {
+                        // signal IO failure
+                        promise.fail(error: ProcessIOError(code: err))
+                    } else if let data = data, !data.isEmpty {
+                        // convert DispatchData to Data and pass to callback
+                        onData(Data(data))
+                    }
+                }
+                io.resume()
+                
+                // return created future and IO stream
+                return (promise.futureResult, io)
+            }
+            
+            // create process data pipes
             let stdout = Pipe()
             let stderr = Pipe()
-
-            // will be set to false when the program is done
-            var running = true
+            print("stdout: \(stdout.fileHandleForReading.fileDescriptor)")
+            print("stderr: \(stderr.fileHandleForReading.fileDescriptor)")
             
-            // readabilityHandler doesn't work on linux, so we are left with this hack
-            DispatchQueue.global().async {
-                while running {
-                    let stdout = stdout.fileHandleForReading.availableData
-                    if !stdout.isEmpty {
-                        output(.stdout(stdout))
-                    }
-                }
+            // launch and run the process
+            let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
+            
+            // setup dispatch IO on each pipe
+            let (stderrFuture, stderrIO) = setupDispatchIO(for: stderr) { output(.stderr($0)) }
+            let (stdoutFuture, stdoutIO) = setupDispatchIO(for: stdout) { output(.stdout($0)) }
+            
+            // create a new promise for the termination status and set callback
+            let processPromise = worker.eventLoop.newPromise(Int32.self)
+            process.terminationHandler = { process in
+                // close dispatch IO
+                stdoutIO.close()
+                stderrIO.close()
+                
+                print("process complete: \(process.terminationStatus)")
+                
+                // complete the promise
+                processPromise.succeed(result: process.terminationStatus)
             }
-            DispatchQueue.global().async {
-                while running {
-                    let stderr = stderr.fileHandleForReading.availableData
-                    if !stderr.isEmpty {
-                        output(.stderr(stderr))
-                    }
-                }
-            }
-
-            // stdout.fileHandleForReading.readabilityHandler = { handle in
-            //     let data = handle.availableData
-            //     guard !data.isEmpty else {
-            //         return
-            //     }
-            //     output(.stdout(data))
-            // }
-            // stderr.fileHandleForReading.readabilityHandler = { handle in
-            //     let data = handle.availableData
-            //     guard !data.isEmpty else {
-            //         return
-            //     }
-            //     output(.stderr(data))
-            // }
-
-            let promise = worker.eventLoop.newPromise(Int32.self)
-            DispatchQueue.global().async {
-                let process = launchProcess(path: program, arguments, stdout: stdout, stderr: stderr)
-                process.waitUntilExit()
-                running = false
-                promise.succeed(result: process.terminationStatus)
-            }
-            return promise.futureResult
+            process.launch()
+            
+            // combine stdout/err and process result futures
+            return stdoutFuture.and(stderrFuture)
+                .transform(to: processPromise.futureResult)
         } else {
             var resolvedPath: String?
             return asyncExecute("/bin/sh", ["-c", "which \(program)"], on: worker) { o in
@@ -164,7 +181,6 @@ extension Process {
         process.arguments = arguments
         process.standardOutput = stdout
         process.standardError = stderr
-        process.launch()
         return process
     }
 }
@@ -181,6 +197,10 @@ public struct ProcessExecuteError: Error {
     public var stdout: String
 }
 
+private struct ProcessIOError: Error {
+    var code: Int32
+}
+
 extension ProcessExecuteError: Debuggable {
     /// See `Debuggable.identifier`.
     public var identifier: String {
@@ -192,5 +212,8 @@ extension ProcessExecuteError: Debuggable {
         return stderr
     }
 }
+
+private let executeQueue = DispatchQueue(label: "codes.vapor.core.async.execute")
+private let executeQueue2 = DispatchQueue(label: "codes.vapor.core.async.execute2")
 
 #endif
