@@ -3,15 +3,20 @@ import XCTest
 
 class CoreTests: XCTestCase {
     func testProcessExecute() throws {
+        #if !os(iOS) && !os(tvOS) && !os(watchOS)
         try XCTAssertEqual(Process.execute("/bin/echo", "hi"), "hi")
+        #endif
     }
     
     func testProcessExecuteCurl() throws {
+        #if !os(iOS) && !os(tvOS) && !os(watchOS)
         let res = try Process.execute("/usr/bin/curl", "--verbose", "https://vapor.codes")
         XCTAssertEqual(res.contains("<title>Vapor"), true)
+        #endif
     }
 
     func testProcessAsyncExecute() throws {
+        #if !os(iOS) && !os(tvOS) && !os(watchOS)
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         var lastOutput: ProcessOutput?
         let status = try Process.asyncExecute("/bin/echo", "hi", on: eventLoop) { output in
@@ -26,10 +31,13 @@ class CoreTests: XCTestCase {
         } else {
             XCTFail("no output")
         }
+        #endif
     }
 
     func testProcessExecuteMissing() throws {
+        #if !os(iOS) && !os(tvOS) && !os(watchOS)
         XCTAssertThrowsError(try Process.execute("foo", "hi"), "hi")
+        #endif
     }
 
     func testBase64() {

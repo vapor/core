@@ -18,10 +18,10 @@ extension Thread {
     /// - parameters:
     ///     - work: Closure to be called on new thread.
     public static func async(_ work: @escaping () -> Void) {
-        if #available(macOS 10.12, iOS 10.0, *) {
+        if #available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *) {
             Thread.detachNewThread(work)
         } else {
-            fatalError("macOS 10.12/iOS 10.0 or later required to call Thread.async(_:)")
+            fatalError("macOS 10.12/iOS 10.0/tvOS 10.0/watchOS 3.0 or later required to call Thread.async(_:)")
         }
     }
 }
