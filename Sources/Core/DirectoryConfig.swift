@@ -8,7 +8,7 @@ import COperatingSystem
 public struct DirectoryConfig {
     /// Path to the current working directory.
     public let workDir: String
-
+    
     /// Create a new `DirectoryConfig` with a custom working directory.
     ///
     /// - parameters:
@@ -16,14 +16,14 @@ public struct DirectoryConfig {
     public init(workDir: String) {
         self.workDir = workDir
     }
-
+    
     /// Creates a `DirectoryConfig` by deriving a working directory using the `#file` variable or `getcwd` method.
     ///
     /// - returns: The derived `DirectoryConfig` if it could be created, otherwise just "./".
     public static func detect() -> DirectoryConfig {
         var fileBasedWorkDir: String? = nil
-
-        #if Xcode
+        
+#if Xcode
         // check if we are in Xcode via SPM integration
         if !#file.contains("SourcePackages/checkouts") {
             // we are NOT in Xcode via SPM integration
@@ -39,8 +39,8 @@ public struct DirectoryConfig {
                 fileBasedWorkDir = #file.components(separatedBy: "/Sources").first
             }
         }
-        #endif
-
+#endif
+        
         let workDir: String
         if let fileBasedWorkDir = fileBasedWorkDir {
             workDir = fileBasedWorkDir
@@ -48,16 +48,18 @@ public struct DirectoryConfig {
             // get actual working directory
             let cwd = getcwd(nil, Int(PATH_MAX))
             defer {
-                free(cwd)
+                if let cwd = cwd {
+                    free(cwd)
+                }
             }
-
+            
             if let cwd = cwd, let string = String(validatingUTF8: cwd) {
                 workDir = string
             } else {
                 workDir = "./"
             }
         }
-
+        
         return DirectoryConfig(
             workDir: workDir.hasSuffix("/") ? workDir : workDir + "/"
         )
