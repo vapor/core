@@ -28,7 +28,7 @@ public protocol Debuggable: CustomDebugStringConvertible, CustomStringConvertibl
     var sourceLocation: SourceLocation? { get }
 
     /// Stack trace from which this error originated (must set this from the error's init)
-    var stackTrace: [String]? { get }
+    var stackTrace: [String] { get }
 
     /// A `String` array describing the possible causes of the error.
     /// - note: Defaults to an empty array.
@@ -117,8 +117,8 @@ extension Debuggable {
     }
 
     /// See `Debuggable`
-    public var stackTrace: [String]? {
-        return nil
+    public var stackTrace: [String] {
+        return []
     }
 }
 
